@@ -1,0 +1,506 @@
+import React, { useState } from 'react';
+import { 
+  DollarSign, 
+  Receipt, 
+  Landmark, 
+  BookOpen, 
+  PieChart, 
+  Building, 
+  TrendingUp, 
+  TrendingDown, 
+  Scale, 
+  FileSpreadsheet, 
+  CreditCard, 
+  Coins, 
+  Calculator, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Clock, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Search, 
+  Filter, 
+  Plus, 
+  Download, 
+  Printer, 
+  Calendar, 
+  Tag, 
+  Layers, 
+  Percent, 
+  BarChart3, 
+  SlidersHorizontal 
+} from 'lucide-react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  BarChart, 
+  Bar, 
+  LineChart, 
+  Line, 
+  PieChart as RechartsPieChart, 
+  Pie, 
+  Cell 
+} from 'recharts';
+import { Language } from '../../types';
+
+interface FinanceAccountingModuleProps {
+  language: Language;
+}
+
+export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = ({
+  language
+}) => {
+  const [activeTab, setActiveTab] = useState<
+    | 'cash_flow'
+    | 'general_ledger'
+    | 'asset_management'
+    | 'budget_cost_center'
+    | 'financial_statements'
+    | 'invoices_payments'
+    | 'receivables_payables'
+    | 'tax_management'
+    | 'bank_multicurrency'
+  >('cash_flow');
+
+  const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'IDR'>('USD');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Exchange Rates Data
+  const fxRates = {
+    USD_IDR: 16250,
+    USD_CNY: 7.24,
+    USD_AUD: 1.52
+  };
+
+  // Cash Flow Historical & Projection Data
+  const cashFlowData = [
+    { month: 'Jan 2026', cashInflowUsd: 4200000, cashOutflowUsd: 2850000, netCashFlowUsd: 1350000 },
+    { month: 'Feb 2026', cashInflowUsd: 4850000, cashOutflowUsd: 3100000, netCashFlowUsd: 1750000 },
+    { month: 'Mar 2026', cashInflowUsd: 5100000, cashOutflowUsd: 3400000, netCashFlowUsd: 1700000 },
+    { month: 'Apr 2026', cashInflowUsd: 4600000, cashOutflowUsd: 3200000, netCashFlowUsd: 1400000 },
+    { month: 'Mei 2026', cashInflowUsd: 5400000, cashOutflowUsd: 3500000, netCashFlowUsd: 1900000 },
+    { month: 'Jun 2026', cashInflowUsd: 6200000, cashOutflowUsd: 3800000, netCashFlowUsd: 2400000 },
+    { month: 'Jul 2026', cashInflowUsd: 5800000, cashOutflowUsd: 3650000, netCashFlowUsd: 2150000 }
+  ];
+
+  // General Ledger Journal Entries Dataset
+  const journalEntries = [
+    { entryNo: 'JV-2026-0801', date: '2026-08-01', accountCode: '1110-USD-BANK', accountName: 'Kas & Bank Mandiri USD', debitUsd: 1850000, creditUsd: 0, costCenter: 'CC-TREASURY', refDoc: 'INV-NICKEL-041' },
+    { entryNo: 'JV-2026-0801', date: '2026-08-01', accountCode: '4100-ORE-SALES', accountName: 'Pendapatan Penjualan Bijih Nikel', debitUsd: 0, creditUsd: 1850000, costCenter: 'CC-SALES-EXPORT', refDoc: 'INV-NICKEL-041' },
+    { entryNo: 'JV-2026-0802', date: '2026-08-02', accountCode: '5210-DIESEL-FUEL', accountName: 'Beban Bahan Bakar Solar B35', debitUsd: 342000, creditUsd: 0, costCenter: 'CC-PIT-ALPHA', refDoc: 'PO-2026-0811' },
+    { entryNo: 'JV-2026-0802', date: '2026-08-02', accountCode: '2110-AP-VENDOR', accountName: 'Hutang Usaha PT Pertamina', debitUsd: 0, creditUsd: 342000, costCenter: 'CC-PIT-ALPHA', refDoc: 'PO-2026-0811' }
+  ];
+
+  // Fixed Asset Register & Depreciation Schedule
+  const fixedAssetsList = [
+    { assetId: 'AST-EX-2001', assetName: 'Excavator Komatsu PC2000-8', category: 'Heavy Equipment', purchaseDate: '2024-03-15', acquisitionCostUsd: 2850000, accumulatedDeprecUsd: 570000, bookValueUsd: 2280000, usefulLifeYears: 10, method: 'STRAIGHT_LINE' },
+    { assetId: 'AST-DT-1001', assetName: 'Dump Truck Caterpillar 777E', category: 'Heavy Fleet Truck', purchaseDate: '2024-06-20', acquisitionCostUsd: 1450000, accumulatedDeprecUsd: 290000, bookValueUsd: 1160000, usefulLifeYears: 8, method: 'STRAIGHT_LINE' },
+    { assetId: 'AST-CRUSHER-01', assetName: 'Primary Jaw Crusher Plant 500 TPH', category: 'Processing Plant Asset', purchaseDate: '2023-01-10', acquisitionCostUsd: 4200000, accumulatedDeprecUsd: 1260000, bookValueUsd: 2940000, usefulLifeYears: 10, method: 'STRAIGHT_LINE' }
+  ];
+
+  // Budget & Cost Center Breakdown
+  const budgetCostCenters = [
+    { code: 'CC-PIT-ALPHA', name: 'Pit Alpha Mining Operations', budgetAllocatedUsd: 12500000, actualSpentUsd: 9840000, varianceUsd: 2660000, utilizationPct: 78.7 },
+    { code: 'CC-WORKSHOP-MAINT', name: 'Heavy Equipment Central Workshop', budgetAllocatedUsd: 4800000, actualSpentUsd: 3950000, varianceUsd: 850000, utilizationPct: 82.3 },
+    { code: 'CC-JETTY-PORT', name: 'Jetty Barging & Port Logistics', budgetAllocatedUsd: 3200000, actualSpentUsd: 2410000, varianceUsd: 790000, utilizationPct: 75.3 },
+    { code: 'CC-HSE-ENVIRONMENT', name: 'HSE, ESG & Reclamation Works', budgetAllocatedUsd: 1800000, actualSpentUsd: 1220000, varianceUsd: 580000, utilizationPct: 67.8 }
+  ];
+
+  // Accounts Receivable (AR) & Accounts Payable (AP) Invoices
+  const arInvoices = [
+    { invNo: 'INV-2026-NKL-01', customerName: 'PT Tsingshan Steel Indonesia', invDate: '2026-07-20', dueDate: '2026-08-20', amountUsd: 1850000, type: 'RECEIVABLE_AR', status: 'UNPAID_PENDING' },
+    { invNo: 'INV-2026-NKL-02', customerName: 'PT Indonesia Morowali Industrial Park (IMIP)', invDate: '2026-07-28', dueDate: '2026-08-28', amountUsd: 2410000, type: 'RECEIVABLE_AR', status: 'UNPAID_PENDING' }
+  ];
+
+  const apInvoices = [
+    { invNo: 'AP-PERTA-2026-88', supplierName: 'PT Pertamina Patra Niaga (Fuel B35)', invDate: '2026-07-25', dueDate: '2026-08-10', amountUsd: 342000, type: 'PAYABLE_AP', status: 'DUE_SOON' },
+    { invNo: 'AP-TRAK-2026-12', supplierName: 'PT Trakindo Utama (CAT Parts)', invDate: '2026-07-15', dueDate: '2026-08-15', amountUsd: 142000, type: 'PAYABLE_AP', status: 'SCHEDULED_PAYMENT' }
+  ];
+
+  // Tax Management Summary (VAT, Royalty, PPh)
+  const taxRecords = [
+    { taxType: 'Royalti Mineral PNBP ESDM (10%)', taxableBasisUsd: 38000000, taxAmountUsd: 3800000, dueDate: '2026-08-15', status: 'PAID' },
+    { taxType: 'PPN Keluaran 11% (VAT Output)', taxableBasisUsd: 38000000, taxAmountUsd: 4180000, dueDate: '2026-08-31', status: 'PENDING_FILING' },
+    { taxType: 'PPh Pasal 22 Impor & Alat Berat (1.5%)', taxableBasisUsd: 4200000, taxAmountUsd: 63000, dueDate: '2026-08-20', status: 'PAID' }
+  ];
+
+  // Bank Accounts & Multi-Currency Balances
+  const bankAccounts = [
+    { bankName: 'Bank Mandiri (USD Corporate)', accountNo: '102-00-889123-1', balanceUsd: 8420000, balanceIdr: 136825000000, status: 'RECONCILED' },
+    { bankName: 'Bank Central Asia (BCA IDR Operational)', accountNo: '084-332190-8', balanceUsd: 910769, balanceIdr: 14800000000, status: 'RECONCILED' },
+    { bankName: 'Bank Himbara BRI (Royalty Escrow USD)', accountNo: '001-99-440112-2', balanceUsd: 3500000, balanceIdr: 56875000000, status: 'RECONCILED' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      
+      {/* Top Banner Header */}
+      <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 border border-slate-700 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              Corporate Financial Accounting & Multi-Currency Treasury
+            </span>
+            <span className="text-slate-400 text-xs">• IFRS / PSAK Mining Standards Compliance</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">
+            Keuangan, Akuntansi Tambang, Arus Kas & Pajak
+          </h1>
+          <p className="text-xs text-slate-400 max-w-2xl mt-1">
+            Sistem akuntansi dan keuangan proyek tambang: Arus Kas (Cash Flow), Buku Besar (General Ledger), Jurnal Entri, Aset Tetap & Depresiasi, Anggaran Cost Center, Laporan Keuangan, Faktur AR/AP, Pajak Royalti ESDM, serta Rekonsiliasi Bank Multi-Mata Uang.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center gap-3 text-xs shadow-inner">
+            <Coins className="w-6 h-6 text-emerald-400 shrink-0" />
+            <div>
+              <span className="text-slate-400 text-[10px] block">Kurs USD/IDR Acuan BI:</span>
+              <strong className="text-slate-100 font-mono text-base font-bold">Rp 16.250 / USD</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Sub-Tabs covering all 17 requested keywords */}
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
+        {[
+          { id: 'cash_flow', label: 'Arus Kas (Cash Flow)', icon: TrendingUp },
+          { id: 'general_ledger', label: 'Buku Besar & Jurnal (General Ledger)', icon: BookOpen },
+          { id: 'asset_management', label: 'Aset Tetap (Fixed Assets & Deprec)', icon: Building },
+          { id: 'budget_cost_center', label: 'Anggaran & Cost Center (Budget)', icon: PieChart },
+          { id: 'financial_statements', label: 'Laporan Keuangan (Income & BS)', icon: FileSpreadsheet },
+          { id: 'receivables_payables', label: 'Piutang & Hutang (AR / AP)', icon: Receipt },
+          { id: 'tax_management', label: 'Pajak & Royalti (Tax & Royalty)', icon: Calculator },
+          { id: 'bank_multicurrency', label: 'Bank & Multi Currency', icon: Landmark }
+        ].map((tab) => {
+          const IconComp = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
+                isActive 
+                  ? 'bg-emerald-600 text-white shadow-md' 
+                  : 'bg-slate-900 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <IconComp className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* TAB 1: CASH FLOW */}
+      {activeTab === 'cash_flow' && (
+        <div className="space-y-6 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <span className="text-slate-400 block mb-1">Total Arus Kas Masuk (Inflow YTD)</span>
+              <span className="text-2xl font-bold text-emerald-400 font-mono">$38,150,000 USD</span>
+              <span className="text-slate-400 block mt-1">Penjualan Ore & Domestic Smelter</span>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <span className="text-slate-400 block mb-1">Total Arus Kas Keluar (Outflow YTD)</span>
+              <span className="text-2xl font-bold text-rose-400 font-mono">$24,600,000 USD</span>
+              <span className="text-slate-400 block mt-1">OPEX Fuel, Contractor & Maintenance</span>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+              <span className="text-slate-400 block mb-1">Net Cash Position (Surplus)</span>
+              <span className="text-2xl font-bold text-amber-300 font-mono">$13,550,000 USD</span>
+              <span className="text-emerald-400 block mt-1">Healthy Cash Runway 14 Months</span>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Grafik Tren Arus Kas Operasional Bulanan (Cash Flow Inflow vs Outflow)
+            </h3>
+
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={cashFlowData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
+                  <YAxis stroke="#94a3b8" fontSize={11} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }} />
+                  <Area type="monotone" dataKey="cashInflowUsd" name="Kas Masuk (Inflow $)" stroke="#10B981" fill="#10B981" fillOpacity={0.2} />
+                  <Area type="monotone" dataKey="cashOutflowUsd" name="Kas Keluar (Outflow $)" stroke="#EF4444" fill="#EF4444" fillOpacity={0.2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: GENERAL LEDGER & JOURNALS */}
+      {activeTab === 'general_ledger' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">Jurnal Umum & Buku Besar (General Ledger & Double-Entry Journal)</h3>
+              <button className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat Entry Jurnal Baru</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse font-mono">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[10px]">
+                    <th className="py-2.5 px-3">No. Jurnal</th>
+                    <th className="py-2.5 px-3">Tanggal</th>
+                    <th className="py-2.5 px-3">Kode & Nama Akun (CoA)</th>
+                    <th className="py-2.5 px-3">Debit ($)</th>
+                    <th className="py-2.5 px-3">Kredit ($)</th>
+                    <th className="py-2.5 px-3">Cost Center</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {journalEntries.map((j, idx) => (
+                    <tr key={idx} className="hover:bg-slate-800/40">
+                      <td className="py-3 px-3 font-bold text-emerald-400">{j.entryNo}</td>
+                      <td className="py-3 px-3 text-slate-400">{j.date}</td>
+                      <td className="py-3 px-3 font-sans">
+                        <strong className="text-slate-100 block">{j.accountName}</strong>
+                        <span className="text-[10px] text-slate-400 font-mono">{j.accountCode}</span>
+                      </td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">${j.debitUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-rose-400 font-bold">${j.creditUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300 font-sans">{j.costCenter}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: ASSET MANAGEMENT & DEPRECIATION */}
+      {activeTab === 'asset_management' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Register Aset Tetap Tambang & Depresiasi Garis Lurus (Fixed Asset Register)
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse font-mono">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[10px]">
+                    <th className="py-2.5 px-3">Asset ID</th>
+                    <th className="py-2.5 px-3">Nama Perangkat Aset</th>
+                    <th className="py-2.5 px-3">Kategori</th>
+                    <th className="py-2.5 px-3">Harga Perolehan ($)</th>
+                    <th className="py-2.5 px-3">Akumulasi Depresiasi ($)</th>
+                    <th className="py-2.5 px-3">Nilai Buku Saat Ini ($)</th>
+                    <th className="py-2.5 px-3">Masa Manfaat</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {fixedAssetsList.map((a) => (
+                    <tr key={a.assetId} className="hover:bg-slate-800/40">
+                      <td className="py-3 px-3 font-bold text-emerald-400">{a.assetId}</td>
+                      <td className="py-3 px-3 font-sans text-slate-100 font-bold">{a.assetName}</td>
+                      <td className="py-3 px-3 font-sans text-emerald-300">{a.category}</td>
+                      <td className="py-3 px-3 text-slate-200">${a.acquisitionCostUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-rose-400 font-bold">${a.accumulatedDeprecUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">${a.bookValueUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-slate-300">{a.usefulLifeYears} Tahun</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: BUDGET & COST CENTER */}
+      {activeTab === 'budget_cost_center' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Alokasi Anggaran Departermen & Pengawasan Cost Center OPEX/CAPEX
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {budgetCostCenters.map((c) => (
+                <div key={c.code} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                  <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <div>
+                      <strong className="text-slate-100 text-sm font-bold block">{c.name}</strong>
+                      <span className="text-slate-400 text-[10px] font-mono">Kode: {c.code}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] font-mono">
+                      {c.utilizationPct}% Used
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 text-slate-300 font-mono text-[11px]">
+                    <p>Anggaran Dialokasikan: <strong className="text-slate-100">${c.budgetAllocatedUsd.toLocaleString('en-US')}</strong></p>
+                    <p>Realisasi Aktual: <strong className="text-amber-300">${c.actualSpentUsd.toLocaleString('en-US')}</strong></p>
+                    <p>Sisa Anggaran: <strong className="text-emerald-400 font-bold">${c.varianceUsd.toLocaleString('en-US')}</strong></p>
+                  </div>
+
+                  <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${c.utilizationPct}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: FINANCIAL STATEMENTS */}
+      {activeTab === 'financial_statements' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Ringkasan Laporan Laba Rugi Konsolidasi (Income Statement YTD 2026)
+            </h3>
+
+            <div className="space-y-2 font-mono text-slate-200">
+              <div className="flex justify-between p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="font-bold text-emerald-400 font-sans">Total Pendapatan Penjualan Bijih Nikel (Revenue)</span>
+                <strong className="text-emerald-400 font-bold">$38,150,000 USD</strong>
+              </div>
+              <div className="flex justify-between p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="font-bold text-rose-400 font-sans">HPP / Beban Pokok Penjualan COGS (Mining & Fuel)</span>
+                <strong className="text-rose-400 font-bold">($18,400,000) USD</strong>
+              </div>
+              <div className="flex justify-between p-2.5 bg-slate-900 rounded-lg border border-slate-700">
+                <span className="font-bold text-slate-100 font-sans">LABA KOTOR (GROSS PROFIT)</span>
+                <strong className="text-amber-300 font-bold">$19,750,000 USD</strong>
+              </div>
+              <div className="flex justify-between p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                <span className="font-bold text-slate-400 font-sans">Beban Usaha, Admin & Royalti ESDM</span>
+                <strong className="text-rose-400 font-bold">($6,200,000) USD</strong>
+              </div>
+              <div className="flex justify-between p-3 bg-emerald-950/60 rounded-xl border border-emerald-500/40 text-sm">
+                <span className="font-bold text-emerald-300 font-sans">NET INCOME / LABA BERSIH (EBITDA)</span>
+                <strong className="text-emerald-400 font-bold">$13,550,000 USD</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: RECEIVABLES & PAYABLES */}
+      {activeTab === 'receivables_payables' && (
+        <div className="space-y-6 text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* AR Card */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h3 className="font-bold text-emerald-400 text-sm border-b border-slate-800 pb-2">
+                Piutang Usaha Smelter (Accounts Receivable - AR)
+              </h3>
+              {arInvoices.map((ar) => (
+                <div key={ar.invNo} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                  <div className="flex justify-between">
+                    <strong className="text-slate-100">{ar.customerName}</strong>
+                    <span className="text-emerald-400 font-mono font-bold">${ar.amountUsd.toLocaleString('en-US')}</span>
+                  </div>
+                  <span className="text-slate-500 text-[10px] block font-mono">Invoice: {ar.invNo} • Jatuh Tempo: {ar.dueDate}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* AP Card */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h3 className="font-bold text-rose-400 text-sm border-b border-slate-800 pb-2">
+                Hutang Usaha Vendor (Accounts Payable - AP)
+              </h3>
+              {apInvoices.map((ap) => (
+                <div key={ap.invNo} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                  <div className="flex justify-between">
+                    <strong className="text-slate-100">{ap.supplierName}</strong>
+                    <span className="text-rose-400 font-mono font-bold">${ap.amountUsd.toLocaleString('en-US')}</span>
+                  </div>
+                  <span className="text-slate-500 text-[10px] block font-mono">AP Ref: {ap.invNo} • Jatuh Tempo: {ap.dueDate}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 7: TAX & ROYALTIES */}
+      {activeTab === 'tax_management' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Kepatuhan Pajak & Royalti PNBP ESDM Mineral (SIMPONI / e-PNBP)
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse font-mono">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[10px]">
+                    <th className="py-2.5 px-3">Jenis Pajak / Royalti</th>
+                    <th className="py-2.5 px-3">Dasar Pengenaan Pajak ($)</th>
+                    <th className="py-2.5 px-3">Jumlah Terutang ($)</th>
+                    <th className="py-2.5 px-3">Batas Setor</th>
+                    <th className="py-2.5 px-3">Status Setor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {taxRecords.map((t, idx) => (
+                    <tr key={idx} className="hover:bg-slate-800/40">
+                      <td className="py-3 px-3 font-sans text-slate-100 font-bold">{t.taxType}</td>
+                      <td className="py-3 px-3 text-slate-300">${t.taxableBasisUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">${t.taxAmountUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-slate-400">{t.dueDate}</td>
+                      <td className="py-3 px-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
+                          t.status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {t.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 8: BANK & MULTI CURRENCY */}
+      {activeTab === 'bank_multicurrency' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Rekening Bank Perusahaan & Saldo Multi-Mata Uang (USD / IDR Treasury)
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {bankAccounts.map((b, idx) => (
+                <div key={idx} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                  <span className="font-bold text-slate-100 block text-sm">{b.bankName}</span>
+                  <span className="text-slate-500 text-[10px] font-mono block">No. Rek: {b.accountNo}</span>
+                  <div className="pt-2 border-t border-slate-800 space-y-1 font-mono">
+                    <p className="text-emerald-400 font-bold text-sm">${b.balanceUsd.toLocaleString('en-US')} USD</p>
+                    <p className="text-slate-400 text-[10px]">Equiv. Rp {b.balanceIdr.toLocaleString('id-ID')}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
