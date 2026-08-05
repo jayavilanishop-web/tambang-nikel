@@ -23,7 +23,8 @@ import {
   Mail, 
   Tag, 
   Send, 
-  Sparkles 
+  Sparkles,
+  X
 } from 'lucide-react';
 import { Language } from '../../types';
 
@@ -48,50 +49,78 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  // Customer / Buyers Dataset
-  const customersList = [
+  // Dynamic Datasets
+  const [customersList, setCustomersList] = useState([
     { custId: 'CUST-SMELTER-01', companyName: 'PT Indonesia Tsingshan Stainless Steel (ITSS)', contactPerson: 'Chen Wei / Procurement Director', country: 'Indonesia (Morowali)', category: 'TIER_1_SMELTER_OFFTAKER', totalContractVal: '$124,500,000 USD', creditLimit: '$15,000,000 USD', status: 'ACTIVE_VIP' },
     { custId: 'CUST-VALE-02', companyName: 'PT Vale Indonesia Tbk (Pomalaa)', contactPerson: 'Ahmad Subagja', country: 'Indonesia (Sultra)', category: 'HIGH_GRADE_SAPROLITE_BUYER', totalContractVal: '$88,000,000 USD', creditLimit: '$10,000,000 USD', status: 'ACTIVE_VIP' },
     { custId: 'CUST-TRADER-03', companyName: 'Glencore International AG', contactPerson: 'Markus Vance', country: 'Switzerland', category: 'GLOBAL_COMMODITY_TRADER', totalContractVal: '$45,200,000 USD', creditLimit: '$5,000,000 USD', status: 'ACTIVE' }
-  ];
+  ]);
 
-  // Contracts Dataset
-  const contractsList = [
+  const [contractsList, setContractsList] = useState([
     { contractNo: 'CTR-OFFTAKE-2026-01', buyerName: 'PT Indonesia Tsingshan (ITSS)', targetVolumeWmt: 1200000, gradeSpec: 'Ni >= 1.80%, Fe >= 15%, MC <= 35%', incoterm: 'FOB Jetty Morowali', pricingBasis: 'HPM ESDM Index + Premium', startDate: '2026-01-01', expiryDate: '2026-12-31', status: 'EXECUTING_ON_SCHEDULE' },
     { contractNo: 'CTR-SPOT-2026-04', buyerName: 'Glencore International AG', targetVolumeWmt: 150000, gradeSpec: 'Ni >= 1.90% High Grade Saprolite', incoterm: 'CIF Weda Bay Port', pricingBasis: 'LME Nickel Index Floating', startDate: '2026-06-01', expiryDate: '2026-09-30', status: 'ACTIVE' }
-  ];
+  ]);
 
-  // Sales Deals Dataset
-  const salesDeals = [
+  const [salesDeals, setSalesDeals] = useState([
     { dealId: 'DEAL-2026-081', dealName: 'Pengapalan Saprolite Shipment #18 (Barge 330ft)', buyer: 'PT Indonesia Tsingshan (ITSS)', volumeWmt: 10500, estRevenueUsd: 682500, dealStage: 'BARGE_DISPATCHED', salesRep: 'Dedi Kurniawan' },
     { dealId: 'DEAL-2026-082', dealName: 'Penjualan Spot Limonite Low Grade (LCT-04)', buyer: 'PT Vale Indonesia', volumeWmt: 7800, estRevenueUsd: 312000, dealStage: 'NEGOTIATION_FINAL', salesRep: 'Rina Sugiarto' }
-  ];
+  ]);
 
-  // Marketing Campaigns Dataset
-  const marketingCampaigns = [
+  const [marketingCampaigns, setMarketingCampaigns] = useState([
     { campaignId: 'MKT-2026-Q3', title: 'Promosi Nickel Ore Kadar Ni >= 1.9% Pasar Asia Pasifik', targetAudience: 'Global Battery Smelter & HPAL Plants', leadsGenerated: 24, channel: 'Mining Conference Jakarta & Direct Outreach', budgetUsd: 45000, status: 'CAMPAIGN_ACTIVE' }
-  ];
+  ]);
 
-  // Quotation Dataset
-  const quotationsList = [
+  const [quotationsList, setQuotationsList] = useState([
     { quoteNo: 'QUO-2026-091', recipientName: 'Zhejiang Huayou Cobalt Co.', oreGradeRequested: 'Limoni Ni 1.30% (HPAL Feedstock)', qtyRequestedWmt: 300000, pricePerWmt: '$32.50 USD / WMT', validUntil: '2026-08-30', status: 'OFFER_SENT' }
-  ];
+  ]);
 
-  // Invoices Dataset
-  const invoicesList = [
+  const [invoicesList, setInvoicesList] = useState([
     { invNo: 'INV-2026-0412', buyerName: 'PT Indonesia Tsingshan (ITSS)', dealRef: 'DEAL-2026-081', invType: 'PROFORMA_INVOICE_90%', amountUsd: 614250, dueDate: '2026-08-15', paymentStatus: 'UNPAID_PENDING_DUE' },
     { invNo: 'INV-2026-0399', buyerName: 'PT Vale Indonesia', dealRef: 'DEAL-2026-072', invType: 'FINAL_COMMERCIAL_INVOICE_100%', amountUsd: 428000, dueDate: '2026-07-30', paymentStatus: 'PAID_FULL' }
-  ];
+  ]);
 
-  // Support Tickets Dataset
-  const supportTickets = [
+  const [supportTickets, setSupportTickets] = useState([
     { ticketId: 'SUP-2026-014', buyerName: 'PT Indonesia Tsingshan', subject: 'Permintaan Dokumen COA (Certificate of Analysis) Independen', priority: 'HIGH', assignedTo: 'Quality Assurance Sales', status: 'IN_PROGRESS' }
-  ];
+  ]);
 
-  // Complaints & Assay Claims Dataset
-  const complaintsList = [
+  const [complaintsList, setComplaintsList] = useState([
     { claimNo: 'CLM-2026-003', buyerName: 'Glencore International', shipmentRef: 'Barge PST-08', claimType: 'MOISTURE_PENALTY_CLAIM', description: 'Moisture Content hasil lab discharge port 36.2% (Kontrak max 35.0%). Penyesuaian potongan bobot 1.2%.', claimValUsd: 12400, resolutionStatus: 'SETTLED_CREDIT_NOTE_ISSUED' }
-  ];
+  ]);
+
+  // Modals state
+  const [showCustModal, setShowCustModal] = useState(false);
+  const [custName, setCustName] = useState('');
+  const [custContact, setCustContact] = useState('');
+  const [custCountry, setCustCountry] = useState('Indonesia (Morowali)');
+
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [contractBuyer, setContractBuyer] = useState('PT Indonesia Tsingshan (ITSS)');
+  const [contractVolume, setContractVolume] = useState(500000);
+
+  const [showDealModal, setShowDealModal] = useState(false);
+  const [dealName, setDealName] = useState('');
+  const [dealBuyer, setDealBuyer] = useState('PT Indonesia Tsingshan (ITSS)');
+  const [dealVolume, setDealVolume] = useState(10000);
+
+  const [showMktModal, setShowMktModal] = useState(false);
+  const [mktTitle, setMktTitle] = useState('');
+  const [mktAudience, setMktAudience] = useState('Global Battery Smelter');
+
+  const [showQuoModal, setShowQuoModal] = useState(false);
+  const [quoBuyer, setQuoBuyer] = useState('Zhejiang Huayou Cobalt Co.');
+  const [quoPrice, setQuoPrice] = useState('$35.00 USD / WMT');
+
+  const [showInvModal, setShowInvModal] = useState(false);
+  const [invBuyer, setInvBuyer] = useState('PT Indonesia Tsingshan (ITSS)');
+  const [invAmountUSD, setInvAmountUSD] = useState(500000);
+
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [ticketSubject, setTicketSubject] = useState('');
+  const [ticketBuyer, setTicketBuyer] = useState('PT Indonesia Tsingshan');
+
+  const [showClaimModal, setShowClaimModal] = useState(false);
+  const [claimBuyer, setClaimBuyer] = useState('Glencore International');
+  const [claimDesc, setClaimDesc] = useState('Klaim penyesuaian penalti moisture content');
 
   return (
     <div className="space-y-6">
@@ -126,7 +155,7 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
           <span className="text-slate-400 text-xs font-semibold block">Total Active Buyers (Smelters)</span>
-          <p className="text-2xl font-extrabold text-indigo-400 font-mono">14 <span className="text-xs font-normal text-slate-400">Companies</span></p>
+          <p className="text-2xl font-extrabold text-indigo-400 font-mono">{customersList.length} <span className="text-xs font-normal text-slate-400">Companies</span></p>
           <span className="text-[11px] text-slate-500 block">3 VIP Long-term Offtakers</span>
         </div>
 
@@ -230,7 +259,10 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="font-bold text-slate-100 text-sm">Direktori Pelanggan & Pembeli Bijih Nikel (Customer Registry)</h3>
-              <button className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5">
+              <button 
+                onClick={() => setShowCustModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Pelanggan Baru</span>
               </button>
@@ -276,9 +308,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'contracts' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Kontrak Penjualan Long-Term Offtake & Agreement Spot (Contract Management)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Kontrak Penjualan Long-Term Offtake & Agreement Spot (Contract Management)
+              </h3>
+              <button 
+                onClick={() => setShowContractModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Terbitkan Kontrak Offtake Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -297,7 +338,7 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
                     <tr key={ct.contractNo} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-indigo-400">{ct.contractNo}</td>
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{ct.buyerName}</td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold">{ct.targetVolumeWmt.toLocaleString()} WMT</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">{(ct.targetVolumeWmt ?? 0).toLocaleString()} WMT</td>
                       <td className="py-3 px-3 font-sans text-amber-300">{ct.gradeSpec}</td>
                       <td className="py-3 px-3 font-sans text-slate-300">{ct.incoterm}</td>
                       <td className="py-3 px-3">
@@ -318,9 +359,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'sales_deals' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Pelacak Transaksi Penjualan & Pengapalan Ore (Sales Deal Pipeline)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Pelacak Transaksi Penjualan & Pengapalan Ore (Sales Deal Pipeline)
+              </h3>
+              <button 
+                onClick={() => setShowDealModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat Deal Transaksi Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -340,8 +390,8 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
                       <td className="py-3 px-3 font-bold text-indigo-400">{d.dealId}</td>
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{d.dealName}</td>
                       <td className="py-3 px-3 font-sans text-slate-300">{d.buyer}</td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold">{d.volumeWmt.toLocaleString()} WMT</td>
-                      <td className="py-3 px-3 text-indigo-300 font-bold">${d.estRevenueUsd.toLocaleString()}</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">{(d.volumeWmt ?? 0).toLocaleString()} WMT</td>
+                      <td className="py-3 px-3 text-indigo-300 font-bold">${(d.estRevenueUsd ?? 0).toLocaleString()}</td>
                       <td className="py-3 px-3">
                         <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-indigo-500/20 text-indigo-300">
                           {d.dealStage}
@@ -360,9 +410,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'marketing' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Kampanye Pemasaran Komoditas & Outreach Smelter Global (Marketing)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Kampanye Pemasaran Komoditas & Outreach Smelter Global (Marketing)
+              </h3>
+              <button 
+                onClick={() => setShowMktModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat Kampanye Marketing</span>
+              </button>
+            </div>
 
             <div className="space-y-3">
               {marketingCampaigns.map((m) => (
@@ -388,9 +447,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'quotation' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Penawaran Harga Resmi Komoditas Bijih Nikel (Quotation / Commercial Offer)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Penawaran Harga Resmi Komoditas Bijih Nikel (Quotation / Commercial Offer)
+              </h3>
+              <button 
+                onClick={() => setShowQuoModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Terbitkan Penawaran Harga</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -410,7 +478,7 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
                       <td className="py-3 px-3 font-bold text-indigo-400">{q.quoteNo}</td>
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{q.recipientName}</td>
                       <td className="py-3 px-3 font-sans text-amber-300">{q.oreGradeRequested}</td>
-                      <td className="py-3 px-3 text-slate-200">{q.qtyRequestedWmt.toLocaleString()} WMT</td>
+                      <td className="py-3 px-3 text-slate-200">{(q.qtyRequestedWmt ?? 0).toLocaleString()} WMT</td>
                       <td className="py-3 px-3 text-emerald-400 font-bold">{q.pricePerWmt}</td>
                       <td className="py-3 px-3">
                         <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-amber-500/20 text-amber-300">
@@ -430,9 +498,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'invoice' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Tagihan & Faktur Komersial (Proforma vs Final Commercial Invoice)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Tagihan & Faktur Komersial (Proforma vs Final Commercial Invoice)
+              </h3>
+              <button 
+                onClick={() => setShowInvModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Terbitkan Invoice Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -452,7 +529,7 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
                       <td className="py-3 px-3 font-bold text-indigo-400">{inv.invNo}</td>
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{inv.buyerName}</td>
                       <td className="py-3 px-3 font-sans text-amber-300 font-bold">{inv.invType}</td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold">${inv.amountUsd.toLocaleString()}</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">${(inv.amountUsd ?? 0).toLocaleString()}</td>
                       <td className="py-3 px-3 text-slate-400">{inv.dueDate}</td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
@@ -474,9 +551,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'support_tickets' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Layanan Bantuan & Permintaan Layanan Pembeli (Customer Support)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Layanan Bantuan & Permintaan Layanan Pembeli (Customer Support)
+              </h3>
+              <button 
+                onClick={() => setShowTicketModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat Tiket Layanan</span>
+              </button>
+            </div>
 
             <div className="space-y-3 font-mono">
               {supportTickets.map((st) => (
@@ -500,9 +586,18 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
       {activeTab === 'complaint_claims' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Penanganan Keluhan & Sengketa Klaim Kadar/Kadar Air (Complaint & Assay Claim Settlement)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Penanganan Keluhan & Sengketa Klaim Kadar/Kadar Air (Complaint & Assay Claim Settlement)
+              </h3>
+              <button 
+                onClick={() => setShowClaimModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Input Klaim Sengketa</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -523,7 +618,7 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{c.buyerName}</td>
                       <td className="py-3 px-3 font-sans text-amber-300 font-bold">{c.claimType}</td>
                       <td className="py-3 px-3 font-sans text-slate-300">{c.description}</td>
-                      <td className="py-3 px-3 text-rose-400 font-bold">${c.claimValUsd.toLocaleString()} USD</td>
+                      <td className="py-3 px-3 text-rose-400 font-bold">${(c.claimValUsd ?? 0).toLocaleString()} USD</td>
                       <td className="py-3 px-3">
                         <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-emerald-500/20 text-emerald-400">
                           {c.resolutionStatus}
@@ -533,6 +628,553 @@ export const CrmSalesCustomerModule: React.FC<CrmSalesCustomerModuleProps> = ({
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: TAMBAH PELANGGAN */}
+      {showCustModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Users className="w-4 h-4 text-indigo-400" /> Registrasi Pembeli / Smelter Baru
+              </h3>
+              <button onClick={() => setShowCustModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Perusahaan Pembeli:</label>
+                <input
+                  type="text"
+                  placeholder="PT Gunbuster Nickel Industry (GNI)"
+                  value={custName}
+                  onChange={(e) => setCustName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Kontak Person / PIC Procurement:</label>
+                <input
+                  type="text"
+                  placeholder="Budi Gunawan / Commercial Manager"
+                  value={custContact}
+                  onChange={(e) => setCustContact(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Lokasi / Negara:</label>
+                <input
+                  type="text"
+                  value={custCountry}
+                  onChange={(e) => setCustCountry(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setCustomersList(prev => [
+                    {
+                      custId: `CUST-SMELTER-0${prev.length + 1}`,
+                      companyName: custName || 'PT Smelter Nickel Indonesia',
+                      contactPerson: custContact || 'Direktur Pengadaan',
+                      country: custCountry,
+                      category: 'TIER_1_SMELTER_OFFTAKER',
+                      totalContractVal: '$50,000,000 USD',
+                      creditLimit: '$5,000,000 USD',
+                      status: 'ACTIVE_VIP'
+                    },
+                    ...prev
+                  ]);
+                  setShowCustModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan Pelanggan
+              </button>
+              <button
+                onClick={() => setShowCustModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: BUAT KONTRAK */}
+      {showContractModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-indigo-400" /> Terbitkan Kontrak Offtake Baru
+              </h3>
+              <button onClick={() => setShowContractModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Pembeli (Buyer):</label>
+                <input
+                  type="text"
+                  value={contractBuyer}
+                  onChange={(e) => setContractBuyer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Target Volume Contract (WMT):</label>
+                <input
+                  type="number"
+                  value={contractVolume}
+                  onChange={(e) => setContractVolume(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setContractsList(prev => [
+                    {
+                      contractNo: `CTR-OFFTAKE-2026-0${prev.length + 1}`,
+                      buyerName: contractBuyer,
+                      targetVolumeWmt: contractVolume,
+                      gradeSpec: 'Ni >= 1.80%, Fe >= 15%, MC <= 35%',
+                      incoterm: 'FOB Jetty Site',
+                      pricingBasis: 'HPM ESDM Index',
+                      startDate: '2026-08-01',
+                      expiryDate: '2027-07-31',
+                      status: 'EXECUTING_ON_SCHEDULE'
+                    },
+                    ...prev
+                  ]);
+                  setShowContractModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Terbitkan Kontrak
+              </button>
+              <button
+                onClick={() => setShowContractModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: BUAT DEAL SALES */}
+      {showDealModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Target className="w-4 h-4 text-indigo-400" /> Buat Deal Penjualan Ore Baru
+              </h3>
+              <button onClick={() => setShowDealModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Deal Transaksi:</label>
+                <input
+                  type="text"
+                  placeholder="Pengapalan Saprolite Barge #20"
+                  value={dealName}
+                  onChange={(e) => setDealName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Pembeli:</label>
+                <input
+                  type="text"
+                  value={dealBuyer}
+                  onChange={(e) => setDealBuyer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Volume Ore (WMT):</label>
+                <input
+                  type="number"
+                  value={dealVolume}
+                  onChange={(e) => setDealVolume(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setSalesDeals(prev => [
+                    {
+                      dealId: `DEAL-2026-0${prev.length + 83}`,
+                      dealName: dealName || 'Penjualan Nikel Ore Barging',
+                      buyer: dealBuyer,
+                      volumeWmt: dealVolume,
+                      estRevenueUsd: dealVolume * 65,
+                      dealStage: 'CONTRACT_AGREED',
+                      salesRep: 'Tim Sales Commercial'
+                    },
+                    ...prev
+                  ]);
+                  setShowDealModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan Deal
+              </button>
+              <button
+                onClick={() => setShowDealModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: BUAT KAMPANYE MARKETING */}
+      {showMktModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-400" /> Buat Kampanye Pemasaran Smelter
+              </h3>
+              <button onClick={() => setShowMktModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Judul Kampanye Marketing:</label>
+                <input
+                  type="text"
+                  placeholder="Program Outreach HPAL Limonite Feedstock"
+                  value={mktTitle}
+                  onChange={(e) => setMktTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Target Audiens:</label>
+                <input
+                  type="text"
+                  value={mktAudience}
+                  onChange={(e) => setMktAudience(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setMarketingCampaigns(prev => [
+                    {
+                      campaignId: `MKT-2026-Q${prev.length + 4}`,
+                      title: mktTitle || 'Promosi Penjualan Bijih Nikel',
+                      targetAudience: mktAudience,
+                      leadsGenerated: 12,
+                      channel: 'Direct Smelter Pitching & Email',
+                      budgetUsd: 25000,
+                      status: 'CAMPAIGN_ACTIVE'
+                    },
+                    ...prev
+                  ]);
+                  setShowMktModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Luncurkan Kampanye
+              </button>
+              <button
+                onClick={() => setShowMktModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: TERBITKAN QUOTATION */}
+      {showQuoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <FileCheck2 className="w-4 h-4 text-indigo-400" /> Terbitkan Penawaran Harga (Quotation)
+              </h3>
+              <button onClick={() => setShowQuoModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Calon Pembeli (Recipient):</label>
+                <input
+                  type="text"
+                  value={quoBuyer}
+                  onChange={(e) => setQuoBuyer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Harga Penawaran per WMT:</label>
+                <input
+                  type="text"
+                  value={quoPrice}
+                  onChange={(e) => setQuoPrice(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setQuotationsList(prev => [
+                    {
+                      quoteNo: `QUO-2026-0${prev.length + 92}`,
+                      recipientName: quoBuyer,
+                      oreGradeRequested: 'Saprolite Ni 1.80%',
+                      qtyRequestedWmt: 200000,
+                      pricePerWmt: quoPrice,
+                      validUntil: '2026-09-15',
+                      status: 'OFFER_SENT'
+                    },
+                    ...prev
+                  ]);
+                  setShowQuoModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Kirim Quotation
+              </button>
+              <button
+                onClick={() => setShowQuoModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: TERBITKAN INVOICE */}
+      {showInvModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-indigo-400" /> Terbitkan Tagihan Invoice
+              </h3>
+              <button onClick={() => setShowInvModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Pembeli:</label>
+                <input
+                  type="text"
+                  value={invBuyer}
+                  onChange={(e) => setInvBuyer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Jumlah Tagihan (USD):</label>
+                <input
+                  type="number"
+                  value={invAmountUSD}
+                  onChange={(e) => setInvAmountUSD(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setInvoicesList(prev => [
+                    {
+                      invNo: `INV-2026-0${prev.length + 413}`,
+                      buyerName: invBuyer,
+                      dealRef: 'DEAL-2026-NEW',
+                      invType: 'PROFORMA_INVOICE_90%',
+                      amountUsd: invAmountUSD,
+                      dueDate: '2026-08-30',
+                      paymentStatus: 'UNPAID_PENDING_DUE'
+                    },
+                    ...prev
+                  ]);
+                  setShowInvModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Terbitkan Invoice
+              </button>
+              <button
+                onClick={() => setShowInvModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 7: SUPPORT TICKET */}
+      {showTicketModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-indigo-400" /> Buat Tiket Dukungan Pelanggan
+              </h3>
+              <button onClick={() => setShowTicketModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Subjek Layanan Support:</label>
+                <input
+                  type="text"
+                  placeholder="Permintaan Sertifikat Draft Survey Tambahan"
+                  value={ticketSubject}
+                  onChange={(e) => setTicketSubject(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Pembeli:</label>
+                <input
+                  type="text"
+                  value={ticketBuyer}
+                  onChange={(e) => setTicketBuyer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setSupportTickets(prev => [
+                    {
+                      ticketId: `SUP-2026-0${prev.length + 15}`,
+                      buyerName: ticketBuyer,
+                      subject: ticketSubject || 'Permintaan Layanan Dokumen Commercial',
+                      priority: 'HIGH',
+                      assignedTo: 'Sales Commercial Support',
+                      status: 'IN_PROGRESS'
+                    },
+                    ...prev
+                  ]);
+                  setShowTicketModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Kirim Tiket
+              </button>
+              <button
+                onClick={() => setShowTicketModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 8: COMPLAINT CLAIM */}
+      {showClaimModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-400" /> Input Sengketa / Klaim Kadar Ore
+              </h3>
+              <button onClick={() => setShowClaimModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Pembeli Pemohon Klaim:</label>
+                <input
+                  type="text"
+                  value={claimBuyer}
+                  onChange={(e) => setClaimBuyer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-rose-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Deskripsi Sengketa Lab / Claim:</label>
+                <textarea
+                  rows={2}
+                  value={claimDesc}
+                  onChange={(e) => setClaimDesc(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-rose-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setComplaintsList(prev => [
+                    {
+                      claimNo: `CLM-2026-00${prev.length + 4}`,
+                      buyerName: claimBuyer,
+                      shipmentRef: 'Barge PST-12',
+                      claimType: 'ASSAY_DISCREPANCY_CLAIM',
+                      description: claimDesc,
+                      claimValUsd: 15000,
+                      resolutionStatus: 'UNDER_SURVEYOR_UMPIRE_REVIEW'
+                    },
+                    ...prev
+                  ]);
+                  setShowClaimModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan Klaim
+              </button>
+              <button
+                onClick={() => setShowClaimModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

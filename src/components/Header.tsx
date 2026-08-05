@@ -35,6 +35,7 @@ interface HeaderProps {
   currentUserRole: UserRole;
   onChangeUserRole: (role: UserRole) => void;
   onToggleMobileSidebar: () => void;
+  onGoToLandingPage?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -51,7 +52,8 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleTheme,
   currentUserRole,
   onChangeUserRole,
-  onToggleMobileSidebar
+  onToggleMobileSidebar,
+  onGoToLandingPage
 }) => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [roleSearch, setRoleSearch] = useState('');
@@ -131,7 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
               <div className="hidden sm:block">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">
-                    SmartMine AI
+                    NickelSmart AI
                   </span>
                   <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     Indonesia
@@ -160,12 +162,24 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Right: Commercial Controls & Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
 
+            {/* Landing Page Toggle */}
+            {onGoToLandingPage && (
+              <button
+                onClick={onGoToLandingPage}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-900/60 border border-indigo-700/80 text-indigo-200 hover:bg-indigo-800 text-xs font-semibold shadow-sm transition-all"
+                title="Kembali ke Landing Page / Portal Login"
+              >
+                <Globe className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden sm:inline">Landing Page</span>
+              </button>
+            )}
+
             {/* License Key Badge */}
             <button
               id="btn-header-license-modal"
               onClick={onOpenLicenseModal}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900/90 border border-emerald-700/50 text-emerald-300 text-xs font-medium transition-all shadow-sm"
-              title="Kelola Lisensi Komersial SmartMine AI"
+              title="Kelola Lisensi Komersial NickelSmart AI"
             >
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span className="hidden sm:inline font-mono text-[11px] font-semibold">{licenseInfo.tier}</span>

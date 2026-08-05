@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LandingPage } from './components/LandingPage';
 import { Header } from './components/Header';
 import { Sidebar, ActiveModule } from './components/Sidebar';
 import { LicenseModal } from './components/LicenseModal';
@@ -8,6 +9,7 @@ import { PushNotificationCenter } from './components/PushNotificationCenter';
 import { DashboardModule } from './components/modules/DashboardModule';
 import { ExplorationPitModule } from './components/modules/ExplorationPitModule';
 import { SurveyTopographyModule } from './components/modules/SurveyTopographyModule';
+import { WeighbridgeModule } from './components/modules/WeighbridgeModule';
 import { GpsTelemetryTrackingModule } from './components/modules/GpsTelemetryTrackingModule';
 import { IotSensorTelemetryModule } from './components/modules/IotSensorTelemetryModule';
 import { WarehouseInventoryModule } from './components/modules/WarehouseInventoryModule';
@@ -74,6 +76,7 @@ import {
 } from './types';
 
 export default function App() {
+  const [viewMode, setViewMode] = useState<'landing' | 'app'>('landing');
   const [activeModule, setActiveModule] = useState<ActiveModule>('dashboard');
   const [licenseInfo, setLicenseInfo] = useState<LicenseInfo>(INITIAL_LICENSE);
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
@@ -91,7 +94,7 @@ export default function App() {
   const [departments, setDepartments] = useState<Department[]>(INITIAL_DEPARTMENTS);
   const [companyUsers, setCompanyUsers] = useState<CompanyUser[]>(INITIAL_COMPANY_USERS);
   const [pits, setPits] = useState<PitOperation[]>(INITIAL_PITS);
-  const [stockpiles] = useState(INITIAL_STOCKPILES);
+  const [stockpiles, setStockpiles] = useState(INITIAL_STOCKPILES);
   const [equipment, setEquipment] = useState<HeavyEquipment[]>(INITIAL_EQUIPMENT);
   const [barges] = useState(INITIAL_BARGES);
   const [hpm] = useState(INITIAL_HPM);
@@ -103,6 +106,36 @@ export default function App() {
   const [auditLogs] = useState<AuditLoginLog[]>(INITIAL_AUDIT_LOGS);
 
   // Handlers
+  const handleNewWeighbridgeTicket = (ticket: any) => {
+    if (ticket.status === 'COMPLETED') {
+      setStockpiles(prev => prev.map(st => {
+        if (ticket.destinationLocation.toLowerCase().includes(st.name.toLowerCase()) || 
+            st.name.toLowerCase().includes(ticket.destinationLocation.toLowerCase())) {
+          return {
+            ...st,
+            currentTonnageMT: st.currentTonnageMT + ticket.netWeightMT,
+            lastUpdated: 'Baru saja'
+          };
+        }
+        return st;
+      }));
+    }
+
+    const newNotif: PushNotification = {
+      id: `NOTIF-${Date.now()}`,
+      title: ticket.status === 'COMPLETED' 
+        ? `Surat Jalan ${ticket.ticketNo} Terbit` 
+        : `⚠️ Overload Detected: ${ticket.truckUnitNo}`,
+      message: ticket.status === 'COMPLETED'
+        ? `Truk ${ticket.truckUnitNo} menimbang ${ticket.netWeightMT} MT ${ticket.materialType} (${ticket.originLocation} ➔ ${ticket.destinationLocation})`
+        : `Truk ${ticket.truckUnitNo} membawa muatan ${ticket.netWeightMT} MT. Ditolak di ${ticket.gateNo}`,
+      time: 'Baru saja',
+      category: 'OPERATIONS',
+      read: false,
+      priority: ticket.status === 'COMPLETED' ? 'NORMAL' : 'URGENT'
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+  };
   const handleRevokeDevice = (deviceId: string) => {
     setDevices(prev => prev.filter(d => d.id !== deviceId));
   };
@@ -164,6 +197,21 @@ export default function App() {
     setNotifications([]);
   };
 
+  if (viewMode === 'landing') {
+    return (
+      <LandingPage
+        onEnterApp={(selectedRole) => {
+          if (selectedRole) {
+            setCurrentUserRole(selectedRole);
+          }
+          setViewMode('app');
+        }}
+        language={language}
+        onToggleLanguage={() => setLanguage(l => l === 'id' ? 'en' : 'id')}
+      />
+    );
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900'} font-sans antialiased selection:bg-emerald-500 selection:text-slate-950`}>
       
@@ -183,6 +231,7 @@ export default function App() {
         currentUserRole={currentUserRole}
         onChangeUserRole={setCurrentUserRole}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        onGoToLandingPage={() => setViewMode('landing')}
       />
 
       {/* Main Layout Area */}
@@ -257,6 +306,18 @@ export default function App() {
             <SurveyTopographyModule
               stockpiles={stockpiles}
               language={language}
+            />
+          )}
+
+          {activeModule === 'weighbridge' && (
+            <WeighbridgeModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              language={language}
+              onOpenAIDrawer={() => setIsAIDrawerOpen(true)}
+              onNavigateModule={setActiveModule}
+              onNewTicketProcessed={handleNewWeighbridgeTicket}
             />
           )}
 

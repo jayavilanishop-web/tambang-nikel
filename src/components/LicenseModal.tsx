@@ -98,7 +98,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-slate-100 text-lg">
-                {language === 'id' ? 'Aktivasi Lisensi Komersial SmartMine AI' : 'SmartMine AI Commercial License Activation'}
+                {language === 'id' ? 'Aktivasi Lisensi Komersial NickelSmart AI' : 'NickelSmart AI Commercial License Activation'}
               </h3>
               <p className="text-xs text-slate-400">
                 {language === 'id' ? 'Sistem Manajemen Lisensi & Hak Akses Enterprise' : 'Enterprise SaaS License Key Manager'}
@@ -249,7 +249,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
 
         {/* Modal Footer */}
         <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs">
-          <span className="text-slate-500 text-[11px]">PT SmartMine Technology Indonesia &copy; 2026</span>
+          <span className="text-slate-500 text-[11px]">PT NickelSmart Technology Indonesia &copy; 2026</span>
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold"

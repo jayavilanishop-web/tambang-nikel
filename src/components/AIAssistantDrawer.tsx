@@ -37,7 +37,7 @@ export const AIAssistantDrawer: React.FC<AIAssistantDrawerProps> = ({
     {
       id: 'init-msg',
       sender: 'ai',
-      text: `Halo! Saya **SmartMine AI**, Asisten Pintar Operasional Pertambangan Nikel Indonesia.
+      text: `Halo! Saya **NickelSmart AI**, Asisten Pintar Operasional Pertambangan Nikel Indonesia.
 Saya siap membantu Anda dalam:
 - **Optimasi Blending Ore Nikel** (Saprolit vs Limonit untuk RKEF / HPAL)
 - **Kepatuhan Regulasi ESDM** (Format RKAB, Harga HPM, DMO)
@@ -152,7 +152,7 @@ Ada yang bisa saya bantu untuk operasional site Anda hari ini?`,
               <Sparkles className="w-5 h-5 text-amber-300" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-100 text-sm">SmartMine AI Assistant</h3>
+              <h3 className="font-bold text-slate-100 text-sm">NickelSmart AI Assistant</h3>
               <p className="text-[11px] text-emerald-400 font-medium">Asisten Operasional Pertambangan Nikel</p>
             </div>
           </div>
@@ -236,7 +236,7 @@ Ada yang bisa saya bantu untuk operasional site Anda hari ini?`,
           {isLoading && (
             <div className="flex gap-3 items-center text-xs text-slate-400 bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
               <RefreshCw className="w-4 h-4 text-emerald-400 animate-spin" />
-              <span>SmartMine AI sedang menganalisis data pertambangan...</span>
+              <span>NickelSmart AI sedang menganalisis data pertambangan...</span>
             </div>
           )}
 

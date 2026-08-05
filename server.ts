@@ -168,7 +168,7 @@ app.post("/api/ai/chat", async (req, res) => {
     const { message, contextHistory = [], mineData } = req.body;
     const ai = getGeminiClient();
 
-    const systemPrompt = `Anda adalah "SmartMine AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise.
+    const systemPrompt = `Anda adalah "NickelSmart AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise.
 Tugas Anda adalah memberikan analisis tingkat tinggi, rekomendasi praktis, optimasi pencampuran kadar nikel (ore blending), pemenuhan regulasi ESDM (RKAB, HPM, DMO, K3LH, Kepmen ESDM 1827 K/30/MEM/2018), manajemen alat berat, serta operasi barging & jetty.
 
 Konteks Tambang Saat Ini:
@@ -182,7 +182,7 @@ Berikan jawaban yang profesional, terstruktur, berbasis data teknis pertambangan
 
     if (ai) {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.6-flash",
         contents: [
           { role: "user", parts: [{ text: `${systemPrompt}\n\nPertanyaan Operator/Manager: ${message}` }] }
         ],
@@ -193,11 +193,11 @@ Berikan jawaban yang profesional, terstruktur, berbasis data teknis pertambangan
       });
 
       const reply = response.text || "Terjadi kendala dalam memproses permintaan AI.";
-      return res.json({ reply, source: "gemini-2.5-flash" });
+      return res.json({ reply, source: "gemini-3.6-flash" });
     }
 
     // High quality fallback answer when key is not configured
-    const fallbackReply = `**SmartMine AI Analysis & Recommendation:**
+    const fallbackReply = `**NickelSmart AI Analysis & Recommendation:**
 
 1. **Evaluasi Kadar Ore & Blending Target:**
    - Untuk mencapai target smelter (${mineData?.saproliteGrade || "1.80% Ni"}), disarankan melakukan Blending Ratio: **65% Stockpile Saprolit Pit-2 (Ni 1.95%)** + **35% Stockpile Limonit ETO (Ni 1.35%)**.
@@ -249,7 +249,7 @@ Berikan output JSON valid dengan struktur:
 
     if (ai) {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.6-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {
           temperature: 0.2,
@@ -304,7 +304,7 @@ Sediakan rangkuman narasi teknis ESDM yang mencakup:
 
     if (ai) {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.6-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: { temperature: 0.3 }
       });
@@ -313,7 +313,7 @@ Sediakan rangkuman narasi teknis ESDM yang mencakup:
 
     const fallbackReport = `LAPORAN KINERJA EVALUASI RKAB PERTAMBANGAN NIKEL
 Periode: ${period || "Q3 2026"} | Lokasi: ${pitName || "Pit Alpha Utama"}
-Dibuat Otomatis oleh Engine SmartMine AI Indonesia
+Dibuat Otomatis oleh Engine NickelSmart AI Indonesia
 
 1. RINGKASAN KINERJA PRODUKSI ORE
    - Target RKAB: ${targetProductionMT || "250,000"} MT
@@ -356,7 +356,7 @@ Berikan jawaban profesional, berbasis data nyata industri nikel Indonesia (Morow
 
     if (ai) {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.6-flash",
         contents: [
           { role: "user", parts: [{ text: `${systemInstruction}\n\n[MODE: ${mode}]\n${userPrompt || 'Berikan analisis operasional komprehensif.'}\nContext Payload: ${JSON.stringify(payload || {})}` }] }
         ],
@@ -400,7 +400,7 @@ Berikan jawaban profesional, berbasis data nyata industri nikel Indonesia (Morow
         fallbackResult = `**MineGPT Technical Translation (Bahasa Indonesia <-> English <-> Mandarin):**\n\n**Indonesian:** "Pencampuran ore nikel kadar tinggi (1.85% Ni) dengan kadar rendah untuk umpan smelter RKEF."\n**English:** "Blending high-grade nickel ore (1.85% Ni) with low-grade ore for RKEF smelter feed."\n**Mandarin (Chinese):** "将高品位镍矿石 (1.85% Ni) 与低品位矿石混合，用于 RKEF 冶炼厂进料。"`;
         break;
       default:
-        fallbackResult = `**MineGPT Analysis (${mode || 'Operational'}):**\n\nSistem AI SmartMine telah memproses parameter operasional site Anda. Semua indikator kinerja produksi, K3LH, dan finansial berada dalam ambang batas aman sesuai regulasi Kepmen ESDM 1827 K/2018.`;
+        fallbackResult = `**MineGPT Analysis (${mode || 'Operational'}):**\n\nSistem AI NickelSmart telah memproses parameter operasional site Anda. Semua indikator kinerja produksi, K3LH, dan finansial berada dalam ambang batas aman sesuai regulasi Kepmen ESDM 1827 K/2018.`;
         break;
     }
 
@@ -479,7 +479,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[SmartMine AI] Enterprise Server running on http://0.0.0.0:${PORT}`);
+    console.log(`[NickelSmart AI] Enterprise Server running on http://0.0.0.0:${PORT}`);
   });
 }
 

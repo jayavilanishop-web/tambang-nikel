@@ -9,12 +9,9 @@ import {
   ResponsiveContainer, 
   LineChart, 
   Line, 
-  PieChart, 
-  Pie, 
-  Cell,
-  AreaChart,
-  Area,
-  ComposedChart
+  AreaChart, 
+  Area, 
+  ComposedChart 
 } from 'recharts';
 import { 
   Pickaxe, 
@@ -26,30 +23,22 @@ import {
   TrendingUp, 
   Sparkles, 
   CheckCircle2, 
-  XCircle, 
-  Gauge, 
   Activity, 
   Compass, 
   MapPin, 
-  ArrowRight, 
   RefreshCw, 
-  FileCheck2, 
-  Sliders, 
-  Building2, 
-  Trees, 
-  Flame, 
-  Fuel, 
-  Radio, 
   Zap, 
-  Play, 
-  Pause, 
   Download, 
   FileText, 
-  ListOrdered, 
-  DollarSign, 
-  UserCheck, 
   ShieldCheck, 
-  RotateCcw
+  Filter, 
+  Search, 
+  Plus, 
+  ChevronRight, 
+  Check, 
+  Radio, 
+  Fuel, 
+  Sliders 
 } from 'lucide-react';
 import { MineSite, OreStockpile, HeavyEquipment, BargeShipment, Language } from '../../types';
 
@@ -80,7 +69,19 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
   >('production');
 
   const [selectedShift, setSelectedShift] = useState<'SHIFT_1' | 'SHIFT_2'>('SHIFT_1');
-  const [selectedPitFilter, setSelectedPitFilter] = useState<string>('PIT_ALPHA');
+  const [selectedPitFilter, setSelectedPitFilter] = useState<string>('ALL');
+  const [showDispatchModal, setShowDispatchModal] = useState(false);
+  const [dispatchSuccessMsg, setDispatchSuccessMsg] = useState<string | null>(null);
+  const [searchTripTerm, setSearchTripTerm] = useState('');
+
+  // Shift Handover Notes State
+  const [shiftNotes, setShiftNotes] = useState([
+    '1. Produksi Ore Getting Pit Alpha berjalan lancar mencapai 4,840 MT dengan kadar Ni rata-rata 1.83%.',
+    '2. Unit Dump Truck DT-09 telah dikirim ke Workshop untuk penggantian ban belakang kanan.',
+    '3. Penyiraman air dust suppression di KM 04 - KM 09 telah dilakukan 4 kali menggunakan Water Truck WT-01.',
+    '4. Pompa dewatering Dewater-02 di Pit Beta Sump aktif 24 jam dengan debit 450 m³/jam.'
+  ]);
+  const [newNoteInput, setNewNoteInput] = useState('');
 
   // Datasets for Operations
   const hourlyProductionTargetVsActual = [
@@ -125,8 +126,28 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
     { id: 'TRK-901', material: 'Saprolite High Grade (1.85% Ni)', origin: 'Pit Alpha - Bench +120', destination: 'Stockpile ETO - Block A', tonnageMT: 240, status: 'IN_TRANSIT', dtUnit: 'DT-14' },
     { id: 'TRK-902', material: 'Saprolite Mid Grade (1.72% Ni)', origin: 'Pit Beta - Bench +85', destination: 'Stockpile ETO - Block C', tonnageMT: 210, status: 'DUMPED', dtUnit: 'DT-08' },
     { id: 'TRK-903', material: 'Limonite HPAL Feed (1.25% Ni)', origin: 'Pit Alpha - Overburden Limonite', destination: 'Limonite Heap Pad 2', tonnageMT: 310, status: 'LOADING', dtUnit: 'DT-22' },
-    { id: 'TRK-904', material: 'Overburden (Waste Rock)', origin: 'Pit Alpha - North Wall', destination: 'Waste Dump Area West', tonnageMT: 450, status: 'IN_TRANSIT', dtUnit: 'DT-31' }
+    { id: 'TRK-904', material: 'Overburden (Waste Rock)', origin: 'Pit Alpha - North Wall', destination: 'Waste Dump Area West', tonnageMT: 450, status: 'IN_TRANSIT', dtUnit: 'DT-31' },
+    { id: 'TRK-905', material: 'Saprolite High Grade (1.92% Ni)', origin: 'Pit Alpha - Bench +115', destination: 'Stockpile ETO - Block A', tonnageMT: 280, status: 'DUMPED', dtUnit: 'DT-05' }
   ];
+
+  const filteredTrips = oreMovementTracking.filter(t => 
+    t.id.toLowerCase().includes(searchTripTerm.toLowerCase()) ||
+    t.material.toLowerCase().includes(searchTripTerm.toLowerCase()) ||
+    t.dtUnit.toLowerCase().includes(searchTripTerm.toLowerCase())
+  );
+
+  const handleRunDispatchAI = () => {
+    setDispatchSuccessMsg('AI Dispatching mengoptimalkan alokasi 24 Dump Truck. Estimasi penghematan cycle time: -1.8 menit/trip.');
+    setTimeout(() => setDispatchSuccessMsg(null), 6000);
+    setShowDispatchModal(false);
+  };
+
+  const handleAddShiftNote = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNoteInput.trim()) return;
+    setShiftNotes([...shiftNotes, `${shiftNotes.length + 1}. ${newNoteInput}`]);
+    setNewNoteInput('');
+  };
 
   return (
     <div className="space-y-6">
@@ -168,24 +189,34 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
             </button>
           </div>
 
-          <button className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-300" />
-            <span>AI Optimasi Dispatch</span>
+          <button 
+            onClick={() => setShowDispatchModal(true)}
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+            <span>AI Optimasi Dispatch Fleet</span>
           </button>
         </div>
       </div>
 
-      {/* Navigation Tabs covering all 25 operations keywords */}
+      {dispatchSuccessMsg && (
+        <div className="p-4 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-3 animate-fade-in">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span>{dispatchSuccessMsg}</span>
+        </div>
+      )}
+
+      {/* Navigation Sub-Modules Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
         {[
-          { id: 'production', label: 'Production & Target', icon: Pickaxe },
-          { id: 'hauling_loading', label: 'Loading, Hauling & Dumping', icon: Truck },
-          { id: 'crusher_movement', label: 'Crusher & Material Tracking', icon: Zap },
-          { id: 'stockpile_blending', label: 'Stockpile & Ore Blending', icon: Layers },
-          { id: 'jetty_port', label: 'Jetty, Port & Shipping', icon: Ship },
-          { id: 'pit_road', label: 'Pit & Road Monitoring', icon: Compass },
-          { id: 'shift_report', label: 'Shift & Daily Report', icon: FileText },
-          { id: 'productivity_downtime', label: 'Utilization & Downtime', icon: Activity }
+          { id: 'production', label: 'Production & Target', icon: Pickaxe, badge: 'Target 102%' },
+          { id: 'hauling_loading', label: 'Loading, Hauling & Dumping', icon: Truck, badge: '24 DT' },
+          { id: 'crusher_movement', label: 'Crusher & Material Tracking', icon: Zap, badge: '3 Station' },
+          { id: 'stockpile_blending', label: 'Stockpile & Ore Blending', icon: Layers, badge: '3 Block' },
+          { id: 'jetty_port', label: 'Jetty, Port & Shipping', icon: Ship, badge: '2 Barge' },
+          { id: 'pit_road', label: 'Pit & Road Monitoring', icon: Compass, badge: '18 KM' },
+          { id: 'shift_report', label: 'Shift & Daily Report', icon: FileText, badge: 'Kepmen 1827' },
+          { id: 'productivity_downtime', label: 'Utilization & Downtime', icon: Activity, badge: 'PA 92.4%' }
         ].map(tab => {
           const IconComp = tab.icon;
           const isActive = activeTab === tab.id;
@@ -201,12 +232,17 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
             >
               <IconComp className="w-4 h-4" />
               <span>{tab.label}</span>
+              <span className={`px-1.5 py-0.2 rounded text-[9px] font-extrabold ${
+                isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {tab.badge}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* TAB 1: PRODUCTION & TARGET VS ACTUAL */}
+      {/* SUB-MODULE 1: PRODUCTION & TARGET VS ACTUAL */}
       {activeTab === 'production' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
@@ -268,7 +304,7 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 2: HAULING, LOADING & DUMPING */}
+      {/* SUB-MODULE 2: HAULING, LOADING & DUMPING */}
       {activeTab === 'hauling_loading' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
@@ -335,10 +371,34 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Cycle Time Breakdown */}
+          <div className="p-5 bg-slate-900 rounded-2xl border border-slate-800 space-y-4 text-xs">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Rincian Cycle Time Pengangkutan Hauling Dump Truck (Total: 24.5 Menit)
+            </h3>
+
+            <div className="space-y-3">
+              {cycleTimeBreakdown.map((item, idx) => (
+                <div key={idx} className="space-y-1">
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-slate-300 font-medium">{item.name}</span>
+                    <span className="text-emerald-400 font-bold font-mono">{item.durationMin} Menit ({item.percentage}%)</span>
+                  </div>
+                  <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+                    <div 
+                      className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all"
+                      style={{ width: `${item.percentage * 2.5}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* TAB 3: CRUSHER & MATERIAL TRACKING */}
+      {/* SUB-MODULE 3: CRUSHER & MATERIAL TRACKING */}
       {activeTab === 'crusher_movement' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
@@ -368,9 +428,21 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
           </div>
 
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Material Tracking & Ore Movement Realtime GPS Telemetri
-            </h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Material Tracking & Ore Movement Realtime GPS Telemetri
+              </h3>
+              <div className="relative w-full sm:w-64">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Cari Trip ID / DT Unit..."
+                  value={searchTripTerm}
+                  onChange={(e) => setSearchTripTerm(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -386,7 +458,7 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono">
-                  {oreMovementTracking.map((t) => (
+                  {filteredTrips.map((t) => (
                     <tr key={t.id} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-slate-200">{t.id}</td>
                       <td className="py-3 px-3 text-emerald-400 font-bold">{t.dtUnit}</td>
@@ -411,7 +483,7 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 4: STOCKPILE & ORE BLENDING */}
+      {/* SUB-MODULE 4: STOCKPILE & ORE BLENDING */}
       {activeTab === 'stockpile_blending' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
@@ -424,7 +496,7 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
                   </span>
                 </div>
                 <div className="text-2xl font-bold text-emerald-400 font-mono">
-                  {st.currentTonnageMT.toLocaleString('id-ID')} MT
+                  {(st.currentTonnageMT ?? 0).toLocaleString('id-ID')} MT
                 </div>
                 <div className="space-y-1 text-[11px] text-slate-400">
                   <div className="flex justify-between">
@@ -446,7 +518,7 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 5: JETTY, PORT & SHIPPING */}
+      {/* SUB-MODULE 5: JETTY, PORT & SHIPPING */}
       {activeTab === 'jetty_port' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -469,16 +541,15 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
                 <div className="flex justify-between items-baseline">
                   <span className="text-slate-400">Tonase Pemuatan:</span>
                   <span className="text-xl font-bold text-emerald-400 font-mono">
-                    {bg.loadedTonnageMT.toLocaleString('id-ID')} / {bg.capacityMT.toLocaleString('id-ID')} MT
+                    {(bg.loadedTonnageMT ?? 0).toLocaleString('id-ID')} / {(bg.capacityMT ?? 0).toLocaleString('id-ID')} MT
                   </span>
                 </div>
 
-                {/* Progress bar */}
                 <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
                   <div 
                     className="bg-emerald-500 h-full rounded-full transition-all"
                     style={{ width: `${Math.min(100, (bg.loadedTonnageMT / bg.capacityMT) * 100)}%` }}
-                  ></div>
+                  />
                 </div>
 
                 <div className="flex justify-between text-[11px] text-slate-400 pt-1">
@@ -491,7 +562,7 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 6: PIT & ROAD MONITORING */}
+      {/* SUB-MODULE 6: PIT & ROAD MONITORING */}
       {activeTab === 'pit_road' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
@@ -521,12 +592,12 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 7: SHIFT & DAILY REPORT */}
+      {/* SUB-MODULE 7: SHIFT & DAILY REPORT */}
       {activeTab === 'shift_report' && (
         <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
-          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3">
             <div>
-              <h3 className="font-bold text-slate-100 text-base">Laporan Harian Operasional Tambang & Catatan Serah Terima Shift</h3>
+              <h3 className="font-bold text-slate-100 text-base">Laporan Harian Operasional Tambang & Serah Terima Shift</h3>
               <p className="text-slate-400 text-[11px]">Format Standar Kepmen ESDM 1827 K/2018</p>
             </div>
             <button className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center gap-2">
@@ -535,18 +606,35 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
             </button>
           </div>
 
-          <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-            <span className="font-bold text-emerald-400 block">Catatan Supervisor Shift 1 -&gt; Shift 2:</span>
-            <p className="text-slate-300 leading-relaxed">
-              1. Produksi Ore Getting Pit Alpha berjalan lancar mencapai 4,840 MT dengan kadar Ni rata-rata 1.83%.<br/>
-              2. Unit Dump Truck DT-09 telah dikirim ke Workshop untuk penggantian ban belakang kanan.<br/>
-              3. Penyiraman air dust suppression di KM 04 - KM 09 telah dilakukan 4 kali menggunakan Water Truck WT-01.
-            </p>
+          <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+            <span className="font-bold text-emerald-400 block">Catatan Handover Supervisor Shift 1 -&gt; Shift 2:</span>
+            <div className="space-y-1.5 text-slate-300">
+              {shiftNotes.map((note, index) => (
+                <p key={index} className="leading-relaxed bg-slate-900/60 p-2 rounded border border-slate-800">{note}</p>
+              ))}
+            </div>
+
+            <form onSubmit={handleAddShiftNote} className="pt-2 flex gap-2">
+              <input
+                type="text"
+                placeholder="Tambah catatan operasional shift..."
+                value={newNoteInput}
+                onChange={(e) => setNewNoteInput(e.target.value)}
+                className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold flex items-center gap-1 shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tambah Catatan</span>
+              </button>
+            </form>
           </div>
         </div>
       )}
 
-      {/* TAB 8: UTILIZATION & DOWNTIME */}
+      {/* SUB-MODULE 8: UTILIZATION & DOWNTIME */}
       {activeTab === 'productivity_downtime' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
@@ -597,6 +685,56 @@ export const OperationCenterModule: React.FC<OperationCenterModuleProps> = ({
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dispatch AI Modal */}
+      {showDispatchModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 space-y-4">
+            <div className="flex items-center gap-3 text-emerald-400 border-b border-slate-800 pb-3">
+              <Sparkles className="w-6 h-6 animate-pulse" />
+              <div>
+                <h3 className="font-bold text-slate-100 text-lg">AI Fleet Dispatch Optimizer</h3>
+                <p className="text-slate-400 text-xs">Simulasi Alokasi Truk Hauling & Excavator Matched Pair</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-300">
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
+                <span className="font-bold text-emerald-400 block">Rekomendasi AI:</span>
+                <p>• Pindahkan 3 DT dari Pit Beta ke Pit Alpha untuk mengeliminasi antrean Excavator EX-201 (PC2000).</p>
+                <p>• Buka jalur bypass KM 06 untuk menghindari pengerjaan perbaikan jalan di KM 05.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                  <span className="text-slate-400 text-[11px] block">Potensi Efisiensi Cycle Time</span>
+                  <span className="text-xl font-bold text-emerald-400 font-mono">-1.8 Menit</span>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                  <span className="text-slate-400 text-[11px] block">Peningkatan Throughput</span>
+                  <span className="text-xl font-bold text-amber-400 font-mono">+380 MT/Shift</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => setShowDispatchModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold hover:bg-slate-700 text-xs"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleRunDispatchAI}
+                className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-md flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>Terapkan Dispatch AI</span>
+              </button>
             </div>
           </div>
         </div>

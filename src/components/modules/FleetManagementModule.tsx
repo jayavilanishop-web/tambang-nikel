@@ -22,7 +22,9 @@ import {
   TrendingUp, 
   AlertOctagon, 
   FileText,
-  Hammer
+  Hammer,
+  CheckSquare,
+  Check
 } from 'lucide-react';
 import { HeavyEquipment, Language } from '../../types';
 
@@ -40,13 +42,57 @@ export const FleetManagementModule: React.FC<FleetManagementModuleProps> = ({
   const [activeTab, setActiveTab] = useState<
     | 'fleet_telemetry'
     | 'maintenance_pm_cm'
+    | 'fuel_b35_management'
     | 'spareparts_tyres'
+    | 'otr_tyre_tracking'
+    | 'p2h_daily_inspection'
     | 'machine_history'
     | 'kpi_availability'
   >('fleet_telemetry');
 
   const [filterType, setFilterType] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Modals state
+  const [isSpkModalOpen, setIsSpkModalOpen] = useState(false);
+  const [isFuelModalOpen, setIsFuelModalOpen] = useState(false);
+  const [isP2hModalOpen, setIsP2hModalOpen] = useState(false);
+  const [selectedUnitForStatus, setSelectedUnitForStatus] = useState<any | null>(null);
+
+  // Form Inputs
+  const [spkUnitCode, setSpkUnitCode] = useState('DT-1001');
+  const [spkType, setSpkType] = useState('PM (Preventive Maintenance)');
+  const [spkComponent, setSpkComponent] = useState('');
+
+  const [fuelUnitCode, setFuelUnitCode] = useState('DT-1001');
+  const [fuelLitersInput, setFuelLitersInput] = useState<number>(450);
+
+  const [p2hUnitCode, setP2hUnitCode] = useState('EX-2001');
+  const [p2hEngineOil, setP2hEngineOil] = useState('GOOD');
+  const [p2hHydraulic, setP2hHydraulic] = useState('GOOD');
+  const [p2hBrakes, setP2hBrakes] = useState('GOOD');
+  const [p2hNotes, setP2hNotes] = useState('');
+
+  // B35 Fuel Station Refueling Logs
+  const [refuelingLogs, setRefuelingLogs] = useState([
+    { id: 'FL-8801', timestamp: '04 Agu 08:30', unitCode: 'DT-1001', fuelTruck: 'FT-6001', volumeL: 550, operator: 'Eko Prasetyo', fuelType: 'Biodiesel B35' },
+    { id: 'FL-8802', timestamp: '04 Agu 07:15', unitCode: 'EX-2001', fuelTruck: 'FT-6001', volumeL: 1200, operator: 'Budi Santoso', fuelType: 'Biodiesel B35' },
+    { id: 'FL-8803', timestamp: '03 Agu 22:10', unitCode: 'DZ-3001', fuelTruck: 'FT-6001', volumeL: 480, operator: 'Agus Wijaya', fuelType: 'Biodiesel B35' }
+  ]);
+
+  // OTR Tyre Tread Depth Tracking Dataset
+  const otrTyreTrackingList = [
+    { serialNo: 'TYRE-BS-2701', brandModel: 'Bridgestone 27.00R49 V-Steel', assignedUnit: 'DT-1001', position: 'Front Left (FL)', installedHm: 8500, currentHm: 12400, treadDepthMm: 62, originalTreadMm: 95, costPerHmUsd: 1.85, condition: 'GOOD' },
+    { serialNo: 'TYRE-BS-2702', brandModel: 'Bridgestone 27.00R49 V-Steel', assignedUnit: 'DT-1001', position: 'Front Right (FR)', installedHm: 8500, currentHm: 12400, treadDepthMm: 58, originalTreadMm: 95, costPerHmUsd: 1.85, condition: 'GOOD' },
+    { serialNo: 'TYRE-MI-2703', brandModel: 'Michelin 27.00R49 X-Traction', assignedUnit: 'DT-1002', position: 'Rear Left Outer', installedHm: 6200, currentHm: 11900, treadDepthMm: 28, originalTreadMm: 95, costPerHmUsd: 2.10, condition: 'REPLACEMENT_RECOMMENDED' }
+  ];
+
+  // P2H Inspection Log
+  const [p2hLogsList, setP2hLogsList] = useState([
+    { id: 'P2H-901', timestamp: '04 Agu 06:45', unitCode: 'EX-2001', operator: 'Budi Santoso', shift: 'Shift 1 (Day)', engineOil: 'PASS', hydraulic: 'PASS', brakeSteering: 'PASS', status: 'FIT_TO_OPERATE' },
+    { id: 'P2H-902', timestamp: '04 Agu 06:50', unitCode: 'DT-1001', operator: 'Eko Prasetyo', shift: 'Shift 1 (Day)', engineOil: 'PASS', hydraulic: 'PASS', brakeSteering: 'PASS', status: 'FIT_TO_OPERATE' },
+    { id: 'P2H-903', timestamp: '04 Agu 07:00', unitCode: 'DZ-3001', operator: 'Agus Wijaya', shift: 'Shift 1 (Day)', engineOil: 'WARNING', hydraulic: 'LEAK_DETECTED', brakeSteering: 'PASS', status: 'WORKSHOP_REQUIRED' }
+  ]);
 
   // Comprehensive Fleet Dataset with all requested machinery types
   const fullEquipmentFleet = [
@@ -123,7 +169,10 @@ export const FleetManagementModule: React.FC<FleetManagementModuleProps> = ({
         {[
           { id: 'fleet_telemetry', label: 'Fleet Roster & Telemetry', icon: Truck },
           { id: 'maintenance_pm_cm', label: 'Maintenance (PM / CM / Workshop)', icon: Wrench },
+          { id: 'fuel_b35_management', label: 'Refueling BBM Solar B35', icon: Fuel },
           { id: 'spareparts_tyres', label: 'Sparepart, Tyre & Battery', icon: Disc },
+          { id: 'otr_tyre_tracking', label: 'OTR Tyre Tread Tracking', icon: Disc },
+          { id: 'p2h_daily_inspection', label: 'Pemeriksaan Harian (P2H)', icon: CheckSquare },
           { id: 'machine_history', label: 'Machine Repair History', icon: History },
           { id: 'kpi_availability', label: 'KPI Metrics (PA / MA / UT / MTBF / MTTR)', icon: BarChart3 }
         ].map((tab) => {
@@ -210,7 +259,7 @@ export const FleetManagementModule: React.FC<FleetManagementModuleProps> = ({
                           <span>{eq.assignedOperator}</span>
                         </div>
                       </td>
-                      <td className="p-3 font-mono">{eq.engineHoursTotal.toLocaleString('id-ID')} HM</td>
+                      <td className="p-3 font-mono">{(eq.engineHoursTotal ?? 0).toLocaleString('id-ID')} HM</td>
                       <td className="p-3 font-mono text-amber-300">{eq.fuelLiterPerHour} L/Jam</td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">
@@ -251,7 +300,10 @@ export const FleetManagementModule: React.FC<FleetManagementModuleProps> = ({
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="font-bold text-slate-100 text-sm">SPK Workshop Maintenance (Preventive PM, Corrective CM & Predictive)</h3>
-              <button className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5">
+              <button
+                onClick={() => setIsSpkModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Buat SPK Service Baru</span>
               </button>
@@ -294,6 +346,377 @@ export const FleetManagementModule: React.FC<FleetManagementModuleProps> = ({
         </div>
       )}
 
+      {/* TAB: B35 FUEL MANAGEMENT */}
+      {activeTab === 'fuel_b35_management' && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm">Manajemen Refueling Solar Biodiesel B35 & Fuel Truck Station</h3>
+                <p className="text-slate-400 text-[11px]">Pencatatan Distribusi BBM Solar ke Alat Berat di Pit via Fuel Truck FT-6001</p>
+              </div>
+
+              <button
+                onClick={() => setIsFuelModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Catat Pengisian B35</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[11px]">
+                    <th className="py-2.5 px-3">ID Refuel</th>
+                    <th className="py-2.5 px-3">Waktu Stempel</th>
+                    <th className="py-2.5 px-3">Kode Unit</th>
+                    <th className="py-2.5 px-3">Fuel Truck Dispatcher</th>
+                    <th className="py-2.5 px-3">Volume Solar (Liter)</th>
+                    <th className="py-2.5 px-3">Operator Penerima</th>
+                    <th className="py-2.5 px-3">Jenis BBM</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono">
+                  {refuelingLogs.map((fl) => (
+                    <tr key={fl.id} className="hover:bg-slate-800/40">
+                      <td className="py-3 px-3 font-bold text-emerald-400">{fl.id}</td>
+                      <td className="py-3 px-3 text-slate-400">{fl.timestamp}</td>
+                      <td className="py-3 px-3 text-slate-100 font-bold">{fl.unitCode}</td>
+                      <td className="py-3 px-3 text-slate-300 font-sans">{fl.fuelTruck}</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">{fl.volumeL} L</td>
+                      <td className="py-3 px-3 text-slate-200 font-sans">{fl.operator}</td>
+                      <td className="py-3 px-3">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">
+                          {fl.fuelType}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: OTR TYRE TREAD TRACKING */}
+      {activeTab === 'otr_tyre_tracking' && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
+              Pelacakan Ketebalan Tread Depth Ban OTR 27.00R49 Dump Truck & Cost per Hour
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[11px]">
+                    <th className="py-2.5 px-3">No Seri Ban</th>
+                    <th className="py-2.5 px-3">Merek & Spesifikasi Ban</th>
+                    <th className="py-2.5 px-3">Unit & Posisi</th>
+                    <th className="py-2.5 px-3">Tread Depth (mm)</th>
+                    <th className="py-2.5 px-3">Original Depth</th>
+                    <th className="py-2.5 px-3">Cost per Hour ($/HM)</th>
+                    <th className="py-2.5 px-3">Status Kelayakan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono">
+                  {otrTyreTrackingList.map((tyre, idx) => (
+                    <tr key={idx} className="hover:bg-slate-800/40">
+                      <td className="py-3 px-3 font-bold text-emerald-400">{tyre.serialNo}</td>
+                      <td className="py-3 px-3 font-sans text-slate-100 font-bold">{tyre.brandModel}</td>
+                      <td className="py-3 px-3 text-slate-300">{tyre.assignedUnit} ({tyre.position})</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">{tyre.treadDepthMm} mm</td>
+                      <td className="py-3 px-3 text-slate-400">{tyre.originalTreadMm} mm</td>
+                      <td className="py-3 px-3 text-emerald-400">${tyre.costPerHmUsd} / HM</td>
+                      <td className="py-3 px-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
+                          tyre.condition === 'GOOD' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                        }`}>
+                          {tyre.condition}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: P2H DAILY INSPECTION CHECKLIST */}
+      {activeTab === 'p2h_daily_inspection' && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm">Pemeriksaan & Perawatan Harian (P2H) Pre-Shift Operator Checklist</h3>
+                <p className="text-slate-400 text-[11px]">Verifikasi Oli Mesin, Sistem Rem, Kemudi & Kebocoran Hidrolik Sebelum Shift</p>
+              </div>
+
+              <button
+                onClick={() => setIsP2hModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Input Form P2H Baru</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[11px]">
+                    <th className="py-2.5 px-3">ID Log P2H</th>
+                    <th className="py-2.5 px-3">Waktu Inspeksi</th>
+                    <th className="py-2.5 px-3">Kode Unit</th>
+                    <th className="py-2.5 px-3">Operator Shift</th>
+                    <th className="py-2.5 px-3">Oli Mesin</th>
+                    <th className="py-2.5 px-3">Sistem Hidrolik</th>
+                    <th className="py-2.5 px-3">Rem & Kemudi</th>
+                    <th className="py-2.5 px-3">Status Kelayakan Shift</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-mono">
+                  {p2hLogsList.map((p2h) => (
+                    <tr key={p2h.id} className="hover:bg-slate-800/40">
+                      <td className="py-3 px-3 font-bold text-emerald-400">{p2h.id}</td>
+                      <td className="py-3 px-3 text-slate-400">{p2h.timestamp}</td>
+                      <td className="py-3 px-3 text-slate-100 font-bold">{p2h.unitCode}</td>
+                      <td className="py-3 px-3 text-slate-300 font-sans">{p2h.operator}</td>
+                      <td className="py-3 px-3 text-emerald-400">{p2h.engineOil}</td>
+                      <td className="py-3 px-3 text-emerald-400">{p2h.hydraulic}</td>
+                      <td className="py-3 px-3 text-emerald-400">{p2h.brakeSteering}</td>
+                      <td className="py-3 px-3">
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
+                          p2h.status === 'FIT_TO_OPERATE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {p2h.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 1: Buat SPK Service Workshop */}
+      {isSpkModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Wrench className="w-4 h-4 text-emerald-400" /> Buat Surat Perintah Kerja (SPK) Service
+              </h3>
+              <button onClick={() => setIsSpkModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Pilih Kode Unit Alat Berat:</label>
+                <select
+                  value={spkUnitCode}
+                  onChange={(e) => setSpkUnitCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                >
+                  {fullEquipmentFleet.map(e => (
+                    <option key={e.id} value={e.code}>{e.code} - {e.modelName}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Jenis Perawatan:</label>
+                <select
+                  value={spkType}
+                  onChange={(e) => setSpkType(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="PM (Preventive Maintenance)">PM (Preventive Maintenance 250H/500H)</option>
+                  <option value="CM (Corrective Maintenance)">CM (Corrective Breakdown Repair)</option>
+                  <option value="PREDICTIVE_INSPECTION">Predictive AI Anomaly Inspection</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Komponen / Deskripsi Pekerjaan:</label>
+                <input
+                  type="text"
+                  value={spkComponent}
+                  onChange={(e) => setSpkComponent(e.target.value)}
+                  placeholder="e.g., Service Periodic 250 HM & Ganti Filter Oli"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setIsSpkModalOpen(false);
+                  setSpkComponent('');
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Terbitkan SPK Workshop
+              </button>
+              <button
+                onClick={() => setIsSpkModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2: Catat Refueling Solar B35 */}
+      {isFuelModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Fuel className="w-4 h-4 text-amber-400" /> Pencatatan Refueling Solar B35
+              </h3>
+              <button onClick={() => setIsFuelModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Pilih Unit Penerima BBM:</label>
+                <select
+                  value={fuelUnitCode}
+                  onChange={(e) => setFuelUnitCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                >
+                  {fullEquipmentFleet.map(e => (
+                    <option key={e.id} value={e.code}>{e.code} - {e.modelName}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Volume Solar Disalurkan (Liter):</label>
+                <input
+                  type="number"
+                  value={fuelLitersInput}
+                  onChange={(e) => setFuelLitersInput(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setRefuelingLogs(prev => [
+                    {
+                      id: `FL-${8804 + prev.length}`,
+                      timestamp: 'Baru Saja',
+                      unitCode: fuelUnitCode,
+                      fuelTruck: 'FT-6001',
+                      volumeL: fuelLitersInput,
+                      operator: 'Operator Duty',
+                      fuelType: 'Biodiesel B35'
+                    },
+                    ...prev
+                  ]);
+                  setIsFuelModalOpen(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Simpan Log Refuel
+              </button>
+              <button
+                onClick={() => setIsFuelModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 3: Input Checklist P2H */}
+      {isP2hModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <CheckSquare className="w-4 h-4 text-emerald-400" /> Form Inspeksi Harian P2H Pre-Shift
+              </h3>
+              <button onClick={() => setIsP2hModalOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Kode Unit Alat Berat:</label>
+                <select
+                  value={p2hUnitCode}
+                  onChange={(e) => setP2hUnitCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                >
+                  {fullEquipmentFleet.map(e => (
+                    <option key={e.id} value={e.code}>{e.code} - {e.modelName}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Catatan Tambahan Operator:</label>
+                <input
+                  type="text"
+                  value={p2hNotes}
+                  onChange={(e) => setP2hNotes(e.target.value)}
+                  placeholder="e.g., Kondisi mesin prima, oli normal"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setP2hLogsList(prev => [
+                    {
+                      id: `P2H-${904 + prev.length}`,
+                      timestamp: 'Baru Saja',
+                      unitCode: p2hUnitCode,
+                      operator: 'Operator Active Shift',
+                      shift: 'Shift Active',
+                      engineOil: 'PASS',
+                      hydraulic: 'PASS',
+                      brakeSteering: 'PASS',
+                      status: 'FIT_TO_OPERATE'
+                    },
+                    ...prev
+                  ]);
+                  setIsP2hModalOpen(false);
+                  setP2hNotes('');
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Submit Checklist P2H
+              </button>
+              <button
+                onClick={() => setIsP2hModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* TAB 3: SPAREPARTS, TYRES & BATTERY */}
       {activeTab === 'spareparts_tyres' && (
         <div className="space-y-6">
@@ -323,7 +746,7 @@ export const FleetManagementModule: React.FC<FleetManagementModuleProps> = ({
                       <td className="py-3 px-3 font-sans text-emerald-400">{sp.category}</td>
                       <td className="py-3 px-3 text-slate-100 font-bold">{sp.stockQty} Unit</td>
                       <td className="py-3 px-3 text-slate-400">{sp.minStock} Unit</td>
-                      <td className="py-3 px-3 text-amber-300">${sp.unitPriceUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300">${(sp.unitPriceUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
                           sp.status === 'HEALTHY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'

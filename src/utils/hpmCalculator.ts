@@ -1,5 +1,5 @@
 /**
- * SmartMine AI - ESDM HPM (Harga Patokan Mineral) Nickel Price & Royalty Calculator
+ * NickelSmart AI - ESDM HPM (Harga Patokan Mineral) Nickel Price & Royalty Calculator
  * Compliant with Kepmen ESDM No 294.K/30/MEM/2020 & Perpres Royalty Regulation
  */
 

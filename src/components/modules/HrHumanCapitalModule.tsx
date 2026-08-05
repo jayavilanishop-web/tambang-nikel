@@ -52,54 +52,76 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Employees Dataset
-  const employeesList = [
+  const [employeesList, setEmployeesList] = useState([
     { empId: 'EMP-2024-001', name: 'Eko Prasetyo', position: 'Senior Heavy Equipment Operator (Dump Truck CAT 777E)', dept: 'Mining Operations', siteRoster: '6 Weeks On / 2 Weeks Off', status: 'PERMANENT', mcuStatus: 'FIT_FOR_DUTY', popCertification: 'POP_CERTIFIED' },
     { empId: 'EMP-2024-002', name: 'Andi Suherman', position: 'Dump Truck Operator Class A', dept: 'Mining Operations', siteRoster: '6 Weeks On / 2 Weeks Off', status: 'CONTRACT_PKWT', mcuStatus: 'FIT_WITH_RESTRICTION', popCertification: 'NON_POP' },
     { empId: 'EMP-2023-088', name: 'Budi Santoso', position: 'Excavator Operator PC2000', dept: 'Mining Operations', siteRoster: '6 Weeks On / 2 Weeks Off', status: 'PERMANENT', mcuStatus: 'FIT_FOR_DUTY', popCertification: 'POP_CERTIFIED' },
     { empId: 'EMP-2022-012', name: 'Hendra Setiawan', position: 'Pit Mining Superintendent', dept: 'Mining Operations', siteRoster: '4 Weeks On / 2 Weeks Off', status: 'PERMANENT', mcuStatus: 'FIT_FOR_DUTY', popCertification: 'POM_SENIOR_CERTIFIED' }
-  ];
+  ]);
 
   // Recruitment ATS Dataset
-  const recruitmentJobs = [
+  const [recruitmentJobs, setRecruitmentJobs] = useState([
     { jobId: 'REC-2026-041', title: 'Heavy Equipment Mechanic Maintenance (Caterpillar)', dept: 'Workshop Maintenance', applicantsCount: 42, shortlistedCount: 8, status: 'INTERVIEW_STAGE' },
     { jobId: 'REC-2026-042', title: 'Mine Geologist Exploration Specialist', dept: 'Geology & Survey', applicantsCount: 18, shortlistedCount: 4, status: 'MCU_CHECK_STAGE' }
-  ];
+  ]);
 
   // Attendance & Shift Roster Dataset
-  const attendanceRoster = [
+  const [attendanceRoster, setAttendanceRoster] = useState([
     { empId: 'EMP-2024-001', name: 'Eko Prasetyo', shift: 'Shift 1 (Pagi 07:00 - 19:00)', clockIn: '06:45', clockOut: '19:10', fatigueScore: 'NORMAL_98%', status: 'PRESENT' },
     { empId: 'EMP-2024-002', name: 'Andi Suherman', shift: 'Shift 1 (Pagi 07:00 - 19:00)', clockIn: '06:52', clockOut: '19:05', fatigueScore: 'WARNING_EYE_CLOSURE', status: 'PRESENT' }
-  ];
+  ]);
 
   // Leave & Roster Permit Dataset
-  const leaveRequests = [
+  const [leaveRequests, setLeaveRequests] = useState([
     { leaveId: 'LV-2026-081', empName: 'Agus Wijaya', leaveType: 'Cuti Periodik Roster Field (14 Hari)', startDate: '2026-08-10', endDate: '2026-08-24', approver: 'Hendra (Mine Supt)', status: 'APPROVED' },
     { leaveId: 'LV-2026-082', empName: 'Rahmat Hidayat', leaveType: 'Izin Sakit / Medical Leave', startDate: '2026-08-03', endDate: '2026-08-05', approver: 'Dr. Farhan (Site Clinic)', status: 'APPROVED' }
-  ];
+  ]);
 
   // Payroll Processing Dataset
-  const payrollSlips = [
+  const [payrollSlips, setPayrollSlips] = useState([
     { slipNo: 'PAY-2026-07', empId: 'EMP-2024-001', name: 'Eko Prasetyo', baseSalaryIdr: 12500000, siteAllowanceIdr: 4500000, overtimeHours: 42, netTakeHomePayIdr: 21850000, status: 'DISBURSED' },
     { slipNo: 'PAY-2026-07', empId: 'EMP-2022-012', name: 'Hendra Setiawan', baseSalaryIdr: 28000000, siteAllowanceIdr: 8500000, overtimeHours: 12, netTakeHomePayIdr: 41200000, status: 'DISBURSED' }
-  ];
+  ]);
 
   // Training & Mine Safety Certifications
-  const certificationsData = [
+  const [certificationsData, setCertificationsData] = useState([
     { certId: 'CERT-POP-001', name: 'Eko Prasetyo', certName: 'Pengawas Operasional Pertama (POP) ESDM', expiryDate: '2028-05-20', issuer: 'BNSP / KESDM', status: 'VALID_ACTIVE' },
     { certId: 'CERT-SIML-002', name: 'Andi Suherman', certName: 'Surat Izin Mengemudi Lokasi (SIMPER) CAT 777E', expiryDate: '2027-01-15', issuer: 'K3LH Mine Safety', status: 'VALID_ACTIVE' }
-  ];
+  ]);
 
   // Medical Check-Up (MCU) Fit-For-Duty Dataset
-  const mcuRecords = [
+  const [mcuRecords, setMcuRecords] = useState([
     { mcuId: 'MCU-2026-Q2', name: 'Eko Prasetyo', mcuDate: '2026-06-10', doctor: 'Dr. Farhan (Site Clinic)', fitResult: 'FIT_FOR_DUTY_CLASS_A', audiometryResult: 'NORMAL', spirometryResult: 'NORMAL' },
     { mcuId: 'MCU-2026-Q2', name: 'Andi Suherman', mcuDate: '2026-06-12', doctor: 'Dr. Farhan (Site Clinic)', fitResult: 'FIT_WITH_RESTRICTION_EYEGLASSES', audiometryResult: 'MILD_HEARING_LOSS', spirometryResult: 'NORMAL' }
-  ];
+  ]);
 
   // Performance KPI & Promotion / Mutation
-  const performanceKpi = [
+  const [performanceKpi, setPerformanceKpi] = useState([
     { empId: 'EMP-2024-001', name: 'Eko Prasetyo', kpiScore: 92.5, safetyRecord: '0 Incident', productivityTon: 142000, ratingGrade: 'OUTSTANDING_A', promotionEligible: 'ELIGIBLE_FOR_LEAD_OPERATOR' },
     { empId: 'EMP-2022-012', name: 'Hendra Setiawan', kpiScore: 94.8, safetyRecord: '0 Incident', productivityTon: 850000, ratingGrade: 'SUPERIOR_A_PLUS', promotionEligible: 'ELIGIBLE_FOR_MANAGER' }
-  ];
+  ]);
+
+  // Modals State
+  const [showEmpModal, setShowEmpModal] = useState(false);
+  const [empName, setEmpName] = useState('');
+  const [empPosition, setEmpPosition] = useState('Operator Heavy Equipment');
+  const [empDept, setEmpDept] = useState('Mining Operations');
+
+  const [showJobModal, setShowJobModal] = useState(false);
+  const [jobTitle, setJobTitle] = useState('');
+  const [jobDept, setJobDept] = useState('HSE & Safety');
+
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [leaveEmpName, setLeaveEmpName] = useState('Eko Prasetyo');
+  const [leaveType, setLeaveType] = useState('Cuti Roster Field 14 Hari');
+
+  const [showPayrollModal, setShowPayrollModal] = useState(false);
+  const [payrollEmpName, setPayrollEmpName] = useState('Eko Prasetyo');
+  const [payrollSalaryIdr, setPayrollSalaryIdr] = useState(15000000);
+
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [certEmpName, setCertEmpName] = useState('Eko Prasetyo');
+  const [certName, setCertName] = useState('Pengawas Operasional Utama (POU)');
 
   return (
     <div className="space-y-6">
@@ -170,7 +192,10 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="font-bold text-slate-100 text-sm">Direktori Master Data Karyawan Site Tambang</h3>
-              <button className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5">
+              <button 
+                onClick={() => setShowEmpModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Karyawan Baru</span>
               </button>
@@ -220,9 +245,18 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
       {activeTab === 'recruitment_ats' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Modul Rekrutmen & Pelacak Pelamar Kerja Tambang (Applicant Tracking System - ATS)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Modul Rekrutmen & Pelacak Pelamar Kerja Tambang (Applicant Tracking System - ATS)
+              </h3>
+              <button 
+                onClick={() => setShowJobModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buka Lowongan Pekerjaan</span>
+              </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recruitmentJobs.map((job) => (
@@ -290,9 +324,18 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
       {activeTab === 'leave_permits' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Pengajuan Cuti Periodik Roster Field, Tiket Penerbangan & Izin Sakit
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Pengajuan Cuti Periodik Roster Field, Tiket Penerbangan & Izin Sakit
+              </h3>
+              <button 
+                onClick={() => setShowLeaveModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Ajukan Cuti / Permit</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -332,9 +375,18 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
       {activeTab === 'payroll_slips' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Pemrosesan Penggajian, Tunjangan Insentif Site & Slip Gaji Online
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Pemrosesan Penggajian, Tunjangan Insentif Site & Slip Gaji Online
+              </h3>
+              <button 
+                onClick={() => setShowPayrollModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Proses Slip Gaji Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -354,10 +406,10 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
                     <tr key={idx} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-emerald-400">{p.slipNo}</td>
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{p.name}</td>
-                      <td className="py-3 px-3 text-slate-300">Rp {p.baseSalaryIdr.toLocaleString('id-ID')}</td>
-                      <td className="py-3 px-3 text-emerald-300">Rp {p.siteAllowanceIdr.toLocaleString('id-ID')}</td>
+                      <td className="py-3 px-3 text-slate-300">Rp {(p.baseSalaryIdr ?? 0).toLocaleString('id-ID')}</td>
+                      <td className="py-3 px-3 text-emerald-300">Rp {(p.siteAllowanceIdr ?? 0).toLocaleString('id-ID')}</td>
                       <td className="py-3 px-3 text-amber-300 font-bold">{p.overtimeHours} Jam</td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold text-sm">Rp {p.netTakeHomePayIdr.toLocaleString('id-ID')}</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold text-sm">Rp {(p.netTakeHomePayIdr ?? 0).toLocaleString('id-ID')}</td>
                       <td className="py-3 px-3">
                         <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-emerald-500/20 text-emerald-400">
                           {p.status}
@@ -376,9 +428,18 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
       {activeTab === 'training_certifications' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Sertifikasi Pengawas Operasional Tambang POP/POM & SIMPER Driver
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Sertifikasi Pengawas Operasional Tambang POP/POM & SIMPER Driver
+              </h3>
+              <button 
+                onClick={() => setShowCertModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Input Sertifikat K3 / POP</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -409,6 +470,343 @@ export const HrHumanCapitalModule: React.FC<HrHumanCapitalModuleProps> = ({
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: TAMBAH KARYAWAN */}
+      {showEmpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Users className="w-4 h-4 text-emerald-400" /> Registrasi Karyawan Site Baru
+              </h3>
+              <button onClick={() => setShowEmpModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Lengkap Personel:</label>
+                <input
+                  type="text"
+                  placeholder="Rian Kurniawan"
+                  value={empName}
+                  onChange={(e) => setEmpName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Jabatan & Posisi Kerja:</label>
+                <input
+                  type="text"
+                  value={empPosition}
+                  onChange={(e) => setEmpPosition(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Departemen:</label>
+                <input
+                  type="text"
+                  value={empDept}
+                  onChange={(e) => setEmpDept(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setEmployeesList(prev => [
+                    {
+                      empId: `EMP-2026-${Math.floor(100 + Math.random() * 900)}`,
+                      name: empName || 'Personel Baru',
+                      position: empPosition,
+                      dept: empDept,
+                      siteRoster: '6 Weeks On / 2 Weeks Off',
+                      status: 'CONTRACT_PKWT',
+                      mcuStatus: 'FIT_FOR_DUTY',
+                      popCertification: 'NON_POP'
+                    },
+                    ...prev
+                  ]);
+                  setShowEmpModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan Karyawan
+              </button>
+              <button
+                onClick={() => setShowEmpModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: BUKA LOWONGAN PEKERJAAN */}
+      {showJobModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <UserPlus className="w-4 h-4 text-emerald-400" /> Buka Requisisi Pekerjaan ATS
+              </h3>
+              <button onClick={() => setShowJobModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Judul Posisi Lowongan:</label>
+                <input
+                  type="text"
+                  placeholder="K3LH Safety Inspector Site"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Departemen:</label>
+                <input
+                  type="text"
+                  value={jobDept}
+                  onChange={(e) => setJobDept(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setRecruitmentJobs(prev => [
+                    {
+                      jobId: `REC-2026-${Math.floor(100 + Math.random() * 900)}`,
+                      title: jobTitle || 'Safety Officer Specialist',
+                      dept: jobDept,
+                      applicantsCount: 0,
+                      shortlistedCount: 0,
+                      status: 'OPEN_PUBLISHED'
+                    },
+                    ...prev
+                  ]);
+                  setShowJobModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Publish Lowongan
+              </button>
+              <button
+                onClick={() => setShowJobModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: AJUKAN CUTI */}
+      {showLeaveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-emerald-400" /> Permohonan Cuti Roster Field
+              </h3>
+              <button onClick={() => setShowLeaveModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Karyawan Pemohon:</label>
+                <input
+                  type="text"
+                  value={leaveEmpName}
+                  onChange={(e) => setLeaveEmpName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Jenis Cuti / Izin Field:</label>
+                <input
+                  type="text"
+                  value={leaveType}
+                  onChange={(e) => setLeaveType(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setLeaveRequests(prev => [
+                    {
+                      leaveId: `LV-2026-${Math.floor(100 + Math.random() * 900)}`,
+                      empName: leaveEmpName,
+                      leaveType: leaveType,
+                      startDate: new Date().toISOString().slice(0, 10),
+                      endDate: '2026-08-28',
+                      approver: 'Hendra (Mine Supt)',
+                      status: 'APPROVED'
+                    },
+                    ...prev
+                  ]);
+                  setShowLeaveModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Kirim Pengajuan
+              </button>
+              <button
+                onClick={() => setShowLeaveModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: PROSES PAYROLL */}
+      {showPayrollModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-emerald-400" /> Proses Slip Gaji & Insentif Site
+              </h3>
+              <button onClick={() => setShowPayrollModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Karyawan Penerima:</label>
+                <input
+                  type="text"
+                  value={payrollEmpName}
+                  onChange={(e) => setPayrollEmpName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Gaji Pokok (IDR Rp):</label>
+                <input
+                  type="number"
+                  value={payrollSalaryIdr}
+                  onChange={(e) => setPayrollSalaryIdr(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setPayrollSlips(prev => [
+                    {
+                      slipNo: `PAY-2026-08`,
+                      empId: `EMP-2024-${Math.floor(100 + Math.random() * 900)}`,
+                      name: payrollEmpName,
+                      baseSalaryIdr: payrollSalaryIdr,
+                      siteAllowanceIdr: payrollSalaryIdr * 0.35,
+                      overtimeHours: 24,
+                      netTakeHomePayIdr: payrollSalaryIdr * 1.5,
+                      status: 'DISBURSED'
+                    },
+                    ...prev
+                  ]);
+                  setShowPayrollModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Disburse Slip Gaji
+              </button>
+              <button
+                onClick={() => setShowPayrollModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: SERTIFIKASI POP/K3 */}
+      {showCertModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-emerald-400" /> Registrasi Sertifikasi K3 / POP ESDM
+              </h3>
+              <button onClick={() => setShowCertModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Pemegang Lisensi:</label>
+                <input
+                  type="text"
+                  value={certEmpName}
+                  onChange={(e) => setCertEmpName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Sertifikat ESDM / K3LH:</label>
+                <input
+                  type="text"
+                  value={certName}
+                  onChange={(e) => setCertName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-300 font-bold focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setCertificationsData(prev => [
+                    {
+                      certId: `CERT-POP-${Math.floor(100 + Math.random() * 900)}`,
+                      name: certEmpName,
+                      certName: certName,
+                      expiryDate: '2029-12-31',
+                      issuer: 'BNSP / KESDM ESDM',
+                      status: 'VALID_ACTIVE'
+                    },
+                    ...prev
+                  ]);
+                  setShowCertModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan Sertifikat
+              </button>
+              <button
+                onClick={() => setShowCertModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

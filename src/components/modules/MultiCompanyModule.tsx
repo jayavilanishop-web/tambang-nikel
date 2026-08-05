@@ -15,7 +15,28 @@ import {
   ShieldCheck, 
   UserPlus,
   ChevronRight,
-  Filter
+  Filter,
+  Lock,
+  Database,
+  Languages,
+  Sun,
+  Moon,
+  HardDrive,
+  RotateCcw,
+  FileText,
+  Settings,
+  Key,
+  Sliders,
+  Clock,
+  Download,
+  Upload,
+  RefreshCw,
+  GitBranch,
+  Shield,
+  Palette,
+  Server,
+  Terminal,
+  FileCode
 } from 'lucide-react';
 import { Company, Department, CompanyUser, MineSite, PitOperation, Language, UserRole } from '../../types';
 
@@ -46,7 +67,22 @@ export const MultiCompanyModule: React.FC<MultiCompanyModuleProps> = ({
   onAddDepartment,
   onAddUser
 }) => {
-  const [activeTab, setActiveTab] = useState<'companies' | 'sites' | 'pits' | 'departments' | 'users'>('companies');
+  const [activeTab, setActiveTab] = useState<
+    | 'companies' 
+    | 'branch' 
+    | 'sites'
+    | 'departments' 
+    | 'roles' 
+    | 'permissions' 
+    | 'users'
+    | 'master_data' 
+    | 'database_engine'
+    | 'localization' 
+    | 'language' 
+    | 'theme' 
+    | 'backup_restore' 
+    | 'audit_log'
+  >('companies');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Modals state
@@ -87,6 +123,119 @@ export const MultiCompanyModule: React.FC<MultiCompanyModuleProps> = ({
   const [newUserRole, setNewUserRole] = useState<UserRole>('Mine Manager');
   const [newUserCompId, setNewUserCompId] = useState(companies[0]?.id || 'COMP-MOROWALI');
   const [newUserDeptId, setNewUserDeptId] = useState(departments[0]?.id || 'DEPT-MINE-ENG');
+
+  // BRANCHES DATASET
+  const [branches, setBranches] = useState([
+    { id: 'BR-01', code: 'BR-MOROWALI', name: 'Cabang Utama Morowali Site & Jetty', company: 'PT Morowali Nickel Mining', location: 'Bahodopi, Morowali, Sulawesi Tengah', head: 'Ir. Bambang Wijaya (GM)', phone: '+62 811-4522-881', staffCount: 840, status: 'OPERATIONAL' },
+    { id: 'BR-02', code: 'BR-HALMAHERA', name: 'Cabang Eksplorasi Halmahera Selatan', company: 'PT Halmahera Mining Energy', location: 'Weda Bay, Halmahera Selatan', head: 'Eko Prasetyo, S.T.', phone: '+62 812-9844-112', staffCount: 320, status: 'OPERATIONAL' },
+    { id: 'BR-03', code: 'BR-JAKARTA', name: 'Kantor Cabang Pusat Jakarta (Commercial & Legal)', company: 'PT Morowali Nickel Mining', location: 'Gedung Menara Palma Lt. 28, Jakarta Selatan', head: 'Hendra Tan (Finance Director)', phone: '+62 21-5290-8800', staffCount: 65, status: 'HEADQUARTERS' },
+    { id: 'BR-04', code: 'BR-KENDARI', name: 'Basecamp Logistik & Transit Kendari Port', company: 'PT Morowali Nickel Mining', location: 'Kawasan Pelabuhan Bungkutoko, Kendari', head: 'Agus Wijaya (Logistics Supervisor)', phone: '+62 852-4110-992', staffCount: 42, status: 'LOGISTICS_BASE' }
+  ]);
+
+  // ROLES DATASET
+  const [rolesList, setRolesList] = useState([
+    { id: 'ROLE-01', name: 'System Super Admin', level: 'Level 0 - Root', usersAssigned: 3, description: 'Akses penuh tanpa batas ke seluruh konfigurasi, audit log, & database', permissionsCount: 128 },
+    { id: 'ROLE-02', name: 'Kepala Teknik Tambang (KTT)', level: 'Level 1 - Executive Site', usersAssigned: 2, description: 'Otorisasi tertinggi keselamatan K3LH, pengajuan RKAB, & legalitas ESDM', permissionsCount: 114 },
+    { id: 'ROLE-03', name: 'Mine Operations Manager', level: 'Level 2 - Operations', usersAssigned: 8, description: 'Pengelolaan fleet, pit digging, ore getting, & stripping ratio', permissionsCount: 92 },
+    { id: 'ROLE-04', name: 'Chief Geologist & Mine Planner', level: 'Level 2 - Technical', usersAssigned: 12, description: 'Model geologi 3D, cut-off grade, ore blending, & lab assay validation', permissionsCount: 86 },
+    { id: 'ROLE-05', name: 'HSE & Safety Lead Inspector', level: 'Level 2 - Compliance', usersAssigned: 15, description: 'Inspeksi K3LH, AMDAL, pemantauan efluen air, & pelaporan insiden', permissionsCount: 78 },
+    { id: 'ROLE-06', name: 'Finance & Cost Control Manager', level: 'Level 2 - Financial', usersAssigned: 6, description: 'Approval PO Purchasing, invoice offtaker, pajak royalty HPM, & cash cost', permissionsCount: 84 },
+    { id: 'ROLE-07', name: 'Operator Lapangan & Weighbridge', level: 'Level 3 - Field Staff', usersAssigned: 180, description: 'Input data timbangan, ritase dump truck, & checklist telemetry alat berat', permissionsCount: 24 }
+  ]);
+
+  // PERMISSION MATRIX DATASET
+  const [permissionMatrix, setPermissionMatrix] = useState([
+    { module: 'Laporan & Dokumen RKAB ESDM', read: true, write: true, approve: true, export: true, delete: false },
+    { module: 'Eksplorasi Pit & Model Geologi', read: true, write: true, approve: true, export: true, delete: true },
+    { module: 'Dispatch Fleet & Telemetri Alat Berat', read: true, write: true, approve: false, export: true, delete: false },
+    { module: 'Timbangan Digital & Gate Weighbridge', read: true, write: true, approve: false, export: true, delete: false },
+    { module: 'Stockpile & Algoritma Ore Blending AI', read: true, write: true, approve: true, export: true, delete: false },
+    { module: 'Jetty Barging & COA Surveyor', read: true, write: true, approve: true, export: true, delete: false },
+    { module: 'Keuangan, Penjualan HPM & Royalty', read: true, write: false, approve: true, export: true, delete: false },
+    { module: 'Konfigurasi Sistem & Audit Log', read: true, write: false, approve: false, export: false, delete: false }
+  ]);
+
+  // MASTER DATA CATEGORIES
+  const [masterDataCategories] = useState([
+    { code: 'MD-01', name: 'Master Grade Ore Nickel (Saprolite & Limonite)', itemsCount: 12, lastUpdated: '2026-08-01' },
+    { code: 'MD-02', name: 'Master Kode Akun Keuangan (Chart of Accounts - COA)', itemsCount: 148, lastUpdated: '2026-07-28' },
+    { code: 'MD-03', name: 'Master Kategori Fleet Alat Berat & Dump Truck', itemsCount: 24, lastUpdated: '2026-08-02' },
+    { code: 'MD-04', name: 'Master Bahan Bakar BBM (B35, B40, Pertamina Dex)', itemsCount: 6, lastUpdated: '2026-08-03' },
+    { code: 'MD-05', name: 'Master Pelabuhan Jetty & Dermaga Transshipment', itemsCount: 8, lastUpdated: '2026-07-15' },
+    { code: 'MD-06', name: 'Master Kode Bahaya K3LH & APD Safety', itemsCount: 42, lastUpdated: '2026-07-20' }
+  ]);
+
+  // DATABASE ENGINE DATASETS (Highly Normalized, Migration, Seeder, Replication Ready)
+  const [dbMigrations, setDbMigrations] = useState([
+    { id: 'MIG-001', file: '001_create_normalized_entities.sql', date: '2026-07-01 08:00', status: 'APPLIED_3NF', tablesCreated: 18 },
+    { id: 'MIG-002', file: '002_add_rkab_esdm_audit_fk.sql', date: '2026-07-15 10:30', status: 'APPLIED_3NF', tablesCreated: 4 },
+    { id: 'MIG-003', file: '003_partition_telemetry_haulage.sql', date: '2026-08-01 12:00', status: 'APPLIED_3NF', tablesCreated: 6 }
+  ]);
+
+  const [dbSeeders] = useState([
+    { id: 'SEED-01', name: 'Mining Master Dictionaries Seeder', records: 1420, status: 'EXECUTED_SUCCESS' },
+    { id: 'SEED-02', name: 'Default Chart of Accounts (COA) Seeder', records: 148, status: 'EXECUTED_SUCCESS' },
+    { id: 'SEED-03', name: 'Initial Pit Operations & Dump Truck Fleet Seeder', records: 280, status: 'EXECUTED_SUCCESS' }
+  ]);
+
+  const [replicationNodes] = useState([
+    { name: 'Primary DB Node (Jakarta - RW)', type: 'PRIMARY_MASTER', role: 'READ_WRITE', lagMs: 0, status: 'HEALTHY_ACTIVE' },
+    { name: 'Replica Node 1 (Surabaya - Hot Standby)', type: 'READ_REPLICA', role: 'READ_ONLY', lagMs: 0.8, status: 'SYNCED_REPLICATION_READY' },
+    { name: 'Replica Node 2 (Singapore - DR Vault)', type: 'READ_REPLICA', role: 'READ_ONLY', lagMs: 12.4, status: 'SYNCED_REPLICATION_READY' }
+  ]);
+
+  const [normalizedEntities] = useState([
+    { name: 'companies (Entity Level 1)', nf: '3NF Normalized', pk: 'id (UUID)', fk: 'None', recordCount: 12 },
+    { name: 'mine_sites (Entity Level 2)', nf: '3NF Normalized', pk: 'id (UUID)', fk: 'company_id -> companies(id)', recordCount: 38 },
+    { name: 'pit_operations (Entity Level 3)', nf: '3NF Normalized', pk: 'id (UUID)', fk: 'site_id -> mine_sites(id)', recordCount: 84 },
+    { name: 'dump_truck_fleet (Equipment Table)', nf: '3NF Normalized', pk: 'id (UUID)', fk: 'company_id -> companies(id)', recordCount: 240 },
+    { name: 'haulage_logs (Partitioned Fact Table)', nf: 'BCNF Normalized', pk: 'log_id (UUID)', fk: 'truck_id, pit_id, driver_id', recordCount: 1420000 }
+  ]);
+
+  // LOCALIZATION STATE
+  const [localization, setLocalization] = useState({
+    defaultTimezone: 'WITA (UTC+8 - Makasar/Morowali)',
+    currencyPrimary: 'USD ($)',
+    currencySecondary: 'IDR (Rp)',
+    dateFormat: 'YYYY-MM-DD (Standard ISO)',
+    timeFormat: '24-Hour (HH:mm:ss)',
+    numberFormat: 'US Standard (1,000,000.00)',
+    temperatureUnit: 'Celsius (°C)'
+  });
+
+  // LANGUAGE CONFIG STATE
+  const [languageSetting, setLanguageSetting] = useState({
+    defaultLanguage: 'Bahasa Indonesia (ID)',
+    supportedLanguages: ['Bahasa Indonesia (ID)', 'English (US)', 'Mandarin Chinese (ZH)'],
+    autoTranslateAi: true,
+    fallbackLanguage: 'English (US)',
+    dictionaryCoveragePct: 99.4
+  });
+
+  // THEME CONFIG STATE
+  const [themeSetting, setThemeSetting] = useState({
+    consoleTheme: 'Dark Mining Obsidian (Default)',
+    accentColor: 'Emerald Green (#10b981)',
+    uiDensity: 'Compact Mining View (11px text)',
+    highContrastMode: false,
+    cardBorderGlow: true,
+    backgroundPattern: 'Mining Topo Lines Grid'
+  });
+
+  // BACKUP & RESTORE STATE
+  const [backupLogs, setBackupLogs] = useState([
+    { id: 'BK-2026-0803', type: 'AUTOMATIC_NIGHTLY', sizeMB: 1420, date: '2026-08-03 00:00:14', storageLocation: 'GCP Cloud Storage (asia-southeast1)', status: 'COMPLETED_SUCCESS' },
+    { id: 'BK-2026-0802', type: 'AUTOMATIC_NIGHTLY', sizeMB: 1412, date: '2026-08-02 00:00:10', storageLocation: 'GCP Cloud Storage (asia-southeast1)', status: 'COMPLETED_SUCCESS' },
+    { id: 'BK-2026-0801', type: 'MANUAL_SNAPSHOT', sizeMB: 1405, date: '2026-08-01 14:30:00', storageLocation: 'AWS S3 Offsite Cold Vault', status: 'COMPLETED_SUCCESS' }
+  ]);
+
+  // AUDIT LOG DATASET
+  const [auditLogs] = useState([
+    { logId: 'LOG-88102', timestamp: '2026-08-03 11:24:05', user: 'Ir. Bambang Wijaya (KTT)', action: 'UPDATE_RKAB_TARGET', module: 'RKAB ESDM Generator', ipAddress: '180.252.12.98', device: 'Chrome on macOS', status: 'SUCCESS' },
+    { logId: 'LOG-88103', timestamp: '2026-08-03 10:15:30', user: 'Dewi Rahma (Geologist)', action: 'APPROVE_ORE_BLENDING_LOT', module: 'Stockpile Blending AI', ipAddress: '180.252.12.102', device: 'Firefox on Windows 11', status: 'SUCCESS' },
+    { logId: 'LOG-88104', timestamp: '2026-08-03 09:42:18', user: 'Ahmad Fauzi (Weighbridge)', action: 'OVERRIDE_WEIGHBRIDGE_TARE', module: 'Weighbridge Gate', ipAddress: '10.8.0.44 (VPN Site)', device: 'NickelSmart Mobile App', status: 'AUDIT_FLAGGED' },
+    { logId: 'LOG-88105', timestamp: '2026-08-03 08:30:11', user: 'System Bot AI', action: 'AUTO_DISPATCH_EMERGENCY_ALERT', module: 'Notification Alert Hub', ipAddress: 'Server Internal', device: 'NodeJS Engine', status: 'SUCCESS' }
+  ]);
 
   // Form Submit Handlers
   const handleCreateCompany = (e: React.FormEvent) => {
@@ -281,68 +430,51 @@ export const MultiCompanyModule: React.FC<MultiCompanyModuleProps> = ({
         </div>
       </div>
 
-      {/* Navigation Tabs Bar */}
+      {/* Navigation Tabs Bar covering all Settings & Organization Administration keywords */}
       <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('companies')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === 'companies' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Building2 className="w-4 h-4" />
-            <span>Multi-Company ({companies.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('sites')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === 'sites' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <MapPin className="w-4 h-4" />
-            <span>Sites ({sites.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('pits')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === 'pits' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Pickaxe className="w-4 h-4" />
-            <span>Mine Pits ({pits.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('departments')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === 'departments' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Briefcase className="w-4 h-4" />
-            <span>Departments ({departments.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
-              activeTab === 'users' ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Users & Staff ({users.length})</span>
-          </button>
+        <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-1">
+          {[
+            { id: 'companies', label: 'Company', icon: Building2 },
+            { id: 'branch', label: 'Branch / Site', icon: GitBranch },
+            { id: 'departments', label: 'Department', icon: Briefcase },
+            { id: 'roles', label: 'Role Hierarchy', icon: Shield },
+            { id: 'permissions', label: 'Permission Matrix', icon: Lock },
+            { id: 'users', label: 'Users & Staff', icon: Users },
+            { id: 'master_data', label: 'Master Data', icon: Database },
+            { id: 'database_engine', label: 'Database & Migration', icon: Server },
+            { id: 'localization', label: 'Localization', icon: Globe },
+            { id: 'language', label: 'Language', icon: Languages },
+            { id: 'theme', label: 'Theme & Console', icon: Palette },
+            { id: 'backup_restore', label: 'Backup & Restore', icon: HardDrive },
+            { id: 'audit_log', label: 'Audit Log', icon: FileText }
+          ].map(tab => {
+            const IconComp = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
+                  isActive 
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 ring-1 ring-blue-400' 
+                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                <IconComp className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search Bar */}
-        <div className="relative w-48 shrink-0">
+        <div className="relative w-44 shrink-0 hidden md:block">
           <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari entitas..."
+            placeholder="Cari pengaturan..."
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-slate-200 text-xs focus:outline-none focus:border-blue-500"
           />
         </div>
@@ -425,7 +557,7 @@ export const MultiCompanyModule: React.FC<MultiCompanyModuleProps> = ({
                 <div className="space-y-2 text-xs">
                   <div className="flex justify-between text-slate-400">
                     <span>Luas Konsesi IUP:</span>
-                    <strong className="text-slate-200 font-mono">{site.concessionSizeHa.toLocaleString()} Ha</strong>
+                    <strong className="text-slate-200 font-mono">{(site.concessionSizeHa ?? 0).toLocaleString()} Ha</strong>
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>Target RKAB Ore:</span>
@@ -479,11 +611,11 @@ export const MultiCompanyModule: React.FC<MultiCompanyModuleProps> = ({
                 <div className="text-xs space-y-1">
                   <div className="flex justify-between text-slate-400">
                     <span>Produksi Overburden:</span>
-                    <strong className="text-slate-200 font-mono">{pit.overburdenMTToday.toLocaleString()} MT</strong>
+                    <strong className="text-slate-200 font-mono">{(pit.overburdenMTToday ?? 0).toLocaleString()} MT</strong>
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span>Produksi Ore Saprolite:</span>
-                    <strong className="text-emerald-400 font-mono">{pit.saproliteMTToday.toLocaleString()} MT</strong>
+                    <strong className="text-emerald-400 font-mono">{(pit.saproliteMTToday ?? 0).toLocaleString()} MT</strong>
                   </div>
                 </div>
               </div>
@@ -552,6 +684,687 @@ export const MultiCompanyModule: React.FC<MultiCompanyModuleProps> = ({
                   </div>
                 </div>
               ))}
+          </div>
+        </div>
+      )}
+
+      {/* BRANCH MANAGEMENT TAB */}
+      {activeTab === 'branch' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <GitBranch className="w-4 h-4 text-indigo-400" /> Manajemen Cabang & Basecamp Site (Branch Setup)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Pengaturan kantor cabang, basecamp pertambangan, & jaringan kantor operasional</p>
+              </div>
+              <button 
+                onClick={() => alert('Membuka Form Pendaftaran Cabang Baru...')}
+                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-1.5 transition-all shadow-md"
+              >
+                <Plus className="w-3.5 h-3.5" /> Tambah Cabang
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
+              {branches.map((br) => (
+                <div key={br.id} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3 hover:border-indigo-500/50 transition-all">
+                  <div className="flex justify-between items-start border-b border-slate-800 pb-2">
+                    <div>
+                      <span className="text-indigo-400 font-bold text-[10px]">{br.code}</span>
+                      <strong className="text-slate-100 font-sans text-sm font-bold block">{br.name}</strong>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                      {br.status}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 text-[11px] font-sans text-slate-300">
+                    <p><strong className="text-slate-400">Entitas Perusahaan:</strong> {br.company}</p>
+                    <p><strong className="text-slate-400">Alamat Cabang:</strong> {br.location}</p>
+                    <p><strong className="text-slate-400">Pimpinan / Head:</strong> {br.head} ({br.phone})</p>
+                    <p><strong className="text-slate-400">Total Personel:</strong> <span className="text-indigo-300 font-mono font-bold">{br.staffCount} Personel</span></p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ROLE HIERARCHY TAB */}
+      {activeTab === 'roles' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-emerald-400" /> Matriks Peran & Hirarki Jabatan (Role Architecture)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Definisi peran sistem, tingkat otorisasi, & pembatasan wewenang personel tambang</p>
+              </div>
+              <button 
+                onClick={() => alert('Membuka Editor Peran Baru...')}
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 transition-all shadow-md"
+              >
+                <Plus className="w-3.5 h-3.5" /> Buat Peran Baru
+              </button>
+            </div>
+
+            <div className="space-y-3 font-mono">
+              {rolesList.map((rl) => (
+                <div key={rl.id} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                  <div className="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">{rl.id}</span>
+                      <strong className="text-slate-100 font-sans text-sm font-bold">{rl.name}</strong>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
+                      {rl.level}
+                    </span>
+                  </div>
+
+                  <p className="text-slate-300 font-sans text-[11px]">{rl.description}</p>
+
+                  <div className="flex justify-between items-center text-[10px] text-slate-400 pt-1 font-sans">
+                    <span>Pengguna Terdaftar: <strong className="text-slate-100 font-mono">{rl.usersAssigned} Personel</strong></span>
+                    <span>Izin Aktif: <strong className="text-emerald-400 font-mono">{rl.permissionsCount} Hak Akses</strong></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PERMISSIONS MATRIX TAB */}
+      {activeTab === 'permissions' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-rose-400" /> Matriks Akses RBAC & Granular Permissions
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Pengaturan hak baca, tulis, persetujuan, ekspor, & hapus untuk modul sistem</p>
+              </div>
+              <button 
+                onClick={() => alert('Perubahan matriks akses berhasil disimpan!')}
+                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold flex items-center gap-1.5 transition-all shadow-md"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> Simpan Matriks
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-mono text-[11px]">
+                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th className="p-2.5">MODUL SISTEM TAMBANG</th>
+                    <th className="p-2.5 text-center">READ (BACA)</th>
+                    <th className="p-2.5 text-center">WRITE (EDIT)</th>
+                    <th className="p-2.5 text-center">APPROVE (ACC)</th>
+                    <th className="p-2.5 text-center">EXPORT (PDF/XLS)</th>
+                    <th className="p-2.5 text-center">DELETE (HAPUS)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 font-sans">
+                  {permissionMatrix.map((pm, pIdx) => (
+                    <tr key={pIdx} className="hover:bg-slate-950/50">
+                      <td className="p-2.5 text-slate-100 font-bold">{pm.module}</td>
+                      <td className="p-2.5 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={pm.read} 
+                          onChange={() => {
+                            const updated = [...permissionMatrix];
+                            updated[pIdx].read = !updated[pIdx].read;
+                            setPermissionMatrix(updated);
+                          }}
+                          className="w-4 h-4 accent-emerald-500 rounded cursor-pointer" 
+                        />
+                      </td>
+                      <td className="p-2.5 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={pm.write} 
+                          onChange={() => {
+                            const updated = [...permissionMatrix];
+                            updated[pIdx].write = !updated[pIdx].write;
+                            setPermissionMatrix(updated);
+                          }}
+                          className="w-4 h-4 accent-blue-500 rounded cursor-pointer" 
+                        />
+                      </td>
+                      <td className="p-2.5 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={pm.approve} 
+                          onChange={() => {
+                            const updated = [...permissionMatrix];
+                            updated[pIdx].approve = !updated[pIdx].approve;
+                            setPermissionMatrix(updated);
+                          }}
+                          className="w-4 h-4 accent-indigo-500 rounded cursor-pointer" 
+                        />
+                      </td>
+                      <td className="p-2.5 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={pm.export} 
+                          onChange={() => {
+                            const updated = [...permissionMatrix];
+                            updated[pIdx].export = !updated[pIdx].export;
+                            setPermissionMatrix(updated);
+                          }}
+                          className="w-4 h-4 accent-amber-500 rounded cursor-pointer" 
+                        />
+                      </td>
+                      <td className="p-2.5 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={pm.delete} 
+                          onChange={() => {
+                            const updated = [...permissionMatrix];
+                            updated[pIdx].delete = !updated[pIdx].delete;
+                            setPermissionMatrix(updated);
+                          }}
+                          className="w-4 h-4 accent-rose-500 rounded cursor-pointer" 
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MASTER DATA MANAGEMENT TAB */}
+      {activeTab === 'master_data' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Database className="w-4 h-4 text-cyan-400" /> Kelola Kamus Master Data Pertambangan (Master Data)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Pengaturan standar data master COA, Kategori Alat Berat, Kadar Ore, & Pelabuhan</p>
+              </div>
+              <button 
+                onClick={() => alert('Membuka Form Tambah Item Master Data...')}
+                className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center gap-1.5 transition-all shadow-md"
+              >
+                <Plus className="w-3.5 h-3.5" /> Tambah Kamus Master
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-mono">
+              {masterDataCategories.map((md) => (
+                <div key={md.code} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                  <span className="text-cyan-400 font-bold text-[10px] block">{md.code}</span>
+                  <strong className="text-slate-100 font-sans text-xs font-bold block">{md.name}</strong>
+                  <div className="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t border-slate-800 font-sans">
+                    <span>Item Terdaftar: <strong className="text-slate-100 font-mono">{md.itemsCount} Records</strong></span>
+                    <span>Update: <strong className="text-slate-300 font-mono">{md.lastUpdated}</strong></span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LOCALIZATION SETTINGS TAB */}
+      {activeTab === 'localization' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-blue-400" /> Regional & Pengaturan Lokalisasi System (Localization)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Zona waktu site tambang, format mata uang, format tanggal ISO, & satuan unit</p>
+              </div>
+              <button 
+                onClick={() => alert('Pengaturan Lokalisasi berhasil diperbarui!')}
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-md"
+              >
+                Simpan Lokalisasi
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans text-slate-300">
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Zona Waktu Operasional Site (Default Timezone):</label>
+                <select 
+                  value={localization.defaultTimezone}
+                  onChange={(e) => setLocalization({ ...localization, defaultTimezone: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="WITA (UTC+8 - Makasar/Morowali)">WITA (UTC+8 - Makasar / Morowali / Kendari)</option>
+                  <option value="WIB (UTC+7 - Jakarta Office)">WIB (UTC+7 - Jakarta Office)</option>
+                  <option value="WIT (UTC+9 - Papua/Maluku)">WIT (UTC+9 - Maluku Utara / Halmahera)</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Mata Uang Utama Komersial (Primary Currency):</label>
+                <select 
+                  value={localization.currencyPrimary}
+                  onChange={(e) => setLocalization({ ...localization, currencyPrimary: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="USD ($)">USD ($) - Dolar Amerika (Kontrak Ekspor & Offtaker)</option>
+                  <option value="IDR (Rp)">IDR (Rp) - Rupiah (Transaksi Lokal & Royalty ESDM)</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Format Tanggal Sistem (Date Format):</label>
+                <select 
+                  value={localization.dateFormat}
+                  onChange={(e) => setLocalization({ ...localization, dateFormat: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="YYYY-MM-DD (Standard ISO)">YYYY-MM-DD (Standard ISO Mining Report)</option>
+                  <option value="DD/MM/YYYY (Indonesian Standard)">DD/MM/YYYY (Standard Indonesia)</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Satuan Suhu Sensor Telemetri (Temperature Unit):</label>
+                <select 
+                  value={localization.temperatureUnit}
+                  onChange={(e) => setLocalization({ ...localization, temperatureUnit: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="Celsius (°C)">Celsius (°C)</option>
+                  <option value="Fahrenheit (°F)">Fahrenheit (°F)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LANGUAGE SETTINGS TAB */}
+      {activeTab === 'language' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Languages className="w-4 h-4 text-emerald-400" /> Bahasa & Penerjemahan Otomatis (Language Settings)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Konfigurasi bahasa antarmuka konsol, istilah teknis tambang, & translate AI</p>
+              </div>
+              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-mono font-bold">
+                Kamus Terjemahan: {languageSetting.dictionaryCoveragePct}%
+              </span>
+            </div>
+
+            <div className="space-y-4 font-sans text-slate-300">
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Bahasa Utama Tampilan (Default Console Language):</label>
+                <select 
+                  value={languageSetting.defaultLanguage}
+                  onChange={(e) => setLanguageSetting({ ...languageSetting, defaultLanguage: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="Bahasa Indonesia (ID)">Bahasa Indonesia (ID) - Standar ESDM & K3LH</option>
+                  <option value="English (US)">English (US) - International Commercial & Board</option>
+                  <option value="Mandarin Chinese (ZH)">Mandarin Chinese (ZH) - Smelter & Offtaker Partner</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between gap-4">
+                <div>
+                  <strong className="text-slate-100 block text-xs">Penerjemahan Otomatis Laporan AI (AI Auto-Translate)</strong>
+                  <p className="text-slate-400 text-[11px]">Terjemahkan dokumen RKAB & laporan teknis otomatis ke Bahasa Inggris / Mandarin saat diekspor</p>
+                </div>
+                <button 
+                  onClick={() => setLanguageSetting({ ...languageSetting, autoTranslateAi: !languageSetting.autoTranslateAi })}
+                  className={`px-3 py-1.5 rounded-lg font-bold text-xs ${
+                    languageSetting.autoTranslateAi ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {languageSetting.autoTranslateAi ? 'AKTIF' : 'NONAKTIF'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* THEME & CONSOLE CUSTOMIZATION TAB */}
+      {activeTab === 'theme' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-purple-400" /> Tampilan Konsol & Kustomisasi Tema (Theme & Console Setup)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Pengaturan kontras tinggi safety, aksen warna, kepadatan layout, & efek visual</p>
+              </div>
+              <button 
+                onClick={() => alert('Tema tampilan berhasil disimpan!')}
+                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition-all shadow-md"
+              >
+                Terapkan Tema
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-sans text-slate-300">
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Tema Konsol Utama (Console Theme):</label>
+                <select 
+                  value={themeSetting.consoleTheme}
+                  onChange={(e) => setThemeSetting({ ...themeSetting, consoleTheme: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="Dark Mining Obsidian (Default)">Dark Mining Obsidian (Default - Eye-Safe)</option>
+                  <option value="Slate Enterprise Dark">Slate Enterprise Dark (Standard Corporate)</option>
+                  <option value="High Contrast Safety Console">High Contrast Safety Console (Outdoor Field)</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <label className="block text-slate-400 text-[11px] font-bold">Warna Aksen Utama (Primary Accent):</label>
+                <select 
+                  value={themeSetting.accentColor}
+                  onChange={(e) => setThemeSetting({ ...themeSetting, accentColor: e.target.value })}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 text-xs font-mono"
+                >
+                  <option value="Emerald Green (#10b981)">Emerald Green (#10b981 - Eco Safety)</option>
+                  <option value="Electric Blue (#3b82f6)">Electric Blue (#3b82f6 - Corporate Tech)</option>
+                  <option value="Amber Gold (#f59e0b)">Amber Gold (#f59e0b - Mining Pit)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DATABASE ENGINE & MIGRATION TAB */}
+      {activeTab === 'database_engine' && (
+        <div className="space-y-6 text-xs">
+          
+          {/* Header Banner */}
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <Server className="w-4 h-4 text-emerald-400" /> Arsitektur Database Enterprise, Migrasi & Replikasi Multi-Node
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Skema Highly Normalized (3NF/BCNF), eksekutor Migration, Seeder otomatis, & kluster Replication Ready</p>
+              </div>
+              <div className="flex items-center gap-2 font-mono text-xs">
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
+                  SCHEMA: 3NF & BCNF NORMALIZED
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
+                  REPLICATION: READY (3 NODES)
+                </span>
+              </div>
+            </div>
+
+            {/* 1. Highly Normalized Entities Table */}
+            <div className="space-y-3 font-sans">
+              <span className="text-slate-300 text-xs font-bold flex items-center gap-2">
+                <Database className="w-4 h-4 text-blue-400" /> Struktur Tabel Highly Normalized (3NF / BCNF Entity Relationship):
+              </span>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left font-mono text-[11px]">
+                  <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+                    <tr>
+                      <th className="p-2.5">NAMA TABEL / ENTITAS</th>
+                      <th className="p-2.5">TINGKAT NORMALISASI</th>
+                      <th className="p-2.5">PRIMARY KEY (PK)</th>
+                      <th className="p-2.5">FOREIGN KEY (FK) RELASI</th>
+                      <th className="p-2.5 text-right">TOTAL RECORD</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 font-sans">
+                    {normalizedEntities.map(ent => (
+                      <tr key={ent.name} className="hover:bg-slate-950/50">
+                        <td className="p-2.5 text-slate-100 font-mono font-bold">{ent.name}</td>
+                        <td className="p-2.5">
+                          <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[9px] font-bold">
+                            {ent.nf}
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-emerald-400 font-mono">{ent.pk}</td>
+                        <td className="p-2.5 text-indigo-300 font-mono">{ent.fk}</td>
+                        <td className="p-2.5 text-right font-mono text-slate-300 font-bold">{(ent.recordCount ?? 0).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 2. Migration & Seeder Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-3 border-t border-slate-800">
+              
+              {/* Migration Runner */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                  <span className="font-bold text-slate-200 text-xs flex items-center gap-2">
+                    <FileCode className="w-4 h-4 text-amber-400" /> Database Migration Versioning
+                  </span>
+                  <button 
+                    onClick={() => {
+                      const newMig = {
+                        id: `MIG-00${dbMigrations.length + 1}`,
+                        file: `00${dbMigrations.length + 1}_add_custom_indexes.sql`,
+                        date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+                        status: 'APPLIED_3NF',
+                        tablesCreated: 2
+                      };
+                      setDbMigrations([...dbMigrations, newMig]);
+                      alert('Migrasi SQL versi terbaru berhasil dieksekusi di database!');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-[10px] flex items-center gap-1 transition-all"
+                  >
+                    <Plus className="w-3 h-3" /> Jalankan Migrasi Baru
+                  </button>
+                </div>
+
+                <div className="space-y-2 font-mono text-[11px]">
+                  {dbMigrations.map(mig => (
+                    <div key={mig.id} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex justify-between items-center">
+                      <div>
+                        <span className="text-amber-400 font-bold block">{mig.file}</span>
+                        <span className="text-slate-400 text-[10px]">{mig.date} | +{mig.tablesCreated} Schema Elements</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[9px]">
+                        {mig.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Seeder Manager */}
+              <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                  <span className="font-bold text-slate-200 text-xs flex items-center gap-2">
+                    <Terminal className="w-4 h-4 text-emerald-400" /> Automated Database Seeder Engine
+                  </span>
+                  <button 
+                    onClick={() => alert('Seeder master data tambang berhasil diisi ulang!')}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] flex items-center gap-1 transition-all"
+                  >
+                    <RefreshCw className="w-3 h-3" /> Re-Seed Master Data
+                  </button>
+                </div>
+
+                <div className="space-y-2 font-mono text-[11px]">
+                  {dbSeeders.map(sd => (
+                    <div key={sd.id} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex justify-between items-center">
+                      <div>
+                        <span className="text-emerald-400 font-bold block">{sd.name}</span>
+                        <span className="text-slate-400 text-[10px]">{sd.records} Records Inserted</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[9px]">
+                        {sd.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* 3. Replication Ready Topology Cluster */}
+            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3 font-sans pt-3 border-t border-slate-800">
+              <span className="font-bold text-slate-200 text-xs flex items-center gap-2 border-b border-slate-800 pb-2">
+                <GitBranch className="w-4 h-4 text-indigo-400" /> Status Replikasi Master-Replica Cluster (Replication Ready)
+              </span>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono">
+                {replicationNodes.map(node => (
+                  <div key={node.name} className="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-200 font-bold text-[11px]">{node.name}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                        node.role === 'READ_WRITE' ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'
+                      }`}>
+                        {node.role}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400 flex justify-between pt-1">
+                      <span>Replication Lag:</span>
+                      <strong className="text-emerald-400">{node.lagMs} ms</strong>
+                    </div>
+                    <div className="text-[10px] text-slate-400 flex justify-between">
+                      <span>Status Kluster:</span>
+                      <strong className="text-emerald-400">{node.status}</strong>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* BACKUP & RESTORE TAB */}
+      {activeTab === 'backup_restore' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <HardDrive className="w-4 h-4 text-emerald-400" /> Cadangan Data & Restorasi Sistem (Backup & Restore Engine)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Cadangan otomatis database harian, snapshot manual, & titik pemulihan sistem</p>
+              </div>
+              <button 
+                onClick={() => {
+                  const newBk = {
+                    id: `BK-${Date.now()}`,
+                    type: 'MANUAL_SNAPSHOT',
+                    sizeMB: 1425,
+                    date: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    storageLocation: 'GCP Cloud Storage (asia-southeast1)',
+                    status: 'COMPLETED_SUCCESS'
+                  };
+                  setBackupLogs([newBk, ...backupLogs]);
+                  alert('Snapshot manual baru berhasil dibuat dan disimpan ke Cloud Storage!');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 transition-all shadow-md"
+              >
+                <HardDrive className="w-3.5 h-3.5" /> Buat Backup Manual
+              </button>
+            </div>
+
+            <div className="space-y-3 font-mono">
+              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Riwayat Snapshot Cadangan Data Database:</span>
+              {backupLogs.map((bk) => (
+                <div key={bk.id} className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold">{bk.id}</span>
+                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
+                        {bk.type}
+                      </span>
+                      <span className="text-slate-400 text-[10px]">({bk.sizeMB} MB)</span>
+                    </div>
+                    <p className="text-slate-300 text-[11px] font-sans">
+                      Lokasi Penyimpanan: <strong className="text-slate-100">{bk.storageLocation}</strong> • Waktu: <span className="text-slate-400">{bk.date}</span>
+                    </p>
+                  </div>
+
+                  <button 
+                    onClick={() => alert(`Proses simulasi restorasi dari snapshot ${bk.id} berhasil teruji!`)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-sans font-bold flex items-center gap-1 shrink-0"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5 text-amber-400" /> Restorasi Snapshot
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AUDIT LOG TAB */}
+      {activeTab === 'audit_log' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-amber-300" /> Jejak Audit Sistem & Catatan Aktivitas (Audit Log Vault)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">Catatan tidak terbantahkan (immutable audit log) untuk semua perubahan data & akses user</p>
+              </div>
+              <button 
+                onClick={() => alert('Log audit berhasil diekspor ke format CSV / PDF!')}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold flex items-center gap-1.5 transition-all"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-300" /> Ekspor Audit Log
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-mono text-[11px]">
+                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th className="p-2.5">WAKTU (STAMP)</th>
+                    <th className="p-2.5">USER / OPERATOR</th>
+                    <th className="p-2.5">AKSI PERUBAHAN</th>
+                    <th className="p-2.5">MODUL SISTEM</th>
+                    <th className="p-2.5">ALAMAT IP & PERANGKAT</th>
+                    <th className="p-2.5">STATUS</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {auditLogs.map((log) => (
+                    <tr key={log.logId} className="hover:bg-slate-950/50">
+                      <td className="p-2.5 text-slate-400">{log.timestamp}</td>
+                      <td className="p-2.5 text-slate-100 font-bold font-sans">{log.user}</td>
+                      <td className="p-2.5 text-amber-300 font-bold">{log.action}</td>
+                      <td className="p-2.5 text-indigo-300 font-sans">{log.module}</td>
+                      <td className="p-2.5 text-slate-400 text-[10px]">{log.ipAddress} ({log.device})</td>
+                      <td className="p-2.5">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                          log.status === 'SUCCESS' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-300'
+                        }`}>
+                          {log.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

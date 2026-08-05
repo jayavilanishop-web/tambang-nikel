@@ -415,8 +415,8 @@ export const EnvironmentEsgModule: React.FC<EnvironmentEsgModuleProps> = ({
                     <tr key={r.blockId} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-emerald-400">{r.blockId}</td>
                       <td className="py-3 px-3 text-slate-100 font-bold">{r.areaHa} Ha</td>
-                      <td className="py-3 px-3 text-slate-400">{r.targetTrees.toLocaleString()} Pohon</td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold">{r.plantedTrees.toLocaleString()} Pohon</td>
+                      <td className="py-3 px-3 text-slate-400">{(r.targetTrees ?? 0).toLocaleString()} Pohon</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">{(r.plantedTrees ?? 0).toLocaleString()} Pohon</td>
                       <td className="py-3 px-3 font-sans text-amber-300">{r.species}</td>
                       <td className="py-3 px-3 text-emerald-300 font-bold">{r.survivalRate}</td>
                       <td className="py-3 px-3">

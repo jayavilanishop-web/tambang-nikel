@@ -16,6 +16,7 @@ import {
   Search, 
   Filter, 
   Plus, 
+  Check,
   Download, 
   Printer, 
   DollarSign, 
@@ -53,16 +54,15 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
   const [scannedCode, setScannedCode] = useState<string>('QR-PART-2026-8841');
   const [scanResult, setScanResult] = useState<any>(null);
 
-  // Warehouse Site Locations
-  const warehouseLocations = [
-    { id: 'WH-MAIN-SITE', name: 'Gudang Utama Central Workshop (Site Alpha)', code: 'WH-01', manager: 'Suryanto (Warehouse Head)', totalBins: 450, occupiedPct: 84, category: 'Main Heavy Parts & Lubricants' },
-    { id: 'WH-PIT-DEPOT', name: 'Depot Fast-Moving Pit Alpha', code: 'WH-02', manager: 'Bambang (Pit Storeman)', totalBins: 120, occupiedPct: 92, category: 'Filters, O-Rings, Fasteners' },
-    { id: 'WH-JETTY-STORE', name: 'Gudang Logistik Port Jetty Terminal', code: 'WH-03', manager: 'Dedi (Jetty Storekeeper)', totalBins: 200, occupiedPct: 65, category: 'Barging Spares, Safety Gear' },
-    { id: 'WH-EXPLOSIVE-MAG', name: 'Gudang Bahan Peledak (Magazine Store)', code: 'WH-04', manager: 'Kapten Haryono (Blasting Store Officer)', totalBins: 40, occupiedPct: 45, category: 'ANFO, Boosters, Detonators' }
-  ];
+  // Warehouse Locations State
+  const [warehouseLocations] = useState([
+    { id: 'WH-MAIN-SITE', name: 'Gudang Utama Central (Main Site Warehouse)', code: 'WH-MAIN', category: 'General Spareparts & Tyres', totalBins: 450, occupiedPct: 78, manager: 'Ahmad Subagyo' },
+    { id: 'WH-PIT-DEPOT', name: 'Depot Pit Alpha Warehouse (Fast-Moving Parts)', code: 'WH-PIT', category: 'Filters, Oils & Hydraulic Hoses', totalBins: 120, occupiedPct: 62, manager: 'Deni Setiawan' },
+    { id: 'WH-JETTY-STORE', name: 'Gudang Logistik Pelabuhan Jetty', code: 'WH-JETTY', category: 'Barging Consumables & Hazmat Chemical', totalBins: 85, occupiedPct: 45, manager: 'Rudy Hartono' }
+  ]);
 
-  // Inventory Stock Dataset with FIFO, Batch & Expiry
-  const inventoryItems = [
+  // Dynamic Lists State
+  const [inventoryList, setInventoryList] = useState([
     { 
       itemCode: 'SKU-TYRE-777E', 
       barcode: '899100234812', 
@@ -135,48 +135,80 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
       expiryDate: '2026-09-10', 
       expiryStatus: 'CRITICAL_EXPIRY_30_DAYS' 
     }
-  ];
+  ]);
 
-  // Goods Receiving GRN Dataset
-  const receivingOrders = [
+  const [receivingOrders, setReceivingOrders] = useState([
     { grnNo: 'GRN-2026-0811', poNo: 'PO-2026-0412', supplier: 'PT Trakindo Utama (Caterpillar)', receiveDate: '2026-08-02', itemsCount: 14, totalValuationUsd: 145000, inspector: 'Eko (QC Inspector)', status: 'RECEIVED_COMPLETED' },
     { grnNo: 'GRN-2026-0812', poNo: 'PO-2026-0415', supplier: 'PT United Tractors Tbk (Komatsu)', receiveDate: '2026-08-03', itemsCount: 8, totalValuationUsd: 68000, inspector: 'Sutrisno (Warehouse)', status: 'IN_INSPECTION' }
-  ];
+  ]);
 
-  // Goods Issue GIS Dataset
-  const issuingSlips = [
+  const [issuingSlips, setIssuingSlips] = useState([
     { gisNo: 'GIS-2026-1102', woNo: 'WO-2026-0412', issuedTo: 'Mekanik Bambang (Service DT-1001)', issueDate: '2026-08-03 08:30', itemIssued: 'Oli Delo 400 (2 Drum) & Filter Oil', costCenter: 'CC-MAINT-FLEET', status: 'ISSUED' },
     { gisNo: 'GIS-2026-1103', woNo: 'WO-2026-0413', issuedTo: 'Tim Blasting Pit Beta', issueDate: '2026-08-03 09:15', itemIssued: 'ANFO Ammonium Nitrate (2.5 Ton)', costCenter: 'CC-PIT-BLASTING', status: 'ISSUED' }
-  ];
+  ]);
 
-  // Stock Transfer Orders Dataset
-  const stockTransfers = [
+  const [stockTransfers, setStockTransfers] = useState([
     { transferNo: 'TRF-2026-0301', fromWh: 'Gudang Utama Central', toWh: 'Depot Pit Alpha', itemCode: 'SKU-FLTR-HYD-KOM', qty: 10, reqBy: 'Pit Supervisor Hendra', status: 'IN_TRANSIT' },
     { transferNo: 'TRF-2026-0302', fromWh: 'Gudang Utama Central', toWh: 'Gudang Jetty Terminal', itemCode: 'SKU-LUB-DELO-400', qty: 4, reqBy: 'Jetty Head Dedi', status: 'DELIVERED' }
-  ];
+  ]);
 
-  // Stock Opname Audit Variance Dataset
-  const stockOpnameAudit = [
+  const [stockOpnameAudit, setStockOpnameAudit] = useState([
     { auditId: 'SO-2026-Q3', whCode: 'WH-MAIN-SITE', itemCode: 'SKU-TYRE-777E', systemQty: 18, physicalQty: 18, varianceQty: 0, varianceValUsd: 0, auditDate: '2026-08-01', status: 'MATCHED' },
     { auditId: 'SO-2026-Q3', whCode: 'WH-PIT-DEPOT', itemCode: 'SKU-FLTR-HYD-KOM', systemQty: 42, physicalQty: 41, varianceQty: -1, varianceValUsd: -220, auditDate: '2026-08-01', status: 'DISCREPANCY_APPROVED' }
-  ];
+  ]);
 
-  const handleSimulateScan = () => {
-    const found = inventoryItems.find(i => i.qrCode === scannedCode || i.barcode === scannedCode || i.itemCode === scannedCode);
-    if (found) {
-      setScanResult(found);
-    } else {
-      setScanResult({ error: 'Kode Barcode / QR Code tidak ditemukan di database gudang!' });
-    }
-  };
+  // Modals state
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
+  const [newItemDesc, setNewItemDesc] = useState('');
+  const [newItemCode, setNewItemCode] = useState('');
+  const [newItemCategory, setNewItemCategory] = useState('Heavy Equipment Parts');
+  const [newItemQty, setNewItemQty] = useState(10);
+  const [newItemPriceUsd, setNewItemPriceUsd] = useState(500);
 
-  const filteredInventory = inventoryItems.filter(item => {
+  // GRN Modal State
+  const [showGrnModal, setShowGrnModal] = useState(false);
+  const [grnPoNo, setGrnPoNo] = useState('');
+  const [grnSupplier, setGrnSupplier] = useState('');
+  const [grnItemsCount, setGrnItemsCount] = useState(5);
+  const [grnValuationUsd, setGrnValuationUsd] = useState(25000);
+
+  // GIS Modal State
+  const [showGisModal, setShowGisModal] = useState(false);
+  const [gisWoNo, setGisWoNo] = useState('');
+  const [gisIssuedTo, setGisIssuedTo] = useState('');
+  const [gisItemIssued, setGisItemIssued] = useState('');
+  const [gisCostCenter, setGisCostCenter] = useState('CC-MAINT-FLEET');
+
+  // Transfer Modal State
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [trfFromWh, setTrfFromWh] = useState('Gudang Utama Central');
+  const [trfToWh, setTrfToWh] = useState('Depot Pit Alpha');
+  const [trfItemCode, setTrfItemCode] = useState('SKU-FLTR-HYD-KOM');
+  const [trfQty, setTrfQty] = useState(5);
+
+  // Opname Modal State
+  const [showOpnameModal, setShowOpnameModal] = useState(false);
+  const [opnameWhCode, setOpnameWhCode] = useState('WH-MAIN-SITE');
+  const [opnameItemCode, setOpnameItemCode] = useState('SKU-TYRE-777E');
+  const [opnameSystemQty, setOpnameSystemQty] = useState(18);
+  const [opnamePhysicalQty, setOpnamePhysicalQty] = useState(18);
+
+  const filteredInventory = inventoryList.filter(item => {
     const matchWh = selectedWarehouse === 'ALL' || item.warehouse === selectedWarehouse;
     const matchSearch = item.itemCode.toLowerCase().includes(searchTerm.toLowerCase()) || 
                         item.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
                         item.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchWh && matchSearch;
   });
+
+  const handleSimulateScan = () => {
+    const found = inventoryList.find(i => i.qrCode === scannedCode || i.barcode === scannedCode || i.itemCode === scannedCode);
+    if (found) {
+      setScanResult(found);
+    } else {
+      setScanResult({ error: 'Kode Barcode / QR Code tidak ditemukan di database gudang!' });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -266,6 +298,14 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
                   <option key={w.id} value={w.id}>{w.name}</option>
                 ))}
               </select>
+
+              <button
+                onClick={() => setShowAddItemModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah Sparepart</span>
+              </button>
             </div>
           </div>
 
@@ -300,7 +340,7 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
                       </td>
                       <td className="p-3 font-bold text-slate-100 text-sm">{item.stockOnHand} {item.unit}</td>
                       <td className="p-3 text-slate-400">{item.minStock} {item.unit}</td>
-                      <td className="p-3 text-amber-300">${item.fifoValueUsd.toLocaleString('en-US')}</td>
+                      <td className="p-3 text-amber-300">${(item.fifoValueUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="p-3 text-right">
                         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-sans font-bold uppercase ${
                           item.stockOnHand > item.minStock
@@ -442,7 +482,10 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="font-bold text-slate-100 text-sm">Penerimaan Barang Masuk (Goods Receipt Note - GRN)</h3>
-              <button className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold flex items-center gap-1.5">
+              <button 
+                onClick={() => setShowGrnModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Buat GRN Baru</span>
               </button>
@@ -469,7 +512,7 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{grn.supplier}</td>
                       <td className="py-3 px-3 text-slate-400">{grn.receiveDate}</td>
                       <td className="py-3 px-3 text-slate-200">{grn.itemsCount} SKU</td>
-                      <td className="py-3 px-3 text-amber-300">${grn.totalValuationUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300">${(grn.totalValuationUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="py-3 px-3">
                         <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-emerald-500/20 text-emerald-400">
                           {grn.status}
@@ -488,9 +531,18 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
       {activeTab === 'goods_issue' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Pengeluaran Barang & Sparepart Perawatan (Goods Issue Slip - GIS)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Pengeluaran Barang & Sparepart Perawatan (Goods Issue Slip - GIS)
+              </h3>
+              <button 
+                onClick={() => setShowGisModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat GIS Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -530,9 +582,18 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
       {activeTab === 'stock_transfer' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Transfer Stok Antar-Gudang Site Tambang (Inter-Warehouse Stock Transfer)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Transfer Stok Antar-Gudang Site Tambang (Inter-Warehouse Stock Transfer)
+              </h3>
+              <button 
+                onClick={() => setShowTransferModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Buat Transfer Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -574,9 +635,18 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
       {activeTab === 'stock_opname' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Stock Opname Fisik & Analisis Variansi Stok Gudang (Audit Reconciliation)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Stock Opname Fisik & Analisis Variansi Stok Gudang (Audit Reconciliation)
+              </h3>
+              <button 
+                onClick={() => setShowOpnameModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Input Audit Stock Opname</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -635,13 +705,13 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {inventoryItems.map((inv) => (
+                  {inventoryList.map((inv) => (
                     <tr key={inv.itemCode} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-emerald-400">{inv.itemCode}</td>
                       <td className="py-3 px-3 text-slate-300">{inv.batchNo}</td>
                       <td className="py-3 px-3 text-slate-400">{inv.mfgDate}</td>
                       <td className="py-3 px-3 text-rose-400 font-bold">{inv.expiryDate}</td>
-                      <td className="py-3 px-3 text-amber-300 font-bold">${inv.fifoValueUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">${(inv.fifoValueUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
                           inv.expiryStatus === 'HEALTHY' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
@@ -653,6 +723,476 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: INPUT SPAREPART / GOODS BARU */}
+      {showAddItemModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Package className="w-4 h-4 text-emerald-400" /> Input Master Data Sparepart Baru
+              </h3>
+              <button onClick={() => setShowAddItemModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Kode SKU / Part Number:</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: SKU-FLTR-OIL-01"
+                  value={newItemCode}
+                  onChange={(e) => setNewItemCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Deskripsi & Spesifikasi Item:</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Oil Filter Engine Cummins QSK60"
+                  value={newItemDesc}
+                  onChange={(e) => setNewItemDesc(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-slate-400 block mb-1">Kategori Item:</label>
+                  <select
+                    value={newItemCategory}
+                    onChange={(e) => setNewItemCategory(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="Heavy Equipment Parts">Heavy Equipment Parts</option>
+                    <option value="Lubricants & Chemical">Lubricants & Chemical</option>
+                    <option value="Tyre & Undercarriage">Tyre & Undercarriage</option>
+                    <option value="Filters & Consumables">Filters & Consumables</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Stok Awal (Qty):</label>
+                  <input
+                    type="number"
+                    value={newItemQty}
+                    onChange={(e) => setNewItemQty(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Harga Satuan Valuasi FIFO ($ USD):</label>
+                <input
+                  type="number"
+                  value={newItemPriceUsd}
+                  onChange={(e) => setNewItemPriceUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  if (newItemCode) {
+                    setInventoryList(prev => [
+                      {
+                        itemCode: newItemCode,
+                        barcode: `899100${Math.floor(100000 + Math.random() * 900000)}`,
+                        qrCode: `QR-PART-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+                        description: newItemDesc || 'Sparepart Komponen Baru',
+                        category: newItemCategory,
+                        warehouse: 'WH-MAIN-SITE',
+                        binRack: 'BIN-NEW-A01',
+                        stockOnHand: newItemQty,
+                        minStock: 5,
+                        maxStock: 50,
+                        unit: 'PCS',
+                        fifoValueUsd: newItemPriceUsd,
+                        batchNo: `BATCH-LOT-${new Date().toISOString().slice(0, 7).replace('-', '')}`,
+                        mfgDate: new Date().toISOString().slice(0, 10),
+                        expiryDate: '2029-12-31',
+                        expiryStatus: 'HEALTHY'
+                      },
+                      ...prev
+                    ]);
+                  }
+                  setShowAddItemModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Simpan Data Item
+              </button>
+              <button
+                onClick={() => setShowAddItemModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: INPUT GRN BARU */}
+      {showGrnModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <FileCheck2 className="w-4 h-4 text-emerald-400" /> Penerimaan Barang Masuk (GRN) Baru
+              </h3>
+              <button onClick={() => setShowGrnModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nomor Purchase Order (PO):</label>
+                <input
+                  type="text"
+                  placeholder="PO-2026-0418"
+                  value={grnPoNo}
+                  onChange={(e) => setGrnPoNo(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Vendor / Pemasok:</label>
+                <input
+                  type="text"
+                  placeholder="PT Trakindo Utama / PT United Tractors"
+                  value={grnSupplier}
+                  onChange={(e) => setGrnSupplier(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-slate-400 block mb-1">Jumlah SKU Item:</label>
+                  <input
+                    type="number"
+                    value={grnItemsCount}
+                    onChange={(e) => setGrnItemsCount(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Total Valuasi ($ USD):</label>
+                  <input
+                    type="number"
+                    value={grnValuationUsd}
+                    onChange={(e) => setGrnValuationUsd(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setReceivingOrders(prev => [
+                    {
+                      grnNo: `GRN-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+                      poNo: grnPoNo || 'PO-2026-0499',
+                      supplier: grnSupplier || 'PT Supplier Tambang Utama',
+                      receiveDate: new Date().toISOString().slice(0, 10),
+                      itemsCount: grnItemsCount,
+                      totalValuationUsd: grnValuationUsd,
+                      inspector: 'QC Inspector Site',
+                      status: 'RECEIVED_COMPLETED'
+                    },
+                    ...prev
+                  ]);
+                  setShowGrnModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Terbitkan GRN
+              </button>
+              <button
+                onClick={() => setShowGrnModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: INPUT GIS BARU */}
+      {showGisModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <FileText className="w-4 h-4 text-emerald-400" /> Pengeluaran Barang (GIS) Baru
+              </h3>
+              <button onClick={() => setShowGisModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nomor Work Order (SPK WO):</label>
+                <input
+                  type="text"
+                  placeholder="WO-2026-0418"
+                  value={gisWoNo}
+                  onChange={(e) => setGisWoNo(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Penerima Komponen / Unit / Tim:</label>
+                <input
+                  type="text"
+                  placeholder="Mekanik / Tim Pit Service"
+                  value={gisIssuedTo}
+                  onChange={(e) => setGisIssuedTo(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Deskripsi Barang Issued:</label>
+                <input
+                  type="text"
+                  placeholder="Filter Hydraulic & Oli Engine (2 Drum)"
+                  value={gisItemIssued}
+                  onChange={(e) => setGisItemIssued(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Cost Center (Pusat Biaya):</label>
+                <select
+                  value={gisCostCenter}
+                  onChange={(e) => setGisCostCenter(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="CC-MAINT-FLEET">CC-MAINT-FLEET (Maintenance Fleet Equipment)</option>
+                  <option value="CC-PIT-BLASTING">CC-PIT-BLASTING (Penambangan & Peledakan Pit)</option>
+                  <option value="CC-JETTY-PORT">CC-JETTY-PORT (Logistik Pelabuhan Jetty)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setIssuingSlips(prev => [
+                    {
+                      gisNo: `GIS-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+                      woNo: gisWoNo || 'WO-2026-0499',
+                      issuedTo: gisIssuedTo || 'Tim Maintenance Workshop',
+                      issueDate: new Date().toISOString().slice(0, 16).replace('T', ' '),
+                      itemIssued: gisItemIssued || 'Komponen Maintenance Unit',
+                      costCenter: gisCostCenter,
+                      status: 'ISSUED'
+                    },
+                    ...prev
+                  ]);
+                  setShowGisModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Process GIS Issue
+              </button>
+              <button
+                onClick={() => setShowGisModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: INPUT TRANSFER STOK BARU */}
+      {showTransferModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <ArrowLeftRight className="w-4 h-4 text-emerald-400" /> Transfer Stok Antar-Gudang Site
+              </h3>
+              <button onClick={() => setShowTransferModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-slate-400 block mb-1">Gudang Asal (From):</label>
+                  <input
+                    type="text"
+                    value={trfFromWh}
+                    onChange={(e) => setTrfFromWh(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-400 block mb-1">Gudang Tujuan (To):</label>
+                  <input
+                    type="text"
+                    value={trfToWh}
+                    onChange={(e) => setTrfToWh(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Kode SKU Item:</label>
+                <input
+                  type="text"
+                  value={trfItemCode}
+                  onChange={(e) => setTrfItemCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Jumlah Transfer (Qty):</label>
+                <input
+                  type="number"
+                  value={trfQty}
+                  onChange={(e) => setTrfQty(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-300 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setStockTransfers(prev => [
+                    {
+                      transferNo: `TRF-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+                      fromWh: trfFromWh,
+                      toWh: trfToWh,
+                      itemCode: trfItemCode,
+                      qty: trfQty,
+                      reqBy: 'Supervisor Gudang Site',
+                      status: 'IN_TRANSIT'
+                    },
+                    ...prev
+                  ]);
+                  setShowTransferModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Proses Transfer Stok
+              </button>
+              <button
+                onClick={() => setShowTransferModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: INPUT AUDIT STOCK OPNAME */}
+      {showOpnameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <ClipboardCheck className="w-4 h-4 text-emerald-400" /> Audit Stock Opname Fisik
+              </h3>
+              <button onClick={() => setShowOpnameModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Kode Gudang:</label>
+                <input
+                  type="text"
+                  value={opnameWhCode}
+                  onChange={(e) => setOpnameWhCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Kode SKU Item:</label>
+                <input
+                  type="text"
+                  value={opnameItemCode}
+                  onChange={(e) => setOpnameItemCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-slate-400 block mb-1">Stok Sistem:</label>
+                  <input
+                    type="number"
+                    value={opnameSystemQty}
+                    onChange={(e) => setOpnameSystemQty(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-400 block mb-1">Stok Fisik Hasil Hitung:</label>
+                  <input
+                    type="number"
+                    value={opnamePhysicalQty}
+                    onChange={(e) => setOpnamePhysicalQty(Number(e.target.value))}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  const diff = opnamePhysicalQty - opnameSystemQty;
+                  setStockOpnameAudit(prev => [
+                    {
+                      auditId: `SO-2026-Q3`,
+                      whCode: opnameWhCode,
+                      itemCode: opnameItemCode,
+                      systemQty: opnameSystemQty,
+                      physicalQty: opnamePhysicalQty,
+                      varianceQty: diff,
+                      varianceValUsd: diff * 200,
+                      auditDate: new Date().toISOString().slice(0, 10),
+                      status: diff === 0 ? 'MATCHED' : 'DISCREPANCY_APPROVED'
+                    },
+                    ...prev
+                  ]);
+                  setShowOpnameModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Simpan Hasil Stock Opname
+              </button>
+              <button
+                onClick={() => setShowOpnameModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

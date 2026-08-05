@@ -27,7 +27,8 @@ import {
   Leaf,
   Briefcase,
   BarChart3,
-  Bell
+  Bell,
+  Scale
 } from 'lucide-react';
 import { Language } from '../types';
 
@@ -38,6 +39,7 @@ export type ActiveModule =
   | 'multi_company'
   | 'exploration' 
   | 'survey'
+  | 'weighbridge'
   | 'gps_telemetry'
   | 'iot_telemetry'
   | 'warehouse'
@@ -81,9 +83,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     {
       id: 'dashboard' as ActiveModule,
       labelId: 'Dasbor Analitik Real-Time',
-      labelEn: 'Executive Dashboard',
+      labelEn: 'Executive Analytics Dashboard',
       icon: LayoutDashboard,
-      badge: 'Live',
+      badge: '15 Sub-Modul',
       category: 'CORE'
     },
     {
@@ -91,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       labelId: 'MineGPT - Asisten Smart AI',
       labelEn: 'MineGPT Smart AI Assistant',
       icon: Sparkles,
-      badge: '29 Engine',
+      badge: '29 Engine AI',
       category: 'CORE'
     },
     {
@@ -99,15 +101,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       labelId: 'Struktur Multi-Company & Site',
       labelEn: 'Multi-Company & Hierarchy',
       icon: Building2,
-      badge: 'Holding',
+      badge: '13 Sub-Modul',
       category: 'CORE'
     },
+
+    // OPERATIONS - MINE & PIT
     {
       id: 'operation' as ActiveModule,
       labelId: 'Pusat Operasional Pit & Hauling',
       labelEn: 'Integrated Mine Operations',
       icon: Compass,
-      badge: 'IMOC',
+      badge: '8 Sub-Modul',
       category: 'OPERATIONS'
     },
     {
@@ -115,6 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       labelId: 'Pit & Model Blok Kadar',
       labelEn: 'Pit & Ore Block Model',
       icon: Pickaxe,
+      badge: '9 Sub-Modul',
       category: 'OPERATIONS'
     },
     {
@@ -122,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       labelId: 'Survei Topografi & Drone',
       labelEn: 'Survey Topography & Drone',
       icon: Ruler,
-      badge: 'Drone LiDAR',
+      badge: '8 Sub-Modul',
       category: 'OPERATIONS'
     },
     {
@@ -142,38 +147,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       category: 'OPERATIONS'
     },
     {
-      id: 'warehouse' as ActiveModule,
-      labelId: 'Gudang & Inventaris FIFO',
-      labelEn: 'Warehouse & Inventory FIFO',
-      icon: Warehouse,
-      badge: 'Barcode/QR',
-      category: 'OPERATIONS'
-    },
-    {
-      id: 'procurement' as ActiveModule,
-      labelId: 'Pengadaan, Tender & Vendor',
-      labelEn: 'Procurement, Tender & Vendor',
-      icon: ShoppingBag,
-      badge: 'PR / RFQ / PO',
-      category: 'OPERATIONS'
-    },
-    {
-      id: 'finance' as ActiveModule,
-      labelId: 'Keuangan, Akuntansi & Pajak',
-      labelEn: 'Finance, Accounting & Tax',
-      icon: DollarSign,
-      badge: 'IFRS / PSAK',
-      category: 'OPERATIONS'
-    },
-    {
-      id: 'hr' as ActiveModule,
-      labelId: 'SDM, Payroll, MCU & K3',
-      labelEn: 'HR, Payroll, MCU & Safety',
-      icon: Users,
-      badge: '1.4k SDM',
-      category: 'OPERATIONS'
-    },
-    {
       id: 'fleet' as ActiveModule,
       labelId: 'Fleet Alat Berat & BBM',
       labelEn: 'Heavy Fleet & Fuel',
@@ -190,11 +163,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
       category: 'OPERATIONS'
     },
     {
+      id: 'weighbridge' as ActiveModule,
+      labelId: 'Pos Timbangan (Weighbridge)',
+      labelEn: 'Digital Weighbridge Gate',
+      icon: Scale,
+      badge: 'IoT Realtime',
+      category: 'OPERATIONS'
+    },
+
+    // SUPPLY CHAIN, WAREHOUSE & FINANCE
+    {
+      id: 'warehouse' as ActiveModule,
+      labelId: 'Gudang & Inventaris FIFO',
+      labelEn: 'Warehouse & Inventory FIFO',
+      icon: Warehouse,
+      badge: 'Barcode/QR',
+      category: 'SUPPLY_FINANCE'
+    },
+    {
+      id: 'procurement' as ActiveModule,
+      labelId: 'Pengadaan, Tender & Vendor',
+      labelEn: 'Procurement, Tender & Vendor',
+      icon: ShoppingBag,
+      badge: 'PR / RFQ / PO',
+      category: 'SUPPLY_FINANCE'
+    },
+    {
+      id: 'finance' as ActiveModule,
+      labelId: 'Keuangan, Akuntansi & Pajak',
+      labelEn: 'Finance, Accounting & Tax',
+      icon: DollarSign,
+      badge: 'IFRS / PSAK',
+      category: 'SUPPLY_FINANCE'
+    },
+    {
+      id: 'hr' as ActiveModule,
+      labelId: 'SDM, Payroll, MCU & K3',
+      labelEn: 'HR, Payroll, MCU & Safety',
+      icon: Users,
+      badge: '1.4k SDM',
+      category: 'SUPPLY_FINANCE'
+    },
+
+    // COMMERCIAL & LOGISTICS
+    {
       id: 'jetty' as ActiveModule,
       labelId: 'Jetty Barging & COA',
       labelEn: 'Jetty & Surveyor COA',
       icon: Ship,
-      category: 'LOGISTICS'
+      category: 'COMMERCIAL'
     },
     {
       id: 'smelter' as ActiveModule,
@@ -202,6 +219,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
       labelEn: 'ESDM HPM & Smelter Sales',
       icon: Coins,
       category: 'COMMERCIAL'
+    },
+    {
+      id: 'crm' as ActiveModule,
+      labelId: 'CRM, Pelanggan & Kontrak',
+      labelEn: 'CRM, Customer & Contract',
+      icon: Users,
+      badge: 'Commercial',
+      category: 'COMMERCIAL'
+    },
+
+    // COMPLIANCE, SAFETY & REGULATORY
+    {
+      id: 'rkab' as ActiveModule,
+      labelId: 'Generator Laporan RKAB AI',
+      labelEn: 'AI ESDM RKAB Compiler',
+      icon: FileText,
+      badge: 'ESDM Format',
+      category: 'COMPLIANCE'
     },
     {
       id: 'hse' as ActiveModule,
@@ -243,44 +278,40 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: 'CAPEX PMO',
       category: 'COMPLIANCE'
     },
-    {
-      id: 'crm' as ActiveModule,
-      labelId: 'CRM, Pelanggan, Kontrak & Invoice',
-      labelEn: 'CRM, Customer, Contract & Invoice',
-      icon: Users,
-      badge: 'Commercial',
-      category: 'BUSINESS'
-    },
+
+    // ANALYTICS & MOBILE
     {
       id: 'report' as ActiveModule,
-      labelId: 'Laporan, Dashboard, Ekspor & Email',
-      labelEn: 'Report, Dashboard, Export & Email',
+      labelId: 'Laporan, Dashboard & Ekspor',
+      labelEn: 'Report, Dashboard & Export',
       icon: BarChart3,
       badge: 'Analytics',
-      category: 'ANALYTICS'
+      category: 'ANALYTICS_MOBILE'
     },
     {
       id: 'notification' as ActiveModule,
-      labelId: 'Notifikasi, WA, SMS & Alert Realtime',
-      labelEn: 'Notification, WA, SMS & Realtime Alert',
+      labelId: 'Notifikasi & Alert Realtime',
+      labelEn: 'Notification & Realtime Alert',
       icon: Bell,
       badge: 'Omni-Channel',
-      category: 'ANALYTICS'
-    },
-    {
-      id: 'rkab' as ActiveModule,
-      labelId: 'Generator Laporan RKAB AI',
-      labelEn: 'AI ESDM RKAB Compiler',
-      icon: FileText,
-      badge: 'ESDM Format',
-      category: 'COMPLIANCE'
+      category: 'ANALYTICS_MOBILE'
     },
     {
       id: 'offline' as ActiveModule,
-      labelId: 'Mode Offline Operator',
-      labelEn: 'Field Operator Offline',
+      labelId: 'Mode Offline Operator & PWA',
+      labelEn: 'Field Operator Offline PWA',
       icon: Smartphone,
-      category: 'MOBILE_FIELD'
+      category: 'ANALYTICS_MOBILE'
+    },
+
+    // SYSTEM, SECURITY & INTEGRATION
+    {
+      id: 'auth_security' as ActiveModule,
+      labelId: 'Keamanan Siber & Modul RBAC',
+      labelEn: 'Cyber Security & RBAC Module',
+      icon: Lock,
+      badge: 'AES-256 / WAF',
+      category: 'ENTERPRISE'
     },
     {
       id: 'api_hub' as ActiveModule,
@@ -296,15 +327,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: KeyRound,
       badge: 'Server',
       category: 'ENTERPRISE'
-    },
-    {
-      id: 'auth_security' as ActiveModule,
-      labelId: 'Autentikasi & RBAC Security',
-      labelEn: 'Auth, SSO & Permissions',
-      icon: Lock,
-      badge: '2FA/SSO',
-      category: 'ENTERPRISE'
     }
+  ];
+
+  const categories = [
+    { id: 'CORE', titleId: 'UTAMA & SMART AI', titleEn: 'CORE & AI SYSTEM' },
+    { id: 'OPERATIONS', titleId: 'OPERASIONAL PIT & ALAT BERAT', titleEn: 'PIT & FLEET OPERATIONS' },
+    { id: 'SUPPLY_FINANCE', titleId: 'LOGISTIK, GUDANG & KEUANGAN', titleEn: 'SUPPLY CHAIN & FINANCE' },
+    { id: 'COMMERCIAL', titleId: 'KOMERSIAL, JETTY & SMELTER', titleEn: 'COMMERCIAL & JETTY SALES' },
+    { id: 'COMPLIANCE', titleId: 'KEPATUHAN ESDM, K3LH & REKLAMASI', titleEn: 'ESDM COMPLIANCE & ESG' },
+    { id: 'ANALYTICS_MOBILE', titleId: 'ANALITIK & MOBILE LAPANGAN', titleEn: 'ANALYTICS & FIELD PWA' },
+    { id: 'ENTERPRISE', titleId: 'KEAMANAN SIBER & SISTEM', titleEn: 'CYBER SECURITY & SYSTEM' }
   ];
 
   const handleItemClick = (id: ActiveModule) => {
@@ -335,9 +368,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center justify-between p-4 border-b border-slate-800 lg:hidden">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
-              SM
+              NS
             </div>
-            <span className="font-bold text-slate-100 text-sm">SmartMine AI Navigation</span>
+            <span className="font-bold text-slate-100 text-sm">NickelSmart AI Navigation</span>
           </div>
           <button 
             onClick={onCloseMobile}
@@ -347,52 +380,72 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1.5 custom-scrollbar">
+        {/* Navigation List grouped by Category */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4 custom-scrollbar">
           
-          <div className="px-3 pb-2 text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-            {language === 'id' ? 'MODUL ERP TAMBANG NIKEL' : 'NICKEL ERP MODULES'}
+          <div className="px-3 pb-1 border-b border-slate-800 flex items-center justify-between text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+            <span>{language === 'id' ? 'KATEGORI MODUL ERP TAMBANG' : 'NICKEL ERP MODULE CATEGORIES'}</span>
+            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[9px]">
+              {menuItems.length} MODULES
+            </span>
           </div>
 
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeModule === item.id;
-            const label = language === 'id' ? item.labelId : item.labelEn;
+          {categories.map((cat) => {
+            const categoryItems = menuItems.filter(item => item.category === cat.id);
+            if (categoryItems.length === 0) return null;
+            const catTitle = language === 'id' ? cat.titleId : cat.titleEn;
 
             return (
-              <button
-                key={item.id}
-                id={`btn-nav-module-${item.id}`}
-                onClick={() => handleItemClick(item.id)}
-                className={`
-                  w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold
-                  transition-all group relative
-                  ${isActive 
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-950/50' 
-                    : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80'
-                  }
-                `}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-emerald-400'}`} />
-                  <span className="truncate text-left">{label}</span>
+              <div key={cat.id} className="space-y-1">
+                <div className="px-3 pt-2 pb-1 text-[10px] font-extrabold tracking-wider text-emerald-400/90 uppercase flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+                  <span>{catTitle}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {item.badge && (
-                    <span className={`
-                      text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider
-                      ${isActive 
-                        ? 'bg-white/20 text-white' 
-                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      }
-                    `}>
-                      {item.badge}
-                    </span>
-                  )}
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'text-white translate-x-0.5' : 'text-slate-600 group-hover:text-slate-400'}`} />
+                <div className="space-y-1 pl-1">
+                  {categoryItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeModule === item.id;
+                    const label = language === 'id' ? item.labelId : item.labelEn;
+
+                    return (
+                      <button
+                        key={item.id}
+                        id={`btn-nav-module-${item.id}`}
+                        onClick={() => handleItemClick(item.id)}
+                        className={`
+                          w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold
+                          transition-all group relative
+                          ${isActive 
+                            ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-950/50 ring-1 ring-emerald-400/30' 
+                            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-emerald-400'}`} />
+                          <span className="truncate text-left">{label}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {item.badge && (
+                            <span className={`
+                              text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider
+                              ${isActive 
+                                ? 'bg-white/20 text-white' 
+                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              }
+                            `}>
+                              {item.badge}
+                            </span>
+                          )}
+                          <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'text-white translate-x-0.5' : 'text-slate-600 group-hover:text-slate-400'}`} />
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -401,7 +454,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 m-3 rounded-xl bg-slate-950 border border-slate-800 text-xs">
           <div className="flex items-center gap-2 text-emerald-400 font-bold mb-1">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>SmartMine AI Engine</span>
+            <span>NickelSmart AI Engine</span>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
             {language === 'id' 

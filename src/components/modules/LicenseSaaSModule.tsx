@@ -121,7 +121,7 @@ export const LicenseSaaSModule: React.FC<LicenseSaaSModuleProps> = ({
       target: 'Mining Holding & Smelter Conglomerate',
       features: [
         'Semua Fitur Pro Tier',
-        'Dedicated SmartMine AI Engine Model',
+        'Dedicated NickelSmart AI Engine Model',
         'API Hub Sync (SAP, Oracle, ESDM MODI)',
         'Multi-Site Pit Custom Deployment',
         'SLA 99.9% & Unlimited Device Activation'
@@ -378,7 +378,7 @@ export const LicenseSaaSModule: React.FC<LicenseSaaSModuleProps> = ({
               <Wifi className="w-5 h-5 text-emerald-400" />
               <div>
                 <h3 className="font-bold text-slate-100 text-base">Aktivasi Online via REST Server</h3>
-                <p className="text-slate-400 text-[11px]">Memverifikasi lisensi langsung ke server SmartMine AI Cloud</p>
+                <p className="text-slate-400 text-[11px]">Memverifikasi lisensi langsung ke server NickelSmart AI Cloud</p>
               </div>
             </div>
 
@@ -480,7 +480,7 @@ export const LicenseSaaSModule: React.FC<LicenseSaaSModuleProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
             <div>
               <h3 className="font-bold text-slate-100 text-base">Perangkat Terdaftar & Batas Aktivasi (Device Limit)</h3>
-              <p className="text-xs text-slate-400">Membatasi jumlah komputer/tablet yang dapat menjalankan SmartMine AI di site</p>
+              <p className="text-xs text-slate-400">Membatasi jumlah komputer/tablet yang dapat menjalankan NickelSmart AI di site</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -625,7 +625,7 @@ export const LicenseSaaSModule: React.FC<LicenseSaaSModuleProps> = ({
               <code className="block bg-slate-900 p-3 rounded font-mono text-[11px] text-purple-300 break-all border border-slate-800">
                 {licenseInfo.encryptedToken || "AES256-R3M4VE1OOTIxO3NuYW1lPWxpc2Vuc2U7Y3A9UFRfTklDS0VMO3N0YXR1cz1B3VElWRS0yMDI3"}
               </code>
-              <p className="text-slate-500 text-[11px]">Token ini diverifikasi oleh runtime SmartMine AI pada setiap startup aplikasi untuk mencegah manipulasi lisensi.</p>
+              <p className="text-slate-500 text-[11px]">Token ini diverifikasi oleh runtime NickelSmart AI pada setiap startup aplikasi untuk mencegah manipulasi lisensi.</p>
             </div>
           </div>
         </div>

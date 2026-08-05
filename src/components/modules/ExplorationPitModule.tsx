@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { 
   Pickaxe, 
   ShieldAlert, 
-  CloudRain, 
-  Sun, 
   Activity, 
   Layers, 
   Plus, 
@@ -11,9 +9,7 @@ import {
   Filter, 
   Compass, 
   FileText, 
-  MapPin, 
   Database, 
-  BarChart3, 
   CheckCircle2, 
   AlertTriangle, 
   Sparkles, 
@@ -25,7 +21,9 @@ import {
   Globe, 
   Download, 
   ChevronRight, 
-  RefreshCw 
+  RefreshCw, 
+  Calculator, 
+  X 
 } from 'lucide-react';
 import { PitOperation, MineSite, Language } from '../../types';
 
@@ -56,7 +54,16 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
 
   const [selectedSiteId, setSelectedSiteId] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [drillSearchTerm, setDrillSearchTerm] = useState('');
+  const [drillStatusFilter, setDrillStatusFilter] = useState<string>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedBlockDetail, setSelectedBlockDetail] = useState<any | null>(null);
+
+  // JORC Calculator State
+  const [calcSaproliteTon, setCalcSaproliteTon] = useState<number>(18500000);
+  const [calcSapGradeNi, setCalcSapGradeNi] = useState<number>(1.84);
+  const [calcLimoniteTon, setCalcLimoniteTon] = useState<number>(12200000);
+  const [calcLimGradeNi, setCalcLimGradeNi] = useState<number>(1.25);
 
   const [newPitName, setNewPitName] = useState('');
   const [newElevation, setNewElevation] = useState(250);
@@ -80,6 +87,12 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
     { id: 'DH-BH-2026-004', easting: 384670, northing: 9720550, elevation: 195, totalDepthM: 30.0, azimuth: 0, dip: -90, status: 'PLANNED', mainLitho: 'Unexplored' }
   ];
 
+  const filteredDrillHoles = drillHolesDatabase.filter(d => {
+    const matchSearch = d.id.toLowerCase().includes(drillSearchTerm.toLowerCase()) || d.mainLitho.toLowerCase().includes(drillSearchTerm.toLowerCase());
+    const matchStatus = drillStatusFilter === 'ALL' || d.status === drillStatusFilter;
+    return matchSearch && matchStatus;
+  });
+
   const coreLoggingIntervals = [
     { holeId: 'DH-BH-2026-001', depthFromM: 0.0, depthToM: 4.5, lithology: 'Overburden (Topsoil & Clay)', rqdPct: 15, niPct: 0.45, fePct: 38.5, smRatio: 0.8 },
     { holeId: 'DH-BH-2026-001', depthFromM: 4.5, depthToM: 14.0, lithology: 'Limonite (High Fe, Low Ni)', rqdPct: 45, niPct: 1.25, fePct: 46.2, smRatio: 1.2 },
@@ -94,10 +107,10 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
   ];
 
   const blockModelMatrix = [
-    { blockId: 'BLK-120-01', elevationBench: 'Bench +120m', niGrade: 1.88, densityTonM3: 1.6, category: 'SAPROLITE_HIGH', volumeM3: 1250 },
-    { blockId: 'BLK-120-02', elevationBench: 'Bench +120m', niGrade: 1.82, densityTonM3: 1.6, category: 'SAPROLITE_MID', volumeM3: 1250 },
-    { blockId: 'BLK-115-01', elevationBench: 'Bench +115m', niGrade: 1.79, densityTonM3: 1.6, category: 'SAPROLITE_MID', volumeM3: 1250 },
-    { blockId: 'BLK-115-02', elevationBench: 'Bench +115m', niGrade: 1.28, densityTonM3: 1.4, category: 'LIMONITE_HPAL', volumeM3: 1250 }
+    { blockId: 'BLK-120-01', elevationBench: 'Bench +120m', niGrade: 1.88, feGrade: 16.5, smRatio: 2.2, densityTonM3: 1.6, category: 'SAPROLITE_HIGH', volumeM3: 1250, tonnageMT: 2000 },
+    { blockId: 'BLK-120-02', elevationBench: 'Bench +120m', niGrade: 1.82, feGrade: 17.8, smRatio: 2.1, densityTonM3: 1.6, category: 'SAPROLITE_MID', volumeM3: 1250, tonnageMT: 2000 },
+    { blockId: 'BLK-115-01', elevationBench: 'Bench +115m', niGrade: 1.79, feGrade: 18.4, smRatio: 1.9, densityTonM3: 1.6, category: 'SAPROLITE_MID', volumeM3: 1250, tonnageMT: 2000 },
+    { blockId: 'BLK-115-02', elevationBench: 'Bench +115m', niGrade: 1.28, feGrade: 44.5, smRatio: 1.1, densityTonM3: 1.4, category: 'LIMONITE_HPAL', volumeM3: 1250, tonnageMT: 1750 }
   ];
 
   const geotechSlopeStability = [
@@ -135,6 +148,11 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
     setNewPitName('');
   };
 
+  const calcContainedNiMetal = (
+    (calcSaproliteTon * (calcSapGradeNi / 100)) + 
+    (calcLimoniteTon * (calcLimGradeNi / 100))
+  ).toLocaleString('id-ID', { maximumFractionDigits: 0 });
+
   return (
     <div className="space-y-6">
       
@@ -166,18 +184,18 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       </div>
 
-      {/* Geology Sub-Tabs Bar covering all 14 requested domain items */}
+      {/* Geology Sub-Tabs Bar */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
         {[
-          { id: 'resource_reserve', label: 'Resource & Reserve (JORC)', icon: Database },
-          { id: 'drill_holes', label: 'Drill Hole Database', icon: Grid },
-          { id: 'core_logging', label: 'Core Logging & RQD', icon: Ruler },
-          { id: 'sampling_quality', label: 'Sampling & Ore Quality', icon: TestTube },
-          { id: 'grade_control', label: 'Grade Control & Pit Front', icon: Pickaxe },
-          { id: 'block_model', label: 'Block Model & Heatmap', icon: Layers },
-          { id: 'lithology_profile', label: 'Lithology Stratigraphy', icon: Trees },
-          { id: 'geotech_mapping', label: 'Geotech Slope Stability', icon: ShieldAlert },
-          { id: 'gis_integration', label: 'GIS Spatial Mapping', icon: Globe }
+          { id: 'resource_reserve', label: 'Resource & Reserve (JORC)', icon: Database, badge: '56.8M WMT' },
+          { id: 'drill_holes', label: 'Drill Hole Database', icon: Grid, badge: '4,820m' },
+          { id: 'core_logging', label: 'Core Logging & RQD', icon: Ruler, badge: '4 Interval' },
+          { id: 'sampling_quality', label: 'Sampling & Ore Quality', icon: TestTube, badge: 'COA Cert' },
+          { id: 'grade_control', label: 'Grade Control & Pit Front', icon: Pickaxe, badge: 'Active Pit' },
+          { id: 'block_model', label: 'Block Model & Heatmap', icon: Layers, badge: '3D Matrix' },
+          { id: 'lithology_profile', label: 'Lithology Stratigraphy', icon: Trees, badge: '4 Horizon' },
+          { id: 'geotech_mapping', label: 'Geotech Slope Stability', icon: ShieldAlert, badge: 'FoS 1.45' },
+          { id: 'gis_integration', label: 'GIS Spatial Mapping', icon: Globe, badge: 'WGS84 51S' }
         ].map((tab) => {
           const IconComp = tab.icon;
           const isActive = activeGeoTab === tab.id;
@@ -193,12 +211,17 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
             >
               <IconComp className="w-4 h-4" />
               <span>{tab.label}</span>
+              <span className={`px-1.5 py-0.2 rounded text-[9px] font-extrabold ${
+                isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+              }`}>
+                {tab.badge}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* TAB 1: RESOURCE & RESERVE (JORC / KCMI) */}
+      {/* SUB-MODULE 1: RESOURCE & RESERVE (JORC / KCMI) */}
       {activeGeoTab === 'resource_reserve' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
@@ -224,6 +247,60 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
             </div>
           </div>
 
+          {/* JORC Interactive Calculator */}
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+              <Calculator className="w-5 h-5 text-emerald-400" />
+              <h3 className="font-bold text-slate-100 text-sm">Simulator Kalkulasi Logam Nikel Terkandung (Contained Nickel Metal)</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Tonase Saprolit (WMT):</label>
+                <input
+                  type="number"
+                  value={calcSaproliteTon}
+                  onChange={(e) => setCalcSaproliteTon(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono font-bold"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Kadar Ni Saprolit (%):</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={calcSapGradeNi}
+                  onChange={(e) => setCalcSapGradeNi(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-mono font-bold"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Tonase Limonit (WMT):</label>
+                <input
+                  type="number"
+                  value={calcLimoniteTon}
+                  onChange={(e) => setCalcLimoniteTon(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono font-bold"
+                />
+              </div>
+              <div>
+                <label className="text-slate-400 block mb-1 font-semibold">Kadar Ni Limonit (%):</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={calcLimGradeNi}
+                  onChange={(e) => setCalcLimGradeNi(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-blue-400 font-mono font-bold"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+              <span className="text-slate-300 font-bold">Hasil Contained Nickel Metal:</span>
+              <span className="text-2xl font-bold text-amber-400 font-mono">{calcContainedNiMetal} MT Metal Ni</span>
+            </div>
+          </div>
+
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
             <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
               Klasifikasi Mineral Resource & Ore Reserve (JORC / KCMI Code)
@@ -245,8 +322,8 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
                   {resourceReserveJORCData.map((r, i) => (
                     <tr key={i} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-slate-200 font-sans">{r.category}</td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold">{r.saproliteWMT.toLocaleString('id-ID')} MT</td>
-                      <td className="py-3 px-3 text-blue-400">{r.limoniteWMT.toLocaleString('id-ID')} MT</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">{(r.saproliteWMT ?? 0).toLocaleString('id-ID')} MT</td>
+                      <td className="py-3 px-3 text-blue-400">{(r.limoniteWMT ?? 0).toLocaleString('id-ID')} MT</td>
                       <td className="py-3 px-3 text-amber-400 font-bold">{r.avgNiGrade}% Ni</td>
                       <td className="py-3 px-3 text-slate-300">{r.avgFeGrade}% Fe</td>
                       <td className="py-3 px-3">
@@ -263,13 +340,36 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 2: DRILL HOLE DATABASE */}
+      {/* SUB-MODULE 2: DRILL HOLE DATABASE */}
       {activeGeoTab === 'drill_holes' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
               <h3 className="font-bold text-slate-100 text-sm">Database Titik Bor Eksplorasi (Drill Hole Geodatabase)</h3>
-              <span className="text-emerald-400 font-mono">Total Meterage Drilled: 4,820 Meter</span>
+              
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={drillStatusFilter}
+                  onChange={(e) => setDrillStatusFilter(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-slate-200 text-xs focus:outline-none"
+                >
+                  <option value="ALL">Semua Status Bor</option>
+                  <option value="COMPLETED">COMPLETED</option>
+                  <option value="DRILLING_NOW">DRILLING_NOW</option>
+                  <option value="PLANNED">PLANNED</option>
+                </select>
+
+                <div className="relative flex-1 sm:w-48">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    type="text"
+                    placeholder="Cari Hole ID..."
+                    value={drillSearchTerm}
+                    onChange={(e) => setDrillSearchTerm(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-slate-100 text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -286,7 +386,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono">
-                  {drillHolesDatabase.map((d) => (
+                  {filteredDrillHoles.map((d) => (
                     <tr key={d.id} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-bold text-slate-200">{d.id}</td>
                       <td className="py-3 px-3 text-slate-400">{d.easting}</td>
@@ -310,7 +410,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 3: CORE LOGGING & RQD */}
+      {/* SUB-MODULE 3: CORE LOGGING & RQD */}
       {activeGeoTab === 'core_logging' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
@@ -350,7 +450,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 4: SAMPLING & ORE QUALITY */}
+      {/* SUB-MODULE 4: SAMPLING & ORE QUALITY */}
       {activeGeoTab === 'sampling_quality' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
@@ -396,7 +496,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 5: GRADE CONTROL & PIT FRONT */}
+      {/* SUB-MODULE 5: GRADE CONTROL & PIT FRONT */}
       {activeGeoTab === 'grade_control' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -432,28 +532,33 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 6: BLOCK MODEL & HEATMAP */}
+      {/* SUB-MODULE 6: BLOCK MODEL & HEATMAP */}
       {activeGeoTab === 'block_model' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
             <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              3D Geological Ore Block Model Matrix
+              3D Geological Ore Block Model Matrix (Klik Blok Untuk Detail)
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {blockModelMatrix.map((b) => (
-                <div key={b.blockId} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                <div 
+                  key={b.blockId} 
+                  onClick={() => setSelectedBlockDetail(b)}
+                  className="p-4 bg-slate-950 hover:bg-slate-800/80 rounded-xl border border-slate-800 space-y-2 cursor-pointer transition-all hover:border-emerald-500/50"
+                >
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-slate-200">{b.blockId}</span>
                     <span className="text-slate-500 text-[10px]">{b.elevationBench}</span>
                   </div>
-                  <div className="text-xl font-bold text-emerald-400 font-mono">
+                  <div className="text-2xl font-bold text-emerald-400 font-mono">
                     {b.niGrade}% Ni
                   </div>
                   <div className="flex justify-between text-[11px] text-slate-400">
-                    <span>Density: {b.densityTonM3} t/m³</span>
-                    <span>Volume: {b.volumeM3} m³</span>
+                    <span>Fe: {b.feGrade}%</span>
+                    <span>SM: {b.smRatio}</span>
                   </div>
+                  <p className="text-[10px] text-emerald-400 font-semibold pt-1">Klik inspeksi blok &rarr;</p>
                 </div>
               ))}
             </div>
@@ -461,7 +566,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 7: LITHOLOGY STRATIGRAPHY */}
+      {/* SUB-MODULE 7: LITHOLOGY STRATIGRAPHY */}
       {activeGeoTab === 'lithology_profile' && (
         <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
           <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
@@ -492,7 +597,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 8: GEOTECH SLOPE STABILITY */}
+      {/* SUB-MODULE 8: GEOTECH SLOPE STABILITY */}
       {activeGeoTab === 'geotech_mapping' && (
         <div className="space-y-6">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
@@ -526,7 +631,7 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
         </div>
       )}
 
-      {/* TAB 9: GIS SPATIAL MAPPING */}
+      {/* SUB-MODULE 9: GIS SPATIAL MAPPING */}
       {activeGeoTab === 'gis_integration' && (
         <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
           <div className="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -543,6 +648,55 @@ export const ExplorationPitModule: React.FC<ExplorationPitModuleProps> = ({
               <p className="text-slate-400 text-xs max-w-md">
                 Terhubung otomatis dengan database spatial GIS ArcGIS / QGIS Server site pertambangan.
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block Inspector Modal */}
+      {selectedBlockDetail && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-base">Inspeksi Detail Block Model {selectedBlockDetail.blockId}</h3>
+              <button 
+                onClick={() => setSelectedBlockDetail(null)}
+                className="text-slate-400 hover:text-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between p-2 bg-slate-950 rounded">
+                <span className="text-slate-400">Elevasi Bench:</span>
+                <span className="font-bold text-slate-100 font-mono">{selectedBlockDetail.elevationBench}</span>
+              </div>
+              <div className="flex justify-between p-2 bg-slate-950 rounded">
+                <span className="text-slate-400">Kadar Nikel (Ni):</span>
+                <span className="font-bold text-emerald-400 font-mono">{selectedBlockDetail.niGrade}% Ni</span>
+              </div>
+              <div className="flex justify-between p-2 bg-slate-950 rounded">
+                <span className="text-slate-400">Kadar Besi (Fe):</span>
+                <span className="font-bold text-amber-400 font-mono">{selectedBlockDetail.feGrade}% Fe</span>
+              </div>
+              <div className="flex justify-between p-2 bg-slate-950 rounded">
+                <span className="text-slate-400">Rasio Silica-Magnesia (SM):</span>
+                <span className="font-bold text-slate-200 font-mono">{selectedBlockDetail.smRatio}</span>
+              </div>
+              <div className="flex justify-between p-2 bg-slate-950 rounded">
+                <span className="text-slate-400">Density & Volume:</span>
+                <span className="font-bold text-slate-200 font-mono">{selectedBlockDetail.densityTonM3} t/m³ | {selectedBlockDetail.volumeM3} m³</span>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setSelectedBlockDetail(null)}
+                className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-500"
+              >
+                Tutup Inspeksi
+              </button>
             </div>
           </div>
         </div>

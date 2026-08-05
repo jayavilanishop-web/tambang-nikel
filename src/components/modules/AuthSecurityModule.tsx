@@ -49,9 +49,9 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
 
   // Login Simulator State
   const [loginMethod, setLoginMethod] = useState<'EMAIL' | 'PHONE' | 'GOOGLE' | 'MICROSOFT'>('EMAIL');
-  const [emailInput, setEmailInput] = useState('p.soebagyo@smartmine.co.id');
+  const [emailInput, setEmailInput] = useState('p.soebagyo@nickelsmart.co.id');
   const [phoneInput, setPhoneInput] = useState('+62 812-8899-2026');
-  const [passwordInput, setPasswordInput] = useState('SmartMine#2026!');
+  const [passwordInput, setPasswordInput] = useState('NickelSmart#2026!');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [otpStep, setOtpStep] = useState(false);
@@ -611,7 +611,7 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800">
                 <tr>
-                  <th className="p-3">Modul Sistem SmartMine AI</th>
+                  <th className="p-3">Modul Sistem NickelSmart AI</th>
                   <th className="p-3 text-center">Read (Lihat)</th>
                   <th className="p-3 text-center">Write (Ubah/Input)</th>
                   <th className="p-3 text-center">Delete (Hapus)</th>

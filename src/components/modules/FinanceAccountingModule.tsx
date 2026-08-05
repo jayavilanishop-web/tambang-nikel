@@ -89,52 +89,74 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
   ];
 
   // General Ledger Journal Entries Dataset
-  const journalEntries = [
+  const [journalEntries, setJournalEntries] = useState([
     { entryNo: 'JV-2026-0801', date: '2026-08-01', accountCode: '1110-USD-BANK', accountName: 'Kas & Bank Mandiri USD', debitUsd: 1850000, creditUsd: 0, costCenter: 'CC-TREASURY', refDoc: 'INV-NICKEL-041' },
     { entryNo: 'JV-2026-0801', date: '2026-08-01', accountCode: '4100-ORE-SALES', accountName: 'Pendapatan Penjualan Bijih Nikel', debitUsd: 0, creditUsd: 1850000, costCenter: 'CC-SALES-EXPORT', refDoc: 'INV-NICKEL-041' },
     { entryNo: 'JV-2026-0802', date: '2026-08-02', accountCode: '5210-DIESEL-FUEL', accountName: 'Beban Bahan Bakar Solar B35', debitUsd: 342000, creditUsd: 0, costCenter: 'CC-PIT-ALPHA', refDoc: 'PO-2026-0811' },
     { entryNo: 'JV-2026-0802', date: '2026-08-02', accountCode: '2110-AP-VENDOR', accountName: 'Hutang Usaha PT Pertamina', debitUsd: 0, creditUsd: 342000, costCenter: 'CC-PIT-ALPHA', refDoc: 'PO-2026-0811' }
-  ];
+  ]);
 
   // Fixed Asset Register & Depreciation Schedule
-  const fixedAssetsList = [
+  const [fixedAssetsList, setFixedAssetsList] = useState([
     { assetId: 'AST-EX-2001', assetName: 'Excavator Komatsu PC2000-8', category: 'Heavy Equipment', purchaseDate: '2024-03-15', acquisitionCostUsd: 2850000, accumulatedDeprecUsd: 570000, bookValueUsd: 2280000, usefulLifeYears: 10, method: 'STRAIGHT_LINE' },
     { assetId: 'AST-DT-1001', assetName: 'Dump Truck Caterpillar 777E', category: 'Heavy Fleet Truck', purchaseDate: '2024-06-20', acquisitionCostUsd: 1450000, accumulatedDeprecUsd: 290000, bookValueUsd: 1160000, usefulLifeYears: 8, method: 'STRAIGHT_LINE' },
     { assetId: 'AST-CRUSHER-01', assetName: 'Primary Jaw Crusher Plant 500 TPH', category: 'Processing Plant Asset', purchaseDate: '2023-01-10', acquisitionCostUsd: 4200000, accumulatedDeprecUsd: 1260000, bookValueUsd: 2940000, usefulLifeYears: 10, method: 'STRAIGHT_LINE' }
-  ];
+  ]);
 
   // Budget & Cost Center Breakdown
-  const budgetCostCenters = [
+  const [budgetCostCenters, setBudgetCostCenters] = useState([
     { code: 'CC-PIT-ALPHA', name: 'Pit Alpha Mining Operations', budgetAllocatedUsd: 12500000, actualSpentUsd: 9840000, varianceUsd: 2660000, utilizationPct: 78.7 },
     { code: 'CC-WORKSHOP-MAINT', name: 'Heavy Equipment Central Workshop', budgetAllocatedUsd: 4800000, actualSpentUsd: 3950000, varianceUsd: 850000, utilizationPct: 82.3 },
     { code: 'CC-JETTY-PORT', name: 'Jetty Barging & Port Logistics', budgetAllocatedUsd: 3200000, actualSpentUsd: 2410000, varianceUsd: 790000, utilizationPct: 75.3 },
     { code: 'CC-HSE-ENVIRONMENT', name: 'HSE, ESG & Reclamation Works', budgetAllocatedUsd: 1800000, actualSpentUsd: 1220000, varianceUsd: 580000, utilizationPct: 67.8 }
-  ];
+  ]);
 
   // Accounts Receivable (AR) & Accounts Payable (AP) Invoices
-  const arInvoices = [
+  const [arInvoices, setArInvoices] = useState([
     { invNo: 'INV-2026-NKL-01', customerName: 'PT Tsingshan Steel Indonesia', invDate: '2026-07-20', dueDate: '2026-08-20', amountUsd: 1850000, type: 'RECEIVABLE_AR', status: 'UNPAID_PENDING' },
     { invNo: 'INV-2026-NKL-02', customerName: 'PT Indonesia Morowali Industrial Park (IMIP)', invDate: '2026-07-28', dueDate: '2026-08-28', amountUsd: 2410000, type: 'RECEIVABLE_AR', status: 'UNPAID_PENDING' }
-  ];
+  ]);
 
-  const apInvoices = [
+  const [apInvoices, setApInvoices] = useState([
     { invNo: 'AP-PERTA-2026-88', supplierName: 'PT Pertamina Patra Niaga (Fuel B35)', invDate: '2026-07-25', dueDate: '2026-08-10', amountUsd: 342000, type: 'PAYABLE_AP', status: 'DUE_SOON' },
     { invNo: 'AP-TRAK-2026-12', supplierName: 'PT Trakindo Utama (CAT Parts)', invDate: '2026-07-15', dueDate: '2026-08-15', amountUsd: 142000, type: 'PAYABLE_AP', status: 'SCHEDULED_PAYMENT' }
-  ];
+  ]);
 
   // Tax Management Summary (VAT, Royalty, PPh)
-  const taxRecords = [
+  const [taxRecords, setTaxRecords] = useState([
     { taxType: 'Royalti Mineral PNBP ESDM (10%)', taxableBasisUsd: 38000000, taxAmountUsd: 3800000, dueDate: '2026-08-15', status: 'PAID' },
     { taxType: 'PPN Keluaran 11% (VAT Output)', taxableBasisUsd: 38000000, taxAmountUsd: 4180000, dueDate: '2026-08-31', status: 'PENDING_FILING' },
     { taxType: 'PPh Pasal 22 Impor & Alat Berat (1.5%)', taxableBasisUsd: 4200000, taxAmountUsd: 63000, dueDate: '2026-08-20', status: 'PAID' }
-  ];
+  ]);
 
   // Bank Accounts & Multi-Currency Balances
-  const bankAccounts = [
+  const [bankAccounts, setBankAccounts] = useState([
     { bankName: 'Bank Mandiri (USD Corporate)', accountNo: '102-00-889123-1', balanceUsd: 8420000, balanceIdr: 136825000000, status: 'RECONCILED' },
     { bankName: 'Bank Central Asia (BCA IDR Operational)', accountNo: '084-332190-8', balanceUsd: 910769, balanceIdr: 14800000000, status: 'RECONCILED' },
     { bankName: 'Bank Himbara BRI (Royalty Escrow USD)', accountNo: '001-99-440112-2', balanceUsd: 3500000, balanceIdr: 56875000000, status: 'RECONCILED' }
-  ];
+  ]);
+
+  // Modals state
+  const [showJvModal, setShowJvModal] = useState(false);
+  const [jvAccountName, setJvAccountName] = useState('Beban Operasional Pit');
+  const [jvAccountCode, setJvAccountCode] = useState('5100-PIT-OPEX');
+  const [jvDebitUsd, setJvDebitUsd] = useState(150000);
+
+  const [showAssetModal, setShowAssetModal] = useState(false);
+  const [assetName, setAssetName] = useState('');
+  const [assetCostUsd, setAssetCostUsd] = useState(500000);
+
+  const [showArModal, setShowArModal] = useState(false);
+  const [arCustomer, setArCustomer] = useState('PT Virtu Dragon Nickel');
+  const [arAmountUsd, setArAmountUsd] = useState(950000);
+
+  const [showApModal, setShowApModal] = useState(false);
+  const [apSupplier, setApSupplier] = useState('PT Shell Indonesia');
+  const [apAmountUsd, setApAmountUsd] = useState(120000);
+
+  const [showTaxModal, setShowTaxModal] = useState(false);
+  const [taxType, setTaxType] = useState('Royalti ESDM');
+  const [taxAmountUsd, setTaxAmountUsd] = useState(250000);
 
   return (
     <div className="space-y-6">
@@ -246,7 +268,10 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
               <h3 className="font-bold text-slate-100 text-sm">Jurnal Umum & Buku Besar (General Ledger & Double-Entry Journal)</h3>
-              <button className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5">
+              <button 
+                onClick={() => setShowJvModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Buat Entry Jurnal Baru</span>
               </button>
@@ -273,8 +298,8 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
                         <strong className="text-slate-100 block">{j.accountName}</strong>
                         <span className="text-[10px] text-slate-400 font-mono">{j.accountCode}</span>
                       </td>
-                      <td className="py-3 px-3 text-emerald-400 font-bold">${j.debitUsd.toLocaleString('en-US')}</td>
-                      <td className="py-3 px-3 text-rose-400 font-bold">${j.creditUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-emerald-400 font-bold">${(j.debitUsd ?? 0).toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-rose-400 font-bold">${(j.creditUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="py-3 px-3 text-amber-300 font-sans">{j.costCenter}</td>
                     </tr>
                   ))}
@@ -289,9 +314,18 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
       {activeTab === 'asset_management' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Register Aset Tetap Tambang & Depresiasi Garis Lurus (Fixed Asset Register)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Register Aset Tetap Tambang & Depresiasi Garis Lurus (Fixed Asset Register)
+              </h3>
+              <button 
+                onClick={() => setShowAssetModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah Aset Tetap Baru</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -312,9 +346,9 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
                       <td className="py-3 px-3 font-bold text-emerald-400">{a.assetId}</td>
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{a.assetName}</td>
                       <td className="py-3 px-3 font-sans text-emerald-300">{a.category}</td>
-                      <td className="py-3 px-3 text-slate-200">${a.acquisitionCostUsd.toLocaleString('en-US')}</td>
-                      <td className="py-3 px-3 text-rose-400 font-bold">${a.accumulatedDeprecUsd.toLocaleString('en-US')}</td>
-                      <td className="py-3 px-3 text-amber-300 font-bold">${a.bookValueUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-slate-200">${(a.acquisitionCostUsd ?? 0).toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-rose-400 font-bold">${(a.accumulatedDeprecUsd ?? 0).toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">${(a.bookValueUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="py-3 px-3 text-slate-300">{a.usefulLifeYears} Tahun</td>
                     </tr>
                   ))}
@@ -347,9 +381,9 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
                   </div>
 
                   <div className="space-y-1 text-slate-300 font-mono text-[11px]">
-                    <p>Anggaran Dialokasikan: <strong className="text-slate-100">${c.budgetAllocatedUsd.toLocaleString('en-US')}</strong></p>
-                    <p>Realisasi Aktual: <strong className="text-amber-300">${c.actualSpentUsd.toLocaleString('en-US')}</strong></p>
-                    <p>Sisa Anggaran: <strong className="text-emerald-400 font-bold">${c.varianceUsd.toLocaleString('en-US')}</strong></p>
+                    <p>Anggaran Dialokasikan: <strong className="text-slate-100">${(c.budgetAllocatedUsd ?? 0).toLocaleString('en-US')}</strong></p>
+                    <p>Realisasi Aktual: <strong className="text-amber-300">${(c.actualSpentUsd ?? 0).toLocaleString('en-US')}</strong></p>
+                    <p>Sisa Anggaran: <strong className="text-emerald-400 font-bold">${(c.varianceUsd ?? 0).toLocaleString('en-US')}</strong></p>
                   </div>
 
                   <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
@@ -402,14 +436,22 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* AR Card */}
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <h3 className="font-bold text-emerald-400 text-sm border-b border-slate-800 pb-2">
-                Piutang Usaha Smelter (Accounts Receivable - AR)
-              </h3>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 className="font-bold text-emerald-400 text-sm">
+                  Piutang Usaha Smelter (Accounts Receivable - AR)
+                </h3>
+                <button
+                  onClick={() => setShowArModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Input AR
+                </button>
+              </div>
               {arInvoices.map((ar) => (
                 <div key={ar.invNo} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
                   <div className="flex justify-between">
                     <strong className="text-slate-100">{ar.customerName}</strong>
-                    <span className="text-emerald-400 font-mono font-bold">${ar.amountUsd.toLocaleString('en-US')}</span>
+                    <span className="text-emerald-400 font-mono font-bold">${(ar.amountUsd ?? 0).toLocaleString('en-US')}</span>
                   </div>
                   <span className="text-slate-500 text-[10px] block font-mono">Invoice: {ar.invNo} • Jatuh Tempo: {ar.dueDate}</span>
                 </div>
@@ -418,14 +460,22 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
 
             {/* AP Card */}
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-              <h3 className="font-bold text-rose-400 text-sm border-b border-slate-800 pb-2">
-                Hutang Usaha Vendor (Accounts Payable - AP)
-              </h3>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 className="font-bold text-rose-400 text-sm">
+                  Hutang Usaha Vendor (Accounts Payable - AP)
+                </h3>
+                <button
+                  onClick={() => setShowApModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Input AP
+                </button>
+              </div>
               {apInvoices.map((ap) => (
                 <div key={ap.invNo} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1">
                   <div className="flex justify-between">
                     <strong className="text-slate-100">{ap.supplierName}</strong>
-                    <span className="text-rose-400 font-mono font-bold">${ap.amountUsd.toLocaleString('en-US')}</span>
+                    <span className="text-rose-400 font-mono font-bold">${(ap.amountUsd ?? 0).toLocaleString('en-US')}</span>
                   </div>
                   <span className="text-slate-500 text-[10px] block font-mono">AP Ref: {ap.invNo} • Jatuh Tempo: {ap.dueDate}</span>
                 </div>
@@ -439,9 +489,18 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
       {activeTab === 'tax_management' && (
         <div className="space-y-6 text-xs">
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Kepatuhan Pajak & Royalti PNBP ESDM Mineral (SIMPONI / e-PNBP)
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm">
+                Kepatuhan Pajak & Royalti PNBP ESDM Mineral (SIMPONI / e-PNBP)
+              </h3>
+              <button
+                onClick={() => setShowTaxModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Input Setoran Royalti / Pajak</span>
+              </button>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse font-mono">
@@ -458,8 +517,8 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
                   {taxRecords.map((t, idx) => (
                     <tr key={idx} className="hover:bg-slate-800/40">
                       <td className="py-3 px-3 font-sans text-slate-100 font-bold">{t.taxType}</td>
-                      <td className="py-3 px-3 text-slate-300">${t.taxableBasisUsd.toLocaleString('en-US')}</td>
-                      <td className="py-3 px-3 text-amber-300 font-bold">${t.taxAmountUsd.toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-slate-300">${(t.taxableBasisUsd ?? 0).toLocaleString('en-US')}</td>
+                      <td className="py-3 px-3 text-amber-300 font-bold">${(t.taxAmountUsd ?? 0).toLocaleString('en-US')}</td>
                       <td className="py-3 px-3 text-slate-400">{t.dueDate}</td>
                       <td className="py-3 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-sans font-bold ${
@@ -491,11 +550,348 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
                   <span className="font-bold text-slate-100 block text-sm">{b.bankName}</span>
                   <span className="text-slate-500 text-[10px] font-mono block">No. Rek: {b.accountNo}</span>
                   <div className="pt-2 border-t border-slate-800 space-y-1 font-mono">
-                    <p className="text-emerald-400 font-bold text-sm">${b.balanceUsd.toLocaleString('en-US')} USD</p>
-                    <p className="text-slate-400 text-[10px]">Equiv. Rp {b.balanceIdr.toLocaleString('id-ID')}</p>
+                    <p className="text-emerald-400 font-bold text-sm">${(b.balanceUsd ?? 0).toLocaleString('en-US')} USD</p>
+                    <p className="text-slate-400 text-[10px]">Equiv. Rp {(b.balanceIdr ?? 0).toLocaleString('id-ID')}</p>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 1: INPUT JURNAL JV */}
+      {showJvModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-emerald-400" /> Buat Entry Jurnal Voucher (JV) Baru
+              </h3>
+              <button onClick={() => setShowJvModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Akun (Chart of Accounts):</label>
+                <input
+                  type="text"
+                  value={jvAccountName}
+                  onChange={(e) => setJvAccountName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Kode Akun CoA:</label>
+                <input
+                  type="text"
+                  value={jvAccountCode}
+                  onChange={(e) => setJvAccountCode(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Jumlah Nominal Debit ($ USD):</label>
+                <input
+                  type="number"
+                  value={jvDebitUsd}
+                  onChange={(e) => setJvDebitUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setJournalEntries(prev => [
+                    {
+                      entryNo: `JV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+                      date: new Date().toISOString().slice(0, 10),
+                      accountCode: jvAccountCode,
+                      accountName: jvAccountName,
+                      debitUsd: jvDebitUsd,
+                      creditUsd: 0,
+                      costCenter: 'CC-PIT-ALPHA',
+                      refDoc: 'MANUAL-ENTRY'
+                    },
+                    ...prev
+                  ]);
+                  setShowJvModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Posting Jurnal
+              </button>
+              <button
+                onClick={() => setShowJvModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: INPUT ASET TETAP */}
+      {showAssetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Building className="w-4 h-4 text-emerald-400" /> Tambah Fixed Asset Baru
+              </h3>
+              <button onClick={() => setShowAssetModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Perangkat Aset:</label>
+                <input
+                  type="text"
+                  placeholder="Wheel Loader Caterpillar 980M"
+                  value={assetName}
+                  onChange={(e) => setAssetName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Harga Perolehan ($ USD):</label>
+                <input
+                  type="number"
+                  value={assetCostUsd}
+                  onChange={(e) => setAssetCostUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-300 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setFixedAssetsList(prev => [
+                    {
+                      assetId: `AST-WL-${Math.floor(1000 + Math.random() * 9000)}`,
+                      assetName: assetName || 'Heavy Equipment Asset',
+                      category: 'Heavy Mining Fleet',
+                      purchaseDate: new Date().toISOString().slice(0, 10),
+                      acquisitionCostUsd: assetCostUsd,
+                      accumulatedDeprecUsd: 0,
+                      bookValueUsd: assetCostUsd,
+                      usefulLifeYears: 8,
+                      method: 'STRAIGHT_LINE'
+                    },
+                    ...prev
+                  ]);
+                  setShowAssetModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan Asset Register
+              </button>
+              <button
+                onClick={() => setShowAssetModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: INPUT AR INVOICE */}
+      {showArModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-emerald-400" /> Terbitkan Faktur Piutang (AR)
+              </h3>
+              <button onClick={() => setShowArModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Customer Smelter:</label>
+                <input
+                  type="text"
+                  value={arCustomer}
+                  onChange={(e) => setArCustomer(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Nilai Tagihan Piutang ($ USD):</label>
+                <input
+                  type="number"
+                  value={arAmountUsd}
+                  onChange={(e) => setArAmountUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setArInvoices(prev => [
+                    {
+                      invNo: `INV-2026-NKL-${Math.floor(10 + Math.random() * 90)}`,
+                      customerName: arCustomer,
+                      invDate: new Date().toISOString().slice(0, 10),
+                      dueDate: '2026-09-15',
+                      amountUsd: arAmountUsd,
+                      type: 'RECEIVABLE_AR',
+                      status: 'UNPAID_PENDING'
+                    },
+                    ...prev
+                  ]);
+                  setShowArModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Terbitkan Invoice
+              </button>
+              <button
+                onClick={() => setShowArModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: INPUT AP INVOICE */}
+      {showApModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-rose-400" /> Catat Hutang Usaha Vendor (AP)
+              </h3>
+              <button onClick={() => setShowApModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Vendor Supplier:</label>
+                <input
+                  type="text"
+                  value={apSupplier}
+                  onChange={(e) => setApSupplier(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-rose-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Nilai Tagihan Vendor ($ USD):</label>
+                <input
+                  type="number"
+                  value={apAmountUsd}
+                  onChange={(e) => setApAmountUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-rose-400 font-bold font-mono focus:outline-none focus:border-rose-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setApInvoices(prev => [
+                    {
+                      invNo: `AP-VND-2026-${Math.floor(10 + Math.random() * 90)}`,
+                      supplierName: apSupplier,
+                      invDate: new Date().toISOString().slice(0, 10),
+                      dueDate: '2026-09-01',
+                      amountUsd: apAmountUsd,
+                      type: 'PAYABLE_AP',
+                      status: 'SCHEDULED_PAYMENT'
+                    },
+                    ...prev
+                  ]);
+                  setShowApModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Catat Tagihan AP
+              </button>
+              <button
+                onClick={() => setShowApModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: INPUT TAX & ROYALTY */}
+      {showTaxModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <Calculator className="w-4 h-4 text-emerald-400" /> Setoran Pajak & Royalti ESDM
+              </h3>
+              <button onClick={() => setShowTaxModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Jenis Setoran Pajak / PNBP:</label>
+                <input
+                  type="text"
+                  value={taxType}
+                  onChange={(e) => setTaxType(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Nominal Setoran ($ USD):</label>
+                <input
+                  type="number"
+                  value={taxAmountUsd}
+                  onChange={(e) => setTaxAmountUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-amber-300 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  setTaxRecords(prev => [
+                    {
+                      taxType: taxType,
+                      taxableBasisUsd: taxAmountUsd * 10,
+                      taxAmountUsd: taxAmountUsd,
+                      dueDate: new Date().toISOString().slice(0, 10),
+                      status: 'PAID'
+                    },
+                    ...prev
+                  ]);
+                  setShowTaxModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Proses Setoran SIMPONI
+              </button>
+              <button
+                onClick={() => setShowTaxModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

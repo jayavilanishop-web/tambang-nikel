@@ -31,7 +31,15 @@ import {
   ShieldCheck, 
   BellRing, 
   Video, 
-  Cpu
+  Cpu,
+  Map,
+  Anchor,
+  Pickaxe,
+  Route,
+  ZoomIn,
+  ZoomOut,
+  Crosshair,
+  Layers3
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -72,6 +80,22 @@ export const GpsTelemetryTrackingModule: React.FC<GpsTelemetryTrackingModuleProp
   const [isPlayingReplay, setIsPlayingReplay] = useState<boolean>(false);
   const [replayProgress, setReplayProgress] = useState<number>(35);
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  // Interactive Inspector Modal & Dispatch Alert
+  const [inspectVehicle, setInspectVehicle] = useState<any | null>(null);
+  const [dispatchAlertNotice, setDispatchAlertNotice] = useState<string | null>(null);
+
+  // GIS Interactive Map View State (MAP, Google Maps, Satellite, Mining Area, Geofence, Pit, Hauling Road, Stockpile, Jetty, Equipment Position)
+  const [mapMode, setMapMode] = useState<'GOOGLE_MAPS' | 'SATELLITE' | 'MINING_AREA' | 'TERRAIN'>('SATELLITE');
+  const [mapZoom, setMapZoom] = useState<number>(14);
+  const [activeLayers, setActiveLayers] = useState({
+    geofence: true,
+    pit: true,
+    haulingRoad: true,
+    stockpile: true,
+    jetty: true,
+    equipmentPos: true
+  });
 
   // Auto animation loop for route replay
   useEffect(() => {
@@ -202,103 +226,405 @@ export const GpsTelemetryTrackingModule: React.FC<GpsTelemetryTrackingModuleProp
 
       {/* TAB 1: LIVE GPS MAP TRACKING */}
       {activeTab === 'live_tracking' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
-          {/* Map Simulation Viewer */}
-          <div className="lg:col-span-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-bold text-slate-100 text-sm">Peta Geospasial Tracking GPS Satelit Waktu-Nyata</h3>
-              </div>
-              <span className="px-2.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
-                LIVE TELEMETRY 100ms
+        <div className="space-y-4 text-xs">
+          
+          {/* Map Controls Top Header Bar */}
+          <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            
+            {/* Map Type Switcher (MAP, Google Maps, Satellite, Mining Area) */}
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 font-bold text-[11px] flex items-center gap-1.5 shrink-0">
+                <Map className="w-3.5 h-3.5 text-emerald-400" /> Mode Peta:
               </span>
-            </div>
-
-            {/* Canvas/Map Container */}
-            <div className="relative h-96 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden flex items-center justify-center">
-              {/* Radial map grid background */}
-              <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:20px_20px] opacity-25" />
-              
-              {/* Geofence Overlay outlines */}
-              <div className="absolute top-8 left-12 w-48 h-32 border-2 border-emerald-500/40 bg-emerald-500/10 rounded-2xl flex items-start p-2">
-                <span className="text-[10px] font-bold text-emerald-400 font-mono">GEOFENCE: PIT ALPHA</span>
-              </div>
-
-              <div className="absolute bottom-10 right-16 w-56 h-36 border-2 border-amber-500/40 bg-amber-500/10 rounded-2xl flex items-start p-2">
-                <span className="text-[10px] font-bold text-amber-400 font-mono">GEOFENCE: ETO STOCKPILE</span>
-              </div>
-
-              {/* Vehicle Markers */}
-              {gpsFleetUnits.map((v, idx) => (
-                <div
-                  key={v.id}
-                  onClick={() => setSelectedVehicleId(v.id)}
-                  style={{ top: `${25 + idx * 12}%`, left: `${20 + idx * 14}%` }}
-                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer p-2 rounded-xl border shadow-xl transition-all hover:scale-110 flex items-center gap-2 ${
-                    selectedVehicleId === v.id
-                      ? 'bg-emerald-600 border-white text-white z-20 shadow-emerald-500/30'
-                      : v.status === 'SPEEDING'
-                      ? 'bg-rose-900/90 border-rose-500 text-rose-200 z-10'
-                      : 'bg-slate-900/90 border-slate-700 text-slate-200 z-10'
+              <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                <button
+                  onClick={() => setMapMode('SATELLITE')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${
+                    mapMode === 'SATELLITE'
+                      ? 'bg-emerald-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
-                  <Navigation className={`w-4 h-4 ${v.status === 'MOVING' ? 'text-emerald-400 animate-spin' : ''}`} />
-                  <div>
-                    <span className="font-bold block text-[11px]">{v.id}</span>
-                    <span className="text-[9px] opacity-80">{v.speedKmh} km/h</span>
-                  </div>
-                </div>
-              ))}
-
-              <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md p-2.5 rounded-xl border border-slate-800 text-[10px] text-slate-400 space-y-1">
-                <p className="font-bold text-slate-200">Keterangan Marker Map:</p>
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> Operasional Normal</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500"></span> Speeding Warning</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Idle Mesin</span>
-                </div>
+                  <Globe className="w-3.5 h-3.5" /> Satellite
+                </button>
+                <button
+                  onClick={() => setMapMode('GOOGLE_MAPS')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${
+                    mapMode === 'GOOGLE_MAPS'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Map className="w-3.5 h-3.5" /> Google Maps
+                </button>
+                <button
+                  onClick={() => setMapMode('MINING_AREA')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${
+                    mapMode === 'MINING_AREA'
+                      ? 'bg-amber-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Pickaxe className="w-3.5 h-3.5" /> Mining Area CAD
+                </button>
+                <button
+                  onClick={() => setMapMode('TERRAIN')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 ${
+                    mapMode === 'TERRAIN'
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Compass className="w-3.5 h-3.5" /> 3D Terrain
+                </button>
               </div>
+            </div>
+
+            {/* GIS Layer Toggles (Geofence, Pit, Hauling Road, Stockpile, Jetty, Equipment Position) */}
+            <div className="flex flex-wrap items-center gap-2 text-[11px]">
+              <span className="text-slate-400 font-bold flex items-center gap-1 shrink-0">
+                <Layers3 className="w-3.5 h-3.5 text-blue-400" /> Layer GIS:
+              </span>
+              
+              <button
+                onClick={() => setActiveLayers(p => ({ ...p, geofence: !p.geofence }))}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all flex items-center gap-1 ${
+                  activeLayers.geofence 
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
+                    : 'bg-slate-950 text-slate-500 border-slate-800'
+                }`}
+              >
+                <ShieldAlert className="w-3 h-3" /> Geofence
+              </button>
+
+              <button
+                onClick={() => setActiveLayers(p => ({ ...p, pit: !p.pit }))}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all flex items-center gap-1 ${
+                  activeLayers.pit 
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' 
+                    : 'bg-slate-950 text-slate-500 border-slate-800'
+                }`}
+              >
+                <Pickaxe className="w-3 h-3" /> Pit Area
+              </button>
+
+              <button
+                onClick={() => setActiveLayers(p => ({ ...p, haulingRoad: !p.haulingRoad }))}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all flex items-center gap-1 ${
+                  activeLayers.haulingRoad 
+                    ? 'bg-blue-500/20 text-blue-300 border-blue-500/40' 
+                    : 'bg-slate-950 text-slate-500 border-slate-800'
+                }`}
+              >
+                <Route className="w-3 h-3" /> Hauling Road
+              </button>
+
+              <button
+                onClick={() => setActiveLayers(p => ({ ...p, stockpile: !p.stockpile }))}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all flex items-center gap-1 ${
+                  activeLayers.stockpile 
+                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40' 
+                    : 'bg-slate-950 text-slate-500 border-slate-800'
+                }`}
+              >
+                <Layers className="w-3 h-3" /> Stockpile
+              </button>
+
+              <button
+                onClick={() => setActiveLayers(p => ({ ...p, jetty: !p.jetty }))}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all flex items-center gap-1 ${
+                  activeLayers.jetty 
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' 
+                    : 'bg-slate-950 text-slate-500 border-slate-800'
+                }`}
+              >
+                <Anchor className="w-3 h-3" /> Jetty Port
+              </button>
+
+              <button
+                onClick={() => setActiveLayers(p => ({ ...p, equipmentPos: !p.equipmentPos }))}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all flex items-center gap-1 ${
+                  activeLayers.equipmentPos 
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' 
+                    : 'bg-slate-950 text-slate-500 border-slate-800'
+                }`}
+              >
+                <Truck className="w-3 h-3" /> Equipment Pos
+              </button>
             </div>
           </div>
 
-          {/* Right Fleet List Panel */}
-          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="font-bold text-slate-100 text-sm">Armada GPS Terhubung</h3>
-              <span className="text-slate-400 font-mono">{filteredGpsUnits.length} Unit</span>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Main Interactive Geospatial Map Screen */}
+            <div className="lg:col-span-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-emerald-400" />
+                  <h3 className="font-bold text-slate-100 text-sm">
+                    {mapMode === 'SATELLITE' && 'Live High-Res Satellite Orthophoto Stream (WGS84)'}
+                    {mapMode === 'GOOGLE_MAPS' && 'Google Maps API Hybrid Layer (Mining Road & Labels)'}
+                    {mapMode === 'MINING_AREA' && 'Mining Area CAD Mine Plan Spatial Vector Map'}
+                    {mapMode === 'TERRAIN' && '3D Digital Elevation Model Topographical Contour'}
+                  </h3>
+                </div>
 
-            <div className="space-y-2.5 max-h-[380px] overflow-y-auto custom-scrollbar">
-              {filteredGpsUnits.map((u) => (
-                <div
-                  key={u.id}
-                  onClick={() => setSelectedVehicleId(u.id)}
-                  className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-2 ${
-                    selectedVehicleId === u.id
-                      ? 'bg-emerald-950/40 border-emerald-500/60 text-slate-100'
-                      : 'bg-slate-950 border-slate-800 hover:border-slate-700 text-slate-300'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-slate-100">{u.code}</span>
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                      u.status === 'MOVING' ? 'bg-emerald-500/20 text-emerald-400' :
-                      u.status === 'SPEEDING' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
-                    }`}>
-                      {u.status}
-                    </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
+                    ZOOM {mapZoom}x
+                  </span>
+
+                  <button
+                    onClick={() => setMapZoom(z => Math.min(z + 1, 20))}
+                    className="p-1 rounded bg-slate-800 text-slate-300 hover:text-white"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => setMapZoom(z => Math.max(z - 1, 8))}
+                    className="p-1 rounded bg-slate-800 text-slate-300 hover:text-white"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedVehicleId('DT-1001')}
+                    className="p-1.5 rounded bg-emerald-600 text-white font-bold text-[10px] flex items-center gap-1"
+                  >
+                    <Crosshair className="w-3.5 h-3.5" /> Center
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic Map Canvas Render Engine */}
+              <div className={`relative h-[440px] rounded-2xl border border-slate-800 overflow-hidden shadow-2xl transition-all ${
+                mapMode === 'SATELLITE' ? 'bg-slate-950' :
+                mapMode === 'GOOGLE_MAPS' ? 'bg-slate-900' :
+                mapMode === 'MINING_AREA' ? 'bg-slate-950 border-emerald-900/40' : 'bg-slate-950'
+              }`}>
+                
+                {/* Visual Background texture & grid based on map mode */}
+                {mapMode === 'SATELLITE' && (
+                  <>
+                    <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+                    <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/30 via-transparent to-slate-950/80 pointer-events-none" />
+                  </>
+                )}
+
+                {mapMode === 'GOOGLE_MAPS' && (
+                  <>
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
+                    <div className="absolute top-2 left-2 bg-white/90 text-slate-900 font-bold px-2 py-0.5 rounded text-[10px] shadow z-30">
+                      Google Maps
+                    </div>
+                  </>
+                )}
+
+                {mapMode === 'MINING_AREA' && (
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#064e3b_1px,transparent_1px),linear-gradient(to_bottom,#064e3b_1px,transparent_1px)] bg-[size:16px_16px] opacity-30" />
+                )}
+
+                {/* SVG GEOSPATIAL LAYERS (Hauling Road Curve, Pit Polygons, Stockpile, Jetty) */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                  
+                  {/* HAULING ROAD NETWORK LAYER */}
+                  {activeLayers.haulingRoad && (
+                    <>
+                      <path
+                        d="M 60 80 Q 180 120 280 200 T 480 280 T 640 340"
+                        fill="none"
+                        stroke="#3b82f6"
+                        strokeWidth="8"
+                        strokeDasharray="6 4"
+                        className="animate-pulse opacity-70"
+                      />
+                      <path
+                        d="M 60 80 Q 180 120 280 200 T 480 280 T 640 340"
+                        fill="none"
+                        stroke="#60a5fa"
+                        strokeWidth="3"
+                      />
+                      <text x="300" y="210" fill="#93c5fd" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                        🛣️ MAIN HAUL ROAD CORRIDOR (KM 00 - KM 18)
+                      </text>
+                    </>
+                  )}
+
+                  {/* PIT AREA CONTOUR POLYGONS LAYER */}
+                  {activeLayers.pit && (
+                    <>
+                      {/* Pit Alpha Polygon */}
+                      <polygon
+                        points="50,40 180,30 220,130 90,150"
+                        fill="rgba(245, 158, 11, 0.15)"
+                        stroke="#f59e0b"
+                        strokeWidth="2"
+                        strokeDasharray="4 2"
+                      />
+                      <text x="70" y="60" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                        ⛏️ PIT ALPHA FRONT +120M
+                      </text>
+
+                      {/* Pit Beta Polygon */}
+                      <polygon
+                        points="220,240 340,220 380,320 260,340"
+                        fill="rgba(234, 179, 8, 0.12)"
+                        stroke="#eab308"
+                        strokeWidth="2"
+                      />
+                      <text x="240" y="260" fill="#fde047" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                        ⛏️ PIT BETA BENCH
+                      </text>
+                    </>
+                  )}
+
+                  {/* STOCKPILE DEPOT POLYGON LAYER */}
+                  {activeLayers.stockpile && (
+                    <g>
+                      <rect
+                        x="420"
+                        y="230"
+                        width="130"
+                        height="90"
+                        rx="12"
+                        fill="rgba(168, 85, 247, 0.15)"
+                        stroke="#a855f7"
+                        strokeWidth="2"
+                      />
+                      <text x="430" y="250" fill="#c084fc" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                        🏔️ STOCKPILE ETO
+                      </text>
+                      <text x="430" y="265" fill="#e9d5ff" fontSize="9" fontFamily="monospace">
+                        Kapasitas: 145,000 MT
+                      </text>
+                    </g>
+                  )}
+
+                  {/* JETTY PORT TERMINAL LAYER */}
+                  {activeLayers.jetty && (
+                    <g>
+                      <rect
+                        x="580"
+                        y="300"
+                        width="130"
+                        height="95"
+                        rx="12"
+                        fill="rgba(6, 182, 212, 0.15)"
+                        stroke="#06b6d4"
+                        strokeWidth="2"
+                      />
+                      <text x="590" y="320" fill="#22d3ee" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                        🚢 JETTY PORT TERMINAL
+                      </text>
+                      <text x="590" y="335" fill="#a5f3fc" fontSize="9" fontFamily="monospace">
+                        Pier 1 & Pier 2 Docks
+                      </text>
+                    </g>
+                  )}
+                </svg>
+
+                {/* GEOFENCE BOUNDARY OVERLAYS */}
+                {activeLayers.geofence && (
+                  <>
+                    <div className="absolute top-4 left-6 px-3 py-1.5 rounded-xl border-2 border-emerald-500/50 bg-emerald-950/40 backdrop-blur-sm text-emerald-300 font-mono text-[10px] font-bold shadow-lg">
+                      🛡️ GEOFENCE: PIT ALPHA EXCAVATION (LIMIT: 25 km/h)
+                    </div>
+
+                    <div className="absolute bottom-12 right-12 px-3 py-1.5 rounded-xl border-2 border-cyan-500/50 bg-cyan-950/40 backdrop-blur-sm text-cyan-300 font-mono text-[10px] font-bold shadow-lg">
+                      🛡️ GEOFENCE: JETTY PORT DRAINAGE ZONE
+                    </div>
+                  </>
+                )}
+
+                {/* REALTIME EQUIPMENT POSITIONS MARKERS LAYER */}
+                {activeLayers.equipmentPos && gpsFleetUnits.map((v, idx) => (
+                  <div
+                    key={v.id}
+                    onClick={() => setSelectedVehicleId(v.id)}
+                    style={{ top: `${22 + idx * 13}%`, left: `${18 + idx * 13}%` }}
+                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer p-2 rounded-xl border shadow-2xl transition-all hover:scale-125 flex items-center gap-2 z-20 ${
+                      selectedVehicleId === v.id
+                        ? 'bg-emerald-600 border-white text-white scale-110 shadow-emerald-500/50 ring-4 ring-emerald-500/30'
+                        : v.status === 'SPEEDING'
+                        ? 'bg-rose-900/90 border-rose-500 text-rose-200 animate-bounce'
+                        : 'bg-slate-900/90 border-slate-700 text-slate-200'
+                    }`}
+                  >
+                    <Navigation className={`w-4 h-4 ${v.status === 'MOVING' ? 'text-emerald-300 animate-spin' : ''}`} />
+                    <div>
+                      <span className="font-bold block text-[11px] font-mono">{v.id}</span>
+                      <span className="text-[9px] opacity-90 font-mono">{v.speedKmh} km/h</span>
+                    </div>
                   </div>
+                ))}
 
-                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400">
-                    <div>Kecepatan: <strong className="text-emerald-400 font-mono">{u.speedKmh} km/h</strong></div>
-                    <div>BBM Solar: <strong className="text-amber-300 font-mono">{u.fuelLevelPct}%</strong></div>
-                    <div>Operator: <strong className="text-slate-200">{u.driverName}</strong></div>
-                    <div>Geofence: <strong className="text-slate-200">{u.geofenceZone}</strong></div>
+                {/* Map Bottom Legend Status Bar */}
+                <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-[10px] text-slate-400 space-y-1 shadow-xl">
+                  <p className="font-bold text-slate-200 flex items-center gap-2">
+                    <Compass className="w-3.5 h-3.5 text-emerald-400" /> Koordinat Geospasial Aktif:
+                    <span className="text-emerald-400 font-mono">-2.5210° S, 121.3420° E (UTM 51S WGS84)</span>
+                  </p>
+                  <div className="flex flex-wrap items-center gap-4 text-slate-300 pt-1">
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Operasional Normal</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Speeding Overlimit</span>
+                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Engine Idle Time</span>
                   </div>
                 </div>
-              ))}
+
+              </div>
             </div>
+
+            {/* Right Side Fleet Status List */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 className="font-bold text-slate-100 text-sm">Armada GPS Terhubung</h3>
+                <span className="text-slate-400 font-mono">{filteredGpsUnits.length} Unit</span>
+              </div>
+
+              <div className="space-y-2.5 max-h-[400px] overflow-y-auto custom-scrollbar">
+                {filteredGpsUnits.map((u) => (
+                  <div
+                    key={u.id}
+                    onClick={() => setSelectedVehicleId(u.id)}
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-2 ${
+                      selectedVehicleId === u.id
+                        ? 'bg-emerald-950/40 border-emerald-500/60 text-slate-100'
+                        : 'bg-slate-950 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-slate-100">{u.code}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setInspectVehicle(u);
+                          }}
+                          className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[9px] flex items-center gap-1"
+                        >
+                          <Eye className="w-3 h-3 text-emerald-400" /> Detail
+                        </button>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                          u.status === 'MOVING' ? 'bg-emerald-500/20 text-emerald-400' :
+                          u.status === 'SPEEDING' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {u.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400">
+                      <div>Kecepatan: <strong className="text-emerald-400 font-mono">{u.speedKmh} km/h</strong></div>
+                      <div>BBM Solar: <strong className="text-amber-300 font-mono">{u.fuelLevelPct}%</strong></div>
+                      <div>Operator: <strong className="text-slate-200">{u.driverName}</strong></div>
+                      <div>Geofence: <strong className="text-slate-200">{u.geofenceZone}</strong></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       )}
@@ -554,6 +880,89 @@ export const GpsTelemetryTrackingModule: React.FC<GpsTelemetryTrackingModuleProp
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dispatch Alert Toast Notification */}
+      {dispatchAlertNotice && (
+        <div className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-emerald-900/90 border border-emerald-500/50 text-white shadow-2xl flex items-center gap-3 backdrop-blur-md animate-bounce">
+          <Radio className="w-5 h-5 text-amber-300 animate-pulse" />
+          <div>
+            <strong className="text-xs font-bold block">Panggilan Dispatch Terkirim:</strong>
+            <p className="text-[11px] text-emerald-200">{dispatchAlertNotice}</p>
+          </div>
+          <button 
+            onClick={() => setDispatchAlertNotice(null)}
+            className="ml-2 text-xs bg-emerald-950 px-2 py-1 rounded hover:bg-emerald-800"
+          >
+            Tutup
+          </button>
+        </div>
+      )}
+
+      {/* Equipment Telemetry Inspector Modal */}
+      {inspectVehicle && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-start border-b border-slate-800 pb-3">
+              <div>
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">
+                  Telemetry Inspector
+                </span>
+                <h3 className="text-lg font-bold text-slate-100 mt-1">{inspectVehicle.code}</h3>
+                <p className="text-slate-400 text-[11px]">Operator: {inspectVehicle.driverName} • {inspectVehicle.category}</p>
+              </div>
+              <button 
+                onClick={() => setInspectVehicle(null)}
+                className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <span className="text-slate-400 text-[10px] block">Status Telemetri</span>
+                <strong className="text-emerald-400 font-mono text-sm">{inspectVehicle.status}</strong>
+              </div>
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <span className="text-slate-400 text-[10px] block">Kecepatan Live</span>
+                <strong className="text-amber-300 font-mono text-sm">{inspectVehicle.speedKmh} km/h</strong>
+              </div>
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <span className="text-slate-400 text-[10px] block">BBM Level</span>
+                <strong className="text-slate-100 font-mono text-sm">{inspectVehicle.fuelLevelPct}% ({inspectVehicle.fuelLiterPerHour} L/Jam)</strong>
+              </div>
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <span className="text-slate-400 text-[10px] block">Zona Geofence</span>
+                <strong className="text-slate-100 font-mono text-sm">{inspectVehicle.geofenceZone}</strong>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-1 font-mono text-[10px] text-slate-400">
+              <p>📍 Koordinat Lat/Lng: <strong className="text-emerald-400">{inspectVehicle.lat}° S, {inspectVehicle.lng}° E</strong></p>
+              <p>📡 Sinyal Satelit GPS: <strong className="text-blue-400">{inspectVehicle.signalRssi} (Starlink Mobile)</strong></p>
+              <p>⏱️ Idle Time: <strong className="text-amber-400">{inspectVehicle.idleTimeMin} Menit</strong></p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setDispatchAlertNotice(`Instruksi radio dikirim ke ${inspectVehicle.code} (Operator ${inspectVehicle.driverName}) via Channel 4 Pit Control.`);
+                  setInspectVehicle(null);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Radio className="w-4 h-4" /> Panggil Radio Dispatch
+              </button>
+              <button
+                onClick={() => setInspectVehicle(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>

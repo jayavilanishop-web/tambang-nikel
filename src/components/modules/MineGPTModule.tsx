@@ -493,7 +493,7 @@ export const MineGPTModule: React.FC<MineGPTModuleProps> = ({ language }) => {
 
           {/* Bottom Action Footer */}
           <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
-            <span>Powered by SmartMine Enterprise AI Neural Network</span>
+            <span>Powered by NickelSmart Enterprise AI Neural Network</span>
             <span className="font-mono text-emerald-400">Response Latency: 120ms</span>
           </div>
         </div>

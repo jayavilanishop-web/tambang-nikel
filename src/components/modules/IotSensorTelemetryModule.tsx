@@ -26,7 +26,12 @@ import {
   Clock, 
   Server, 
   BarChart3, 
-  SlidersHorizontal 
+  SlidersHorizontal,
+  Disc,
+  BellRing,
+  Plus,
+  PlusCircle,
+  Check
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -61,11 +66,32 @@ export const IotSensorTelemetryModule: React.FC<IotSensorTelemetryModuleProps> =
     | 'vibration_sensors'
     | 'engine_ecu'
     | 'realtime_monitoring'
+    | 'tpms_tyres'
+    | 'alert_rule_engine'
   >('realtime_monitoring');
 
   const [selectedUnit, setSelectedUnit] = useState<string>('DT-1001');
   const [isLiveStreaming, setIsLiveStreaming] = useState<boolean>(true);
   const [tick, setTick] = useState<number>(0);
+
+  // New Rule Modal State
+  const [isAddRuleOpen, setIsAddRuleOpen] = useState<boolean>(false);
+  const [ruleName, setRuleName] = useState<string>('');
+  const [sensorTypeInput, setSensorTypeInput] = useState<string>('SUHU_COOLANT');
+  const [thresholdValInput, setThresholdValInput] = useState<number>(100);
+  const [customRulesList, setCustomRulesList] = useState([
+    { id: 'RL-101', name: 'Coolant Engine High Temp Siren Alert', sensor: 'Caterpillar C27 Coolant', threshold: '> 102 °C', action: 'WhatsApp & SMS Ke Pit Supervisor', status: 'ACTIVE' },
+    { id: 'RL-102', name: 'Anti-Siphoning Fuel Drop Detection', sensor: 'Ultrasonic Fuel Tank Meter', threshold: 'Penurunan > 15 L / min (Mesin Mati)', action: 'Trigger Siren & Lock Gate', status: 'ACTIVE' },
+    { id: 'RL-103', name: 'Payload Overload 110% Warning', sensor: 'Strut Pressure Payload Meter', threshold: '> 99.0 Ton', action: 'Lampu Strobo Merah Nyala', status: 'ACTIVE' }
+  ]);
+
+  // TPMS OTR Tyre Telemetry Dataset
+  const tpmsTyreData = [
+    { unitCode: 'DT-1001', tyrePosition: 'Front Left (FL)', serialNo: 'TYRE-BS-2701', pressurePsi: 110 + (tick % 2), tempC: 62, status: 'OPTIMAL' },
+    { unitCode: 'DT-1001', tyrePosition: 'Front Right (FR)', serialNo: 'TYRE-BS-2702', pressurePsi: 108 + (tick % 2), tempC: 64, status: 'OPTIMAL' },
+    { unitCode: 'DT-1001', tyrePosition: 'Rear Outer Left (ROL)', serialNo: 'TYRE-BS-2703', pressurePsi: 98, tempC: 72, status: 'LOW_PRESSURE_WARNING' },
+    { unitCode: 'DT-1002', tyrePosition: 'Front Left (FL)', serialNo: 'TYRE-MI-2704', pressurePsi: 112, tempC: 58, status: 'OPTIMAL' }
+  ];
 
   // Auto tick to simulate real-time sensor fluctuation
   useEffect(() => {
@@ -179,7 +205,9 @@ export const IotSensorTelemetryModule: React.FC<IotSensorTelemetryModuleProps> =
           { id: 'temperature_sensors', label: 'Temperature Sensors', icon: Thermometer },
           { id: 'pressure_sensors', label: 'Pressure Sensors', icon: Gauge },
           { id: 'vibration_sensors', label: 'Vibration Sensors', icon: Waves },
-          { id: 'engine_ecu', label: 'Engine ECU Telemetry', icon: Zap }
+          { id: 'engine_ecu', label: 'Engine ECU Telemetry', icon: Zap },
+          { id: 'tpms_tyres', label: 'TPMS Tyre Sensors', icon: Disc },
+          { id: 'alert_rule_engine', label: 'IoT Rule Engine & Alerts', icon: BellRing }
         ].map((tab) => {
           const IconComp = tab.icon;
           const isActive = activeTab === tab.id;
@@ -453,6 +481,185 @@ export const IotSensorTelemetryModule: React.FC<IotSensorTelemetryModuleProps> =
                   <span className="text-slate-500 text-[10px]">Standard Target: {e.nominal}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 9: TPMS TYRE SENSORS */}
+      {activeTab === 'tpms_tyres' && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm">Sensor Tekanan & Suhu Ban OTR TPMS (Tyre Pressure Monitoring)</h3>
+                <p className="text-slate-400 text-[11px]">Monitoring Tekanan Angin (PSI) & Suhu Inner Liner Ban 27.00R49 Dump Truck</p>
+              </div>
+              <span className="px-3 py-1 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold font-mono">
+                TPMS 433MHz Wireless
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {tpmsTyreData.map((t, idx) => (
+                <div key={idx} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="font-bold text-emerald-400 font-mono block">{t.unitCode}</span>
+                      <span className="text-slate-100 text-xs font-bold">{t.tyrePosition}</span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                      t.status === 'OPTIMAL' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'
+                    }`}>
+                      {t.status}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1 pt-2 font-mono text-[11px]">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-sans">No Seri Ban:</span>
+                      <strong className="text-slate-200">{t.serialNo}</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-sans">Tekanan PSI:</span>
+                      <strong className="text-amber-300 font-bold">{t.pressurePsi} PSI</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400 font-sans">Suhu Ban:</span>
+                      <strong className="text-rose-400">{t.tempC} °C</strong>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 10: IOT RULE ENGINE & ALERTS */}
+      {activeTab === 'alert_rule_engine' && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 text-xs">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm">Mesin Aturan Ambang Batas Sensor (IoT Threshold Rule Engine)</h3>
+                <p className="text-slate-400 text-[11px]">Konfigurasi Pemicu Otomatis Notifikasi WhatsApp, Sirine & Auto Shutdown</p>
+              </div>
+
+              <button
+                onClick={() => setIsAddRuleOpen(true)}
+                className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" /> Tambah Rule IoT
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {customRulesList.map((rule) => (
+                <div key={rule.id} className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-emerald-400 font-bold">{rule.id}</span>
+                      <span className="text-slate-500">•</span>
+                      <strong className="text-slate-100 text-sm font-bold">{rule.name}</strong>
+                    </div>
+                    <p className="text-slate-400">
+                      Sensor: <strong className="text-slate-200">{rule.sensor}</strong> | Threshold: <strong className="text-amber-300 font-mono">{rule.threshold}</strong>
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-mono text-[10px] font-bold border border-indigo-500/30">
+                      Action: {rule.action}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">
+                      {rule.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Add Rule IoT */}
+      {isAddRuleOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 text-xs shadow-2xl">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <BellRing className="w-4 h-4 text-emerald-400" /> Tambah Rule Threshold IoT
+              </h3>
+              <button onClick={() => setIsAddRuleOpen(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Nama Rule Trigger:</label>
+                <input
+                  type="text"
+                  value={ruleName}
+                  onChange={(e) => setRuleName(e.target.value)}
+                  placeholder="e.g., Peringatan Suhu Mesin High Temp"
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Pilih Jenis Sensor:</label>
+                <select
+                  value={sensorTypeInput}
+                  onChange={(e) => setSensorTypeInput(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="SUHU_COOLANT">Suhu Coolant Engine (°C)</option>
+                  <option value="TEKANAN_HIDROLIK">Tekanan Hidrolik Pump (Bar)</option>
+                  <option value="FUEL_SIPHONING">Kebocoran BBM Solar (L/min)</option>
+                  <option value="OVERLOAD_PAYLOAD">Muatan Overload (Ton)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Batas Nilai Threshold:</label>
+                <input
+                  type="number"
+                  value={thresholdValInput}
+                  onChange={(e) => setThresholdValInput(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => {
+                  if (ruleName) {
+                    setCustomRulesList(prev => [
+                      {
+                        id: `RL-${104 + prev.length}`,
+                        name: ruleName,
+                        sensor: sensorTypeInput,
+                        threshold: `> ${thresholdValInput}`,
+                        action: 'Notifikasi Otomatis Dispatch & WA Alert',
+                        status: 'ACTIVE'
+                      },
+                      ...prev
+                    ]);
+                  }
+                  setIsAddRuleOpen(false);
+                  setRuleName('');
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <Check className="w-4 h-4" /> Simpan Rule Baru
+              </button>
+              <button
+                onClick={() => setIsAddRuleOpen(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-bold"
+              >
+                Batal
+              </button>
             </div>
           </div>
         </div>

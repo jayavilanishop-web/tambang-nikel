@@ -103,7 +103,7 @@ export const PushNotificationCenter: React.FC<PushNotificationCenterProps> = ({
 
         {/* Footer */}
         <div className="p-3 bg-slate-950 border-t border-slate-800 text-center text-[11px] text-slate-500">
-          SmartMine AI WebSocket Real-time Connector v2.5
+          NickelSmart AI WebSocket Real-time Connector v2.5
         </div>
 
       </div>

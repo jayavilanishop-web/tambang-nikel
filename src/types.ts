@@ -1,5 +1,5 @@
 /**
- * SmartMine AI Indonesia - Global Types & Data Interfaces
+ * NickelSmart AI Indonesia - Global Types & Data Interfaces
  */
 
 export type Language = 'id' | 'en';
