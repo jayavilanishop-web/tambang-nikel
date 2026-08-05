@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { askAIChat } from '../services/aiService';
 import { 
   Sparkles, 
   Send, 
@@ -95,27 +96,21 @@ Ada yang bisa saya bantu untuk operasional site Anda hari ini?`,
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          mineData: {
-            siteName: "Bahodopi Pit Alpha",
-            rkabTarget: "250,000 MT/bulan",
-            saproliteGrade: "1.82% Ni",
-            limoniteGrade: "1.28% Ni",
-            hpmPrice: "$16,450 / dmt"
-          }
-        })
+      const replyText = await askAIChat({
+        message: text,
+        mineData: {
+          siteName: "Bahodopi Pit Alpha",
+          rkabTarget: "250,000 MT/bulan",
+          saproliteGrade: "1.82% Ni",
+          limoniteGrade: "1.28% Ni",
+          hpmPrice: "$16,450 / dmt"
+        }
       });
-
-      const data = await response.json();
 
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'ai',
-        text: data.reply || "Maaf, terjadi kendala saat menghubungi AI Engine.",
+        text: replyText,
         timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -126,7 +121,7 @@ Ada yang bisa saya bantu untuk operasional site Anda hari ini?`,
         {
           id: `err-${Date.now()}`,
           sender: 'ai',
-          text: "Gagal terhubung ke AI Service. Silakan periksa jaringan Anda.",
+          text: "Maaf, terjadi kendala saat terhubung ke AI Service.",
           timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
         }
       ]);

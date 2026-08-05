@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { askMineGPT } from '../../services/aiService';
 import { 
   Bot, 
   Sparkles, 
@@ -154,22 +155,15 @@ export const MineGPTModule: React.FC<MineGPTModuleProps> = ({ language }) => {
     }
 
     try {
-      const res = await fetch('/api/ai/mine-gpt', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: modeName,
-          prompt: userMsgText,
-          payload: {
-            selectedDoc: selectedDocName,
-            site: 'Bahodopi Pit Alpha Morowali',
-            currentNi: 1.83
-          }
-        })
+      const outputText = await askMineGPT({
+        mode: modeName,
+        prompt: userMsgText,
+        payload: {
+          selectedDoc: selectedDocName,
+          site: 'Bahodopi Pit Alpha Morowali',
+          currentNi: 1.83
+        }
       });
-
-      const data = await res.json();
-      const outputText = data.result || (data.error ? `Pemberitahuan: ${data.error}` : "Analisis MineGPT berhasil diselesaikan.");
 
       if (modeName === 'chat') {
         setChatMessages(prev => [
@@ -183,7 +177,7 @@ export const MineGPTModule: React.FC<MineGPTModuleProps> = ({ language }) => {
       if (modeName === 'chat') {
         setChatMessages(prev => [
           ...prev,
-          { sender: 'minegpt', text: 'Maaf, sistem MineGPT mengalami kendala koneksi ke server AI.', time: 'Now' }
+          { sender: 'minegpt', text: 'Maaf, terjadi kendala saat memproses analisis.', time: 'Now' }
         ]);
       } else {
         setAnalysisResult('Gagal memproses analisis MineGPT.');

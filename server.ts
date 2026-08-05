@@ -3,6 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import { parseAndCalculateMiningPrompt } from "./src/services/miningEngine";
 
 dotenv.config();
 
@@ -412,53 +413,11 @@ Berikan jawaban profesional, berbasis data nyata industri nikel Indonesia (Morow
       }
     }
 
-    // High quality domain fallback responses per mode
-    let fallbackResult = "";
+    // Dynamic Mining Operational Calculation Engine Fallback
+    const engineRes = parseAndCalculateMiningPrompt(userPrompt || "", mode || "chat");
+    let fallbackResult = engineRes.formattedResponse;
 
-    const lowerPrompt = (userPrompt || "").toLowerCase();
-    if (lowerPrompt.includes("dt") || lowerPrompt.includes("dump truck") || lowerPrompt.includes("hauling") || lowerPrompt.includes("30 km") || lowerPrompt.includes("100.000") || lowerPrompt.includes("100000")) {
-      fallbackResult = `**Hasil Kalkulasi Kebutuhan Dump Truck (DT 30 Ton):**
-
-**1. Spesifikasi & Asumsi Parameter Operasional:**
-- **Target Produksi Hauling:** 100,000 Ton/Bulan (± 3,333 Ton/Hari pada 30 hari kerja)
-- **Kapasitas Nyata DT:** 30 Ton / trip
-- **Jarak Hauling (One-Way):** 30 km (Jarak Pergi-Pulang / Round Trip = 60 km)
-- **Kecepatan Rata-rata DT Bermuatan:** 30 km/jam
-- **Kecepatan Rata-rata DT Kosong:** 40 km/jam
-- **Jam Kerja Efektif (Effective Operating Hours):** 18 Jam/Hari (2 Shift)
-- **Physical Availability (PA) / Mechanical Availability (MA):** 85%
-- **Efficiency Factor (Efisiensi Kerja):** 75% (0.75)
-
----
-
-**2. Rincian Perhitungan Waktu Edar (Cycle Time DT):**
-- **Waktu Muat (Loading Time by Excavator):** 3.5 menit
-- **Waktu Angkut Bermuatan (30 km @ 30 km/jam):** 60.0 menit
-- **Waktu Antri & Dumping di Stockpile/Smelter:** 4.5 menit
-- **Waktu Kembali Kosong (30 km @ 40 km/jam):** 45.0 menit
-- **Total Waktu Edar (Cycle Time / CTM):** **113 menit** (~1.88 Jam)
-
----
-
-**3. Perhitungan Produktivitas Per Unit DT:**
-- **Jumlah Trip per Jam:** 60 menit / 113 menit = **0.53 trip/jam**
-- **Produktivitas per Jam per DT:** 0.53 trip/jam × 30 Ton × 0.75 (Efisiensi) = **11.95 Ton/Jam/DT**
-- **Produktivitas Harian per DT (18 Jam Efektif):** 11.95 Ton/Jam × 18 Jam = **215.1 Ton/Hari/DT**
-
----
-
-**4. Estimasi Jumlah Unit Dump Truck yang Dibutuhkan:**
-- **Target Harian:** 3,333 Ton / Hari
-- **Kebutuhan Unit Aktif (Operating Fleet):** 3,333 Ton / 215.1 Ton = **15.5 Unit** (Dibulatkan **16 Unit Aktif**)
-- **Kebutuhan Total (+ Cadangan Maintenance PA 85%):** 16 Unit / 0.85 = **18.8 Unit**
-
----
-
-**💡 Kesimpulan & Rekomendasi Operasional MineGPT:**
-1. **Total Unit Dibutuhkan:** **19 Unit Dump Truck (DT 30 Ton)** (16 Unit Aktif Operasional + 3 Unit Cadangan Service/Standby).
-2. **Kebutuhan Support Excavator:** Diperlukan **3 - 4 Unit Excavator Kelas 50 Ton (misal Komatsu PC500 / CAT 349)** di front loading untuk melayani 16 unit DT agar *queue time* tidak membengkak.
-3. **Catatan Efisiensi:** Jarak angkut 30 km tergolong jarak menengah-jauh. Disarankan mempertimbangkan optimasi Haul Road untuk meningkatkan kecepatan rata-rata bermuatan menjadi 35-40 km/jam agar jumlah DT aktif bisa dipangkas menjadi **14 Unit**.`;
-    } else {
+    if (!engineRes.isMiningCalc) {
       switch (mode) {
       case 'risk':
         fallbackResult = `**MineGPT Risk Analysis Report (Site Morowali & Halmahera):**\n\n- **Risiko Geoteknik Pit Alpha:** Akselerasi pergerakan lereng terdeteksi +2.4 mm/hari akibat curah hujan tinggi. Risiko longsor sedang (Probability: 18%). Direkomendasikan pemasangan inclinometer tambahan.\n- **Risiko K3LH & Fatigue Operator:** 3 operator Excavator PC2000 terdeteksi indikasi kelelahan di Shift 2. Rekomendasi rotasi istirahat otomatis.\n- **Risiko Paparan HPM:** Volatilitas HMA Nikel ($16,450) berdampak pada margin bersih bila MC ore > 32%.`;
@@ -484,7 +443,7 @@ Berikan jawaban profesional, berbasis data nyata industri nikel Indonesia (Morow
       default:
         fallbackResult = `**MineGPT Analysis (${mode || 'Operational'}):**\n\nSistem AI NickelSmart telah memproses parameter operasional site Anda. Semua indikator kinerja produksi, K3LH, dan finansial berada dalam ambang batas aman sesuai regulasi Kepmen ESDM 1827 K/2018.`;
         break;
-    }
+      }
     }
 
     return res.json({
