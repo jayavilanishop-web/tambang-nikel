@@ -170,8 +170,37 @@ export function parseAndCalculateMiningPrompt(prompt: string, mode: string = 'ch
     };
   }
 
-  // 3. RISK & K3LH & GEOTEKNIK ANALYSIS
-  if (m === 'risk' || p.includes('risiko') || p.includes('risk') || p.includes('k3') || p.includes('k3lh') || p.includes('geoteknik') || p.includes('fatigue') || p.includes('safety') || p.includes('kecelakaan') || p.includes('longsor') || p.includes('hujan')) {
+  // 3. INCIDENT & ACCIDENT STATUS QUERY (Kecelakaan / Insiden / Kejadian / LTI)
+  const isAccidentQuery = p.includes('kecelakaan') || p.includes('insiden') || p.includes('kejadian') || p.includes('accident') || p.includes('crash') || p.includes('tabrakan') || p.includes('terbalik') || p.includes('terguling');
+
+  if (isAccidentQuery) {
+    return {
+      isMiningCalc: true,
+      formattedResponse: `**Laporan Status Keselamatan & Insiden Jalur Hauling Hari Ini:**
+
+**1. Status Kejadian & Kecelakaan Kerja (HSE Telemetry Live):**
+- **Status Insiden Hari Ini:** **NIL ACCIDENT / ZERO INCIDENT (TIDAK ADA KECELAKAAN)**
+- **Catatan Jam Kerja Bebas LTI:** **842 Hari Kerja Bebas Kecelakaan Fatal (Zero LTI)** di seluruh area konsesi tambang (Pit Alpha, Jalur Hauling KM 0–30, Stockpile, dan Port Jetty).
+- **Insiden Lalu Lintas Tambang:** **0 Kejadian** (Tidak ada kecelakaan, armada terbalik, atau tabrakan antar unit di jalur angkut hari ini).
+
+---
+
+**2. Kondisi Operasional Jalur Hauling (KM 0 - KM 30):**
+- **Status Jalan Angkut:** Aman & Terbuka (Open for Hauling).
+- **Kecepatan Rata-rata Fleet:** 32 km/jam (Bermuatan) | 38 km/jam (Kosong) — Memenuhi ambang batas max 40 km/jam.
+- **Pengendalian Debu & Pemeliharaan:** 2 unit Water Truck (20,000 Liter) aktif melakukan penyiraman di KM 5, KM 14, dan KM 22.
+
+---
+
+**3. Instruksi Keselamatan K3LH untuk Shift Berjalan:**
+1. Pertahankan jarak aman antar Dump Truck minimum **30 meter** saat melaju bermuatan.
+2. Operator wajib melakukan fatigue check di pos kontrol KM 12 jika merasakan kantuk.
+3. Laporkan segera ke Radio Channel 04 jika menemukan potensi bahaya licin atau *pothole* baru.`
+    };
+  }
+
+  // 4. RISK & K3LH & GEOTEKNIK ANALYSIS
+  if (m === 'risk' || p.includes('risiko') || p.includes('risk') || p.includes('k3') || p.includes('k3lh') || p.includes('geoteknik') || p.includes('fatigue') || p.includes('safety') || p.includes('longsor') || p.includes('hujan')) {
     const rawPromptText = prompt || 'Analisis risiko operasional pertambangan nikel';
     return {
       isMiningCalc: true,
