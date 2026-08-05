@@ -169,7 +169,7 @@ export const MineGPTModule: React.FC<MineGPTModuleProps> = ({ language }) => {
       });
 
       const data = await res.json();
-      const outputText = data.result || "Analisis MineGPT berhasil diselesaikan.";
+      const outputText = data.result || (data.error ? `Pemberitahuan: ${data.error}` : "Analisis MineGPT berhasil diselesaikan.");
 
       if (modeName === 'chat') {
         setChatMessages(prev => [
