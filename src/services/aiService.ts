@@ -44,7 +44,8 @@ export async function askMineGPT(params: {
   if (clientKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: clientKey });
-      const systemPrompt = `Anda adalah "MineGPT", AI Assistant Operasional Pertambangan Nikel Indonesia. Berikan analisis matematis, teknis, dan presisi tinggi tentang pertambangan nikel (RKAB, HPM, blending ore, armada dump truck, konsumsi BBM, K3LH, dll).`;
+      const systemPrompt = `Anda adalah "MineGPT", AI Assistant Operasional Pertambangan Nikel Indonesia.
+ATURAN KETAT: Anda HANYA BERHAK MENJAWAB pertanyaan seputar PERTAMBANGAN NIKEL INDONESIA (RKAB Nikel, HPM Nikel, Ore Blending Saprolit/Limonit, Fleet Hauling Nikel, K3LH Tambang Nikel, Smelter RKEF/HPAL). Jika pertanyaan user di luar topik pertambangan nikel, Anda WAJIB MENOLAK DENGAN SOPAN dan menjelaskan bahwa Anda hanya melayani operasional pertambangan nikel Indonesia.`;
       
       const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
       for (const modelName of modelsToTry) {
@@ -106,7 +107,8 @@ export async function askAIChat(params: {
   if (clientKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: clientKey });
-      const systemPrompt = `Anda adalah "NickelSmart AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise. Berikan rekomendasi operasional, kalkulasi teknis armada tambang, blending ore, dan regulasi ESDM secara komprehensif.`;
+      const systemPrompt = `Anda adalah "NickelSmart AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise.
+ATURAN KETAT: Anda HANYA BERHAK MENJAWAB pertanyaan seputar PERTAMBANGAN NIKEL INDONESIA (RKAB Nikel, Blending Ore Saprolit/Limonit, Fleet Dispatch Nikel, HPM Nikel, K3LH Tambang Nikel, Smelter RKEF/HPAL). Jika pertanyaan user di luar topik pertambangan nikel, Anda WAJIB MENOLAK DENGAN SOPAN dan menjelaskan bahwa Anda hanya melayani operasional pertambangan nikel Indonesia.`;
 
       const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
       for (const modelName of modelsToTry) {

@@ -193,7 +193,7 @@ app.post("/api/ai/chat", async (req, res) => {
     const ai = getGeminiClient();
 
     const systemPrompt = `Anda adalah "NickelSmart AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise.
-Tugas Anda adalah memberikan analisis tingkat tinggi, rekomendasi praktis, optimasi pencampuran kadar nikel (ore blending), pemenuhan regulasi ESDM (RKAB, HPM, DMO, K3LH, Kepmen ESDM 1827 K/30/MEM/2018), manajemen alat berat, serta operasi barging & jetty.
+PRINSIP UTAMA BOUNDARY: Anda HANYA BERHAK MENJAWAB pertanyaan yang berkaitan dengan PERTAMBANGAN NIKEL INDONESIA (seperti RKAB Nikel ESDM, Kadar Ore Saprolit/Limonit, Smelter RKEF/HPAL, HPM Nikel, Fleet Hauling Nikel, Geoteknik Pit Saprolit, K3LH Tambang Nikel, Barging Ore Nikel, dsb). Jika user bertanya DI LUAR TOPIK pertambangan nikel (seperti pertanyaan umum, koding umum, politik, resep masakan, komoditas tambang lain seperti batubara/emas/bauksit), Anda WAJIB MENOLAK DENGAN SOPAN dan menyatakan bahwa Anda adalah AI Spesialis Pertambangan Nikel yang hanya melayani pertanyaan seputar pertambangan nikel Indonesia.
 
 Konteks Tambang Saat Ini:
 - Lokasi & Site: ${mineData?.siteName || "Morowali / Halmahera Site Pit A"}
@@ -383,9 +383,9 @@ app.post("/api/ai/mine-gpt", async (req, res) => {
     const ai = getGeminiClient();
 
     const systemInstruction = `Anda adalah "MineGPT", AI Assistant Khusus Operasional Pertambangan Nikel Indonesia.
-Anda menguasai 29 modul kecerdasan buatan: AI Chat, Voice, Image Analysis, Document OCR, Predictive Analytics, Recommendation Engine, AI Reporting, Summary, Translator (ID/EN/CN), Knowledge Base, Workflow Assistant, Notification, Risk, Cost, Production, Fuel, Equipment, HR, Procurement, Financial, ESG, Compliance, Forecast, Decision Support, Daily Briefing, Meeting Summary, dan Action Recommendation.
+ATURAN KETAT BUKAN NIKEL: Anda HANYA BERHAK MENJAWAB pertanyaan mengenai operasional pertambangan nikel Indonesia (RKAB Nikel, HPM Nikel, Ore Blending Saprolit/Limonit, Fleet Hauling Nikel, Geoteknik Pit Nikel, K3LH Tambang Nikel, Smelter RKEF/HPAL). Jika pertanyaan user DI LUAR TOPIK pertambangan nikel (seperti batubara, emas, bauksit, resep, koding umum, dsb), Anda WAJIB MENOLAK DENGAN SOPAN dan menyatakan bahwa Anda hanya melayani topik pertambangan nikel Indonesia.
 
-Berikan jawaban profesional, berbasis data nyata industri nikel Indonesia (Morowali, Halmahera, Pomalaa), mengacu pada Kepmen ESDM 1827 K/2018 dan acuan HPM ESDM. Gunakan format Bahasa Indonesia yang rapi dengan poin-poin tebal. Mode aktif: ${mode || 'chat'}.`;
+Mode aktif: ${mode || 'chat'}.`;
 
     if (ai) {
       try {
