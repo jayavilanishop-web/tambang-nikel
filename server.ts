@@ -415,36 +415,7 @@ Berikan jawaban profesional, berbasis data nyata industri nikel Indonesia (Morow
 
     // Dynamic Mining Operational Calculation Engine Fallback
     const engineRes = parseAndCalculateMiningPrompt(userPrompt || "", mode || "chat");
-    let fallbackResult = engineRes.formattedResponse;
-
-    if (!engineRes.isMiningCalc) {
-      switch (mode) {
-      case 'risk':
-        fallbackResult = `**MineGPT Risk Analysis Report (Site Morowali & Halmahera):**\n\n- **Risiko Geoteknik Pit Alpha:** Akselerasi pergerakan lereng terdeteksi +2.4 mm/hari akibat curah hujan tinggi. Risiko longsor sedang (Probability: 18%). Direkomendasikan pemasangan inclinometer tambahan.\n- **Risiko K3LH & Fatigue Operator:** 3 operator Excavator PC2000 terdeteksi indikasi kelelahan di Shift 2. Rekomendasi rotasi istirahat otomatis.\n- **Risiko Paparan HPM:** Volatilitas HMA Nikel ($16,450) berdampak pada margin bersih bila MC ore > 32%.`;
-        break;
-      case 'cost':
-        fallbackResult = `**MineGPT Cost Analysis (COSR - Cash Cost per Metric Ton):**\n\n- **Mining Cost:** $14.20 / MT (BBM 42%, Gaji Operator 24%, Maintenance 34%)\n- **Hauling & Stockpile:** $4.80 / MT\n- **Barging & Transshipment:** $3.50 / MT\n- **Royalti PNBP ESDM (10% HPM):** $4.85 / MT\n- **Total Cash Cost:** $27.35 / WMT (Margin Bersih: +$21.15 / MT pada HPM $48.50).`;
-        break;
-      case 'fuel':
-        fallbackResult = `**MineGPT Fuel Efficiency & Anomaly Report:**\n\n- **Konsumsi Solar B35 Total:** 18,450 Liter / Hari\n- **Unit Paling Efisien:** Scania DT-12 (2.1 L/BCM)\n- **Anomali Idle Time:** Komatsu PC2000 EX-04 mencatat 3.2 jam idle saat menunggu dump truck di Pit B. Pemborosan solar diperkirakan 96 Liter ($115/hari).\n- **Tindakan:** Re-dispatch 2 unit DT dari Pit A ke Pit B untuk memangkas queue time.`;
-        break;
-      case 'equipment':
-        fallbackResult = `**MineGPT Equipment & OEE Analytics:**\n\n- **Physical Availability (PA):** 92.4% (Target: >90%)\n- **Use of Availability (UA):** 86.1%\n- **Mean Time Between Failures (MTBF):** 142 Jam\n- **Peringatan Preventive Maintenance:** Excavator EX-201 butuh ganti oil filter hidrolik dalam 18 jam operasional.`;
-        break;
-      case 'daily_briefing':
-        fallbackResult = `**MINEGPT DAILY EXECUTIVE BRIEFING (3 AGUSTUS 2026)**\n\n1. **Produksi Kemarin:** 8,420 MT Ore Getting (102% dari target harian).\n2. **Kualitas Ore:** Rata-rata Ni 1.83%, MC 29.2% (Kualitas Premium untuk Smelter RKEF).\n3. **Keuangan:** 1 Tongkang BG-MOR-09 selesai dikirim, estimasi klaim HPM $392,000.\n4. **Safety HSE:** 842 Hari Bebas LTI. Zero kecelakaan kerja.\n5. **Fokus Hari Ini:** Optimasi pemuatan barging 2 unit tongkang di Jetty Port Alpha.`;
-        break;
-      case 'meeting_summary':
-        fallbackResult = `**MineGPT AI Meeting Summary & Action Items:**\n\n**Topik:** Evaluasi Kinerja Penambangan & Kepatuhan RKAB Triwulan III\n\n- **Keputusan 1:** Menambah 4 unit Dump Truck Scania 480 HP di Pit Alpha mulai Senin.\n- **Keputusan 2:** Penyiraman dust suppression diperbanyak 3x sehari di Haul Road KM 4-8.\n- **Action Item 1:** Pak Hendra (Mine Manager) menyerahkan revisi kuota RKAB ke Modals ESDM sebelum tanggal 10.\n- **Action Item 2:** Tim HSE menyelesaikan pengujian sampel air settling pond di laboratorium Sucofindo.`;
-        break;
-      case 'translator':
-        fallbackResult = `**MineGPT Technical Translation (Bahasa Indonesia <-> English <-> Mandarin):**\n\n**Indonesian:** "Pencampuran ore nikel kadar tinggi (1.85% Ni) dengan kadar rendah untuk umpan smelter RKEF."\n**English:** "Blending high-grade nickel ore (1.85% Ni) with low-grade ore for RKEF smelter feed."\n**Mandarin (Chinese):** "将高品位镍矿石 (1.85% Ni) 与低品位矿石混合，用于 RKEF 冶炼厂进料。"`;
-        break;
-      default:
-        fallbackResult = `**MineGPT Analysis (${mode || 'Operational'}):**\n\nSistem AI NickelSmart telah memproses parameter operasional site Anda. Semua indikator kinerja produksi, K3LH, dan finansial berada dalam ambang batas aman sesuai regulasi Kepmen ESDM 1827 K/2018.`;
-        break;
-      }
-    }
+    const fallbackResult = engineRes.formattedResponse;
 
     return res.json({
       success: true,
