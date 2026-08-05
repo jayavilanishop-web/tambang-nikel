@@ -26,26 +26,33 @@ export default async function handler(req: any, res: any) {
         const systemPrompt = `Anda adalah "NickelSmart AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise.
 Konstruksi jawaban Anda harus sangat detail, ramah, profesional, dan menyertakan data kalkulasi atau langkah konkret untuk masalah operasional nikel (RKAB ESDM, Blending Ore, Fleet Dispatch, HPM Nikel, K3LH).`;
 
-        const response = await ai.models.generateContent({
-          model: "gemini-3.6-flash",
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `${systemPrompt}\n\n[Site Context: ${JSON.stringify(mineData || {})}]\n\nPertanyaan User: ${userPrompt}` }]
-            }
-          ],
-          config: {
-            temperature: 0.3,
-            maxOutputTokens: 8192
-          }
-        });
+        const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+        for (const modelName of modelsToTry) {
+          try {
+            const response = await ai.models.generateContent({
+              model: modelName,
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: `${systemPrompt}\n\n[Site Context: ${JSON.stringify(mineData || {})}]\n\nPertanyaan User: ${userPrompt}` }]
+                }
+              ],
+              config: {
+                temperature: 0.3,
+                maxOutputTokens: 8192
+              }
+            });
 
-        if (response.text && response.text.trim().length > 0) {
-          return res.status(200).json({
-            success: true,
-            modelUsed: "gemini-3.6-flash",
-            reply: response.text
-          });
+            if (response.text && response.text.trim().length > 0) {
+              return res.status(200).json({
+                success: true,
+                modelUsed: modelName,
+                reply: response.text
+              });
+            }
+          } catch (mErr: any) {
+            console.warn(`Model ${modelName} call failed:`, mErr?.message || mErr);
+          }
         }
       } catch (geminiError: any) {
         console.warn("Vercel Gemini API call issue, using dynamic mining engine fallback:", geminiError?.message || geminiError);

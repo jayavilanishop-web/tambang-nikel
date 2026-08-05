@@ -27,27 +27,34 @@ export default async function handler(req: any, res: any) {
         const systemInstruction = `Anda adalah "MineGPT", AI Assistant Spesialis Operasional Pertambangan Nikel Indonesia.
 Berikan jawaban teknis, mendalam, dan komprehensif tanpa terputus. Jelaskan rincian kalkulasi teknis (waktu edar, trip/jam, jam kerja efektif, efisiensi, PA/MA, unit cadangan) secara lengkap.`;
 
-        const response = await ai.models.generateContent({
-          model: "gemini-3.6-flash",
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `${systemInstruction}\n\n[Mode: ${mode}]\n[Payload: ${JSON.stringify(payload || {})}]\n\nUser Question:\n${userPrompt}` }]
-            }
-          ],
-          config: {
-            temperature: 0.3,
-            maxOutputTokens: 8192
-          }
-        });
+        const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+        for (const modelName of modelsToTry) {
+          try {
+            const response = await ai.models.generateContent({
+              model: modelName,
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: `${systemInstruction}\n\n[Mode: ${mode}]\n[Payload: ${JSON.stringify(payload || {})}]\n\nUser Question:\n${userPrompt}` }]
+                }
+              ],
+              config: {
+                temperature: 0.3,
+                maxOutputTokens: 8192
+              }
+            });
 
-        if (response.text && response.text.trim().length > 0) {
-          return res.status(200).json({
-            success: true,
-            mode,
-            modelUsed: "gemini-3.6-flash",
-            result: response.text
-          });
+            if (response.text && response.text.trim().length > 0) {
+              return res.status(200).json({
+                success: true,
+                mode,
+                modelUsed: modelName,
+                result: response.text
+              });
+            }
+          } catch (mErr: any) {
+            console.warn(`Model ${modelName} call failed:`, mErr?.message || mErr);
+          }
         }
       } catch (geminiError: any) {
         console.warn("Vercel Gemini API call issue, using dynamic mining engine fallback:", geminiError?.message || geminiError);

@@ -46,19 +46,26 @@ export async function askMineGPT(params: {
       const ai = new GoogleGenAI({ apiKey: clientKey });
       const systemPrompt = `Anda adalah "MineGPT", AI Assistant Operasional Pertambangan Nikel Indonesia. Berikan analisis matematis, teknis, dan presisi tinggi tentang pertambangan nikel (RKAB, HPM, blending ore, armada dump truck, konsumsi BBM, K3LH, dll).`;
       
-      const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
-        contents: [
-          { role: "user", parts: [{ text: `${systemPrompt}\n\nUser query: ${prompt}` }] }
-        ],
-        config: {
-          temperature: 0.3,
-          maxOutputTokens: 8192
-        }
-      });
+      const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+      for (const modelName of modelsToTry) {
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: [
+              { role: "user", parts: [{ text: `${systemPrompt}\n\nUser query: ${prompt}` }] }
+            ],
+            config: {
+              temperature: 0.3,
+              maxOutputTokens: 8192
+            }
+          });
 
-      if (response.text && response.text.trim().length > 0) {
-        return response.text;
+          if (response.text && response.text.trim().length > 0) {
+            return response.text;
+          }
+        } catch (mErr) {
+          console.warn(`Client model ${modelName} call failed:`, mErr);
+        }
       }
     } catch (geminiClientErr) {
       console.warn("Client-side Gemini API call failed, using dynamic mining calculation engine...", geminiClientErr);
@@ -101,19 +108,26 @@ export async function askAIChat(params: {
       const ai = new GoogleGenAI({ apiKey: clientKey });
       const systemPrompt = `Anda adalah "NickelSmart AI", Asisten Pintar Operasional Tambang Nikel Indonesia berstandar Enterprise. Berikan rekomendasi operasional, kalkulasi teknis armada tambang, blending ore, dan regulasi ESDM secara komprehensif.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
-        contents: [
-          { role: "user", parts: [{ text: `${systemPrompt}\n\nUser Query: ${message}` }] }
-        ],
-        config: {
-          temperature: 0.3,
-          maxOutputTokens: 8192
-        }
-      });
+      const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
+      for (const modelName of modelsToTry) {
+        try {
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: [
+              { role: "user", parts: [{ text: `${systemPrompt}\n\nUser Query: ${message}` }] }
+            ],
+            config: {
+              temperature: 0.3,
+              maxOutputTokens: 8192
+            }
+          });
 
-      if (response.text && response.text.trim().length > 0) {
-        return response.text;
+          if (response.text && response.text.trim().length > 0) {
+            return response.text;
+          }
+        } catch (mErr) {
+          console.warn(`Client chat model ${modelName} call failed:`, mErr);
+        }
       }
     } catch (geminiClientErr) {
       console.warn("Client-side Gemini API call failed, using dynamic mining calculation engine...", geminiClientErr);

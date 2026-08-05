@@ -14,36 +14,34 @@ app.use(express.json({ limit: "10mb" }));
 
 // Helper for Gemini AI client with lazy init
 function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
   if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
     return null;
   }
   return new GoogleGenAI({ apiKey });
 }
 
-// Helper to attempt call with primary model gemini-3.6-flash with retry on temporary demand spikes
+// Helper to attempt call with primary model gemini-3.6-flash and fallback to gemini-flash-latest
 async function generateContentWithFallback(ai: GoogleGenAI, params: { contents: any; config?: any }) {
-  const attempts = 2;
+  const modelsToTry = ["gemini-3.6-flash", "gemini-flash-latest"];
   let lastErr: any = null;
 
-  for (let i = 0; i < attempts; i++) {
+  for (const model of modelsToTry) {
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-3.6-flash",
+        model,
         contents: params.contents,
         config: params.config
       });
-      return { response, model: "gemini-3.6-flash" };
+      if (response.text && response.text.trim().length > 0) {
+        return { response, model };
+      }
     } catch (err: any) {
       lastErr = err;
-      console.warn(`Gemini API attempt ${i + 1} failed:`, err?.message || err);
-      if (i < attempts - 1) {
-        // Short pause before retrying on temporary demand spikes
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      }
+      console.warn(`Gemini API call with model ${model} failed:`, err?.message || err);
     }
   }
-  throw lastErr;
+  throw lastErr || new Error("Tidak ada respon dari Gemini API.");
 }
 
 // System License Storage & Verification (Commercial SaaS Engine)
