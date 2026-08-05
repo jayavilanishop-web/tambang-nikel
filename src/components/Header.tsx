@@ -135,9 +135,6 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-400 bg-clip-text text-transparent">
                     NickelSmart AI
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    Indonesia
-                  </span>
                 </div>
                 <p className="text-[11px] text-slate-400 font-medium">
                   {language === 'id' ? 'Enterprise Nickel Mining ERP & AI' : 'Enterprise Nickel ERP Platform'}
