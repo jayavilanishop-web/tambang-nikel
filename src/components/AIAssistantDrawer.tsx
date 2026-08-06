@@ -142,13 +142,48 @@ Ada yang bisa saya bantu untuk operasional site Anda hari ini?`,
         
         {/* Drawer Header */}
         <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-md shadow-emerald-900/40">
-              <Sparkles className="w-5 h-5 text-amber-300" />
+          <div className="flex items-center gap-3">
+            {/* Mining AI Human Engineer Avatar Header Badge */}
+            <div className="relative w-10 h-10 rounded-xl bg-slate-900 border border-emerald-500/60 p-1 flex items-center justify-center shrink-0 shadow-md shadow-emerald-900/30">
+              <svg viewBox="0 0 100 100" className="w-8 h-8">
+                <defs>
+                  <linearGradient id="hdrHelmet3D" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#fef08a" />
+                    <stop offset="100%" stopColor="#b45309" />
+                  </linearGradient>
+                  <linearGradient id="hdrSkin3D" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fed7aa" />
+                    <stop offset="100%" stopColor="#fb923c" />
+                  </linearGradient>
+                  <linearGradient id="hdrVest3D" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ff7849" />
+                    <stop offset="100%" stopColor="#ea580c" />
+                  </linearGradient>
+                </defs>
+                <path d="M 22 84 C 22 70, 32 64, 50 64 C 68 64, 78 70, 78 84 L 80 96 L 20 96 Z" fill="url(#hdrVest3D)" />
+                <rect x="28" y="66" width="10" height="28" rx="2" fill="#ffffff" opacity="0.9" />
+                <rect x="62" y="66" width="10" height="28" rx="2" fill="#ffffff" opacity="0.9" />
+                <rect x="42" y="54" width="16" height="14" rx="4" fill="url(#hdrSkin3D)" />
+                <ellipse cx="50" cy="46" rx="21" ry="20" fill="url(#hdrSkin3D)" />
+                <ellipse cx="40" cy="42" rx="3" ry="3.5" fill="#1e293b" />
+                <ellipse cx="60" cy="42" rx="3" ry="3.5" fill="#1e293b" />
+                <rect x="32" y="38" width="16" height="10" rx="3" fill="#0284c7" opacity="0.8" />
+                <rect x="52" y="38" width="16" height="10" rx="3" fill="#0284c7" opacity="0.8" />
+                <line x1="48" y1="42" x2="52" y2="42" stroke="#0f172a" strokeWidth="2" />
+                <path d="M 43 53 Q 50 58 57 53" stroke="#9a3412" strokeWidth="2" strokeLinecap="round" fill="none" />
+                <path d="M 23 35 C 23 12, 77 12, 77 35 Z" fill="url(#hdrHelmet3D)" />
+                <path d="M 16 35 C 16 33, 84 33, 84 35 C 84 39, 16 39, 16 35 Z" fill="#d97706" />
+                <rect x="43" y="24" width="14" height="9" rx="3" fill="#1e293b" />
+                <circle cx="50" cy="28.5" r="3.5" fill="#38bdf8" />
+              </svg>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-slate-950" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-100 text-sm">NickelSmart AI Assistant</h3>
-              <p className="text-[11px] text-emerald-400 font-medium">Asisten Operasional Pertambangan Nikel</p>
+              <div className="flex items-center gap-1.5">
+                <h3 className="font-bold text-slate-100 text-sm">MineGPT / NickelSmart AI</h3>
+                <span className="px-1.5 py-0.2 text-[9px] font-extrabold bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">NIKEL SPECIALIST</span>
+              </div>
+              <p className="text-[11px] text-emerald-400 font-medium">Asisten Pintar Operasional Tambang Nikel</p>
             </div>
           </div>
           <button

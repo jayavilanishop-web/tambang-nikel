@@ -5,6 +5,7 @@ import { Sidebar, ActiveModule } from './components/Sidebar';
 import { LicenseModal } from './components/LicenseModal';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { PushNotificationCenter } from './components/PushNotificationCenter';
+import { FloatingAIAvatar } from './components/FloatingAIAvatar';
 
 import { DashboardModule } from './components/modules/DashboardModule';
 import { ExplorationPitModule } from './components/modules/ExplorationPitModule';
@@ -494,6 +495,9 @@ export default function App() {
         onUpdateLicense={setLicenseInfo}
         language={language}
       />
+
+      {/* Floating AI Mining Avatar Button */}
+      <FloatingAIAvatar onOpenAIDrawer={() => setIsAIDrawerOpen(true)} />
 
       {/* Smart AI Assistant Drawer */}
       <AIAssistantDrawer
