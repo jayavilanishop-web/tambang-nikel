@@ -50,10 +50,12 @@ import { Language } from '../../types';
 
 interface FinanceAccountingModuleProps {
   language: Language;
+  initialTab?: string;
 }
 
 export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = ({
-  language
+  language,
+  initialTab
 }) => {
   const [activeTab, setActiveTab] = useState<
     | 'cash_flow'
@@ -65,7 +67,7 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
     | 'receivables_payables'
     | 'tax_management'
     | 'bank_multicurrency'
-  >('cash_flow');
+  >((initialTab as any) || 'cash_flow');
 
   const [selectedCurrency, setSelectedCurrency] = useState<'USD' | 'IDR'>('USD');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -103,12 +105,15 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
     { assetId: 'AST-CRUSHER-01', assetName: 'Primary Jaw Crusher Plant 500 TPH', category: 'Processing Plant Asset', purchaseDate: '2023-01-10', acquisitionCostUsd: 4200000, accumulatedDeprecUsd: 1260000, bookValueUsd: 2940000, usefulLifeYears: 10, method: 'STRAIGHT_LINE' }
   ]);
 
-  // Budget & Cost Center Breakdown
+  // Budget & Cost Center Breakdown per Departemen / Bagian Tambang
   const [budgetCostCenters, setBudgetCostCenters] = useState([
-    { code: 'CC-PIT-ALPHA', name: 'Pit Alpha Mining Operations', budgetAllocatedUsd: 12500000, actualSpentUsd: 9840000, varianceUsd: 2660000, utilizationPct: 78.7 },
-    { code: 'CC-WORKSHOP-MAINT', name: 'Heavy Equipment Central Workshop', budgetAllocatedUsd: 4800000, actualSpentUsd: 3950000, varianceUsd: 850000, utilizationPct: 82.3 },
-    { code: 'CC-JETTY-PORT', name: 'Jetty Barging & Port Logistics', budgetAllocatedUsd: 3200000, actualSpentUsd: 2410000, varianceUsd: 790000, utilizationPct: 75.3 },
-    { code: 'CC-HSE-ENVIRONMENT', name: 'HSE, ESG & Reclamation Works', budgetAllocatedUsd: 1800000, actualSpentUsd: 1220000, varianceUsd: 580000, utilizationPct: 67.8 }
+    { code: 'CC-PIT-ALPHA', name: 'Pit Alpha Mining Operations', dept: 'Departemen Penambangan (Mining)', budgetAllocatedUsd: 12500000, actualSpentUsd: 9840000, varianceUsd: 2660000, utilizationPct: 78.7 },
+    { code: 'CC-GEOLOGY-EXPL', name: 'Geology, Exploration & Survey', dept: 'Departemen Geologi & EKS', budgetAllocatedUsd: 2200000, actualSpentUsd: 1650000, varianceUsd: 550000, utilizationPct: 75.0 },
+    { code: 'CC-WORKSHOP-MAINT', name: 'Heavy Equipment Central Workshop', dept: 'Departemen Maintenance Fleet', budgetAllocatedUsd: 4800000, actualSpentUsd: 3950000, varianceUsd: 850000, utilizationPct: 82.3 },
+    { code: 'CC-JETTY-PORT', name: 'Jetty Barging & Port Logistics', dept: 'Departemen Logistik Jetty', budgetAllocatedUsd: 3200000, actualSpentUsd: 2410000, varianceUsd: 790000, utilizationPct: 75.3 },
+    { code: 'CC-SMELTER-PLANT', name: 'Ore Processing & Blending Plant', dept: 'Departemen Pengolahan Smelter', budgetAllocatedUsd: 5500000, actualSpentUsd: 4100000, varianceUsd: 1400000, utilizationPct: 74.5 },
+    { code: 'CC-HSE-ENVIRONMENT', name: 'HSE, ESG & Reclamation Works', dept: 'Departemen K3 & Lingkungan', budgetAllocatedUsd: 1800000, actualSpentUsd: 1220000, varianceUsd: 580000, utilizationPct: 67.8 },
+    { code: 'CC-HR-ADMIN', name: 'Human Capital, GA & Camp Operations', dept: 'Departemen HR & General Affairs', budgetAllocatedUsd: 2600000, actualSpentUsd: 1980000, varianceUsd: 620000, utilizationPct: 76.2 }
   ]);
 
   // Accounts Receivable (AR) & Accounts Payable (AP) Invoices
@@ -135,6 +140,23 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
     { bankName: 'Bank Central Asia (BCA IDR Operational)', accountNo: '084-332190-8', balanceUsd: 910769, balanceIdr: 14800000000, status: 'RECONCILED' },
     { bankName: 'Bank Himbara BRI (Royalty Escrow USD)', accountNo: '001-99-440112-2', balanceUsd: 3500000, balanceIdr: 56875000000, status: 'RECONCILED' }
   ]);
+
+  // Detailed Operational Expenses (Biaya Operasional Tambang Dataset)
+  const [opexRecords, setOpexRecords] = useState([
+    { id: 'OPEX-2026-001', category: 'Bahan Bakar Solar B35 Industry', costCenter: 'CC-PIT-ALPHA', vendor: 'PT Pertamina Patra Niaga', monthlyAmountUsd: 1250000, costPerTonUsd: 8.33, status: 'APPROVED', lastUpdated: '2026-08-05', note: 'Pasokan solar 850.000 Liter/bulan untuk Fleet Pit Alpha & Hauling' },
+    { id: 'OPEX-2026-002', category: 'Jasa Kontraktor Stripping Overburden & Mining', costCenter: 'CC-PIT-ALPHA', vendor: 'PT Pama Persada / PT Delta Dunia', monthlyAmountUsd: 1850000, costPerTonUsd: 12.33, status: 'APPROVED', lastUpdated: '2026-08-04', note: 'Jasa pemindahan OB 420.000 BCM & pengupasan limonin' },
+    { id: 'OPEX-2026-003', category: 'Pemeliharaan & Spareparts Alat Berat (Workshop)', costCenter: 'CC-WORKSHOP-MAINT', vendor: 'PT Trakindo Utama / Komatsu', monthlyAmountUsd: 680000, costPerTonUsd: 4.53, status: 'APPROVED', lastUpdated: '2026-08-06', note: 'Overhaul engine CAT 777E & penggantian bucket tooth Excavator PC2000' },
+    { id: 'OPEX-2026-004', category: 'Logistik Jetty, Loading & Transshipment Tongkang', costCenter: 'CC-JETTY-PORT', vendor: 'PT Pelayaran Nasional / Jetty Site', monthlyAmountUsd: 420000, costPerTonUsd: 2.80, status: 'APPROVED', lastUpdated: '2026-08-03', note: 'Sewa conveyor, tugboat & biaya loading 150.000 MT bijih nikel ke barge' },
+    { id: 'OPEX-2026-005', category: 'Gaji, Tunjangan Site & Mess Karyawan', costCenter: 'CC-PIT-ALPHA', vendor: 'Internal HR Payroll', monthlyAmountUsd: 520000, costPerTonUsd: 3.47, status: 'APPROVED', lastUpdated: '2026-08-01', note: 'Gaji 1.420 SDM site, insentif roster, & operasional catering camp' },
+    { id: 'OPEX-2026-006', category: 'Pengelolaan Lingkungan, Reklamasi & K3 (HSE)', costCenter: 'CC-HSE-ENVIRONMENT', vendor: 'Internal HSE & Lab Lingkungan', monthlyAmountUsd: 210000, costPerTonUsd: 1.40, status: 'APPROVED', lastUpdated: '2026-08-02', note: 'Pemantauan air asam tambang, penanaman cover crop, & APD K3' }
+  ]);
+
+  const [showOpexModal, setShowOpexModal] = useState(false);
+  const [newOpexCategory, setNewOpexCategory] = useState('Bahan Bakar Solar B35 Industry');
+  const [newOpexCostCenter, setNewOpexCostCenter] = useState('CC-PIT-ALPHA');
+  const [newOpexVendor, setNewOpexVendor] = useState('PT Pertamina Patra Niaga');
+  const [newOpexAmountUsd, setNewOpexAmountUsd] = useState(250000);
+  const [newOpexNote, setNewOpexNote] = useState('Pembelian pelumas & BBM cadangan site');
 
   // Modals state
   const [showJvModal, setShowJvModal] = useState(false);
@@ -195,7 +217,7 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
           { id: 'cash_flow', label: 'Arus Kas (Cash Flow)', icon: TrendingUp },
           { id: 'general_ledger', label: 'Buku Besar & Jurnal (General Ledger)', icon: BookOpen },
           { id: 'asset_management', label: 'Aset Tetap (Fixed Assets & Deprec)', icon: Building },
-          { id: 'budget_cost_center', label: 'Anggaran & Cost Center (Budget)', icon: PieChart },
+          { id: 'budget_cost_center', label: 'Biaya Operasional & Cost Center (OPEX)', icon: PieChart },
           { id: 'financial_statements', label: 'Laporan Keuangan (Income & BS)', icon: FileSpreadsheet },
           { id: 'receivables_payables', label: 'Piutang & Hutang (AR / AP)', icon: Receipt },
           { id: 'tax_management', label: 'Pajak & Royalti (Tax & Royalty)', icon: Calculator },
@@ -359,38 +381,190 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
         </div>
       )}
 
-      {/* TAB 4: BUDGET & COST CENTER */}
+      {/* TAB 4: BUDGET & COST CENTER / BIAYA OPERASIONAL */}
       {activeTab === 'budget_cost_center' && (
         <div className="space-y-6 text-xs">
+          {/* Headline Operational Expense KPIs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Operational Cash Cost Per Ton</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-extrabold text-emerald-400 font-mono">$32.86 / MT</span>
+                <span className="text-[10px] text-emerald-400 font-bold">(-4.2% vs Budget)</span>
+              </div>
+              <p className="text-[10px] text-slate-500">Biaya Penambangan, Fuel & Hauling per Ton Ore</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Total Realisasi Biaya Operasional (YTD)</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-extrabold text-slate-100 font-mono">
+                  ${(budgetCostCenters.reduce((acc, curr) => acc + (curr.actualSpentUsd || 0), 0)).toLocaleString('en-US')} USD
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-mono">
+                Rp {((budgetCostCenters.reduce((acc, curr) => acc + (curr.actualSpentUsd || 0), 0)) * fxRates.USD_IDR).toLocaleString('id-ID')}
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Anggaran OPEX Dialokasikan (RKAB)</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-extrabold text-amber-300 font-mono">
+                  ${(budgetCostCenters.reduce((acc, curr) => acc + (curr.budgetAllocatedUsd || 0), 0)).toLocaleString('en-US')} USD
+                </span>
+              </div>
+              <p className="text-[10px] text-emerald-400 font-semibold">Sisa Anggaran: ${(budgetCostCenters.reduce((acc, curr) => acc + (curr.varianceUsd || 0), 0)).toLocaleString('en-US')}</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-1">
+              <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block">Rasio Efisiensi Penggunaan Anggaran</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-extrabold text-indigo-400 font-mono">77.2%</span>
+                <span className="text-[10px] text-indigo-300 font-bold">ON TARGET</span>
+              </div>
+              <p className="text-[10px] text-slate-500">Pengawasan Cost Center Tambang & Plant</p>
+            </div>
+          </div>
+
+          {/* Departmental Cost Center Cards */}
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-            <h3 className="font-bold text-slate-100 text-sm border-b border-slate-800 pb-3">
-              Alokasi Anggaran Departermen & Pengawasan Cost Center OPEX/CAPEX
-            </h3>
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm">
+                  Alokasi Anggaran Departemen & Pengawasan Cost Center Biaya Operasional (OPEX)
+                </h3>
+                <p className="text-[11px] text-slate-400">Monitoring realisasi pengeluaran operasional per deparlemen tambang vs batas dokumen RKAB ESDM</p>
+              </div>
+              <button
+                onClick={() => setShowOpexModal(true)}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center gap-1.5 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Input Biaya Operasional Baru</span>
+              </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {budgetCostCenters.map((c) => (
-                <div key={c.code} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+                <div key={c.code} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3 hover:border-slate-700 transition-all">
                   <div className="flex justify-between items-center border-b border-slate-800 pb-2">
                     <div>
                       <strong className="text-slate-100 text-sm font-bold block">{c.name}</strong>
-                      <span className="text-slate-400 text-[10px] font-mono">Kode: {c.code}</span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-emerald-400 font-semibold text-[10px] bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">{c.dept}</span>
+                        <span className="text-slate-500 text-[10px] font-mono">Kode: {c.code}</span>
+                      </div>
                     </div>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] font-mono">
-                      {c.utilizationPct}% Used
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] font-mono border border-emerald-500/30">
+                      {c.utilizationPct}% Terpakai
                     </span>
                   </div>
 
-                  <div className="space-y-1 text-slate-300 font-mono text-[11px]">
-                    <p>Anggaran Dialokasikan: <strong className="text-slate-100">${(c.budgetAllocatedUsd ?? 0).toLocaleString('en-US')}</strong></p>
-                    <p>Realisasi Aktual: <strong className="text-amber-300">${(c.actualSpentUsd ?? 0).toLocaleString('en-US')}</strong></p>
-                    <p>Sisa Anggaran: <strong className="text-emerald-400 font-bold">${(c.varianceUsd ?? 0).toLocaleString('en-US')}</strong></p>
+                  <div className="grid grid-cols-3 gap-2 text-slate-300 font-mono text-[11px]">
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Anggaran RKAB:</span>
+                      <strong className="text-slate-100">${(c.budgetAllocatedUsd ?? 0).toLocaleString('en-US')}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Realisasi OPEX:</span>
+                      <strong className="text-amber-300">${(c.actualSpentUsd ?? 0).toLocaleString('en-US')}</strong>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block text-[10px]">Sisa Alokasi:</span>
+                      <strong className="text-emerald-400 font-bold">${(c.varianceUsd ?? 0).toLocaleString('en-US')}</strong>
+                    </div>
                   </div>
 
-                  <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                    <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${c.utilizationPct}%` }} />
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[10px] text-slate-400">
+                      <span>Progres Pengeluaran</span>
+                      <span>{c.utilizationPct}%</span>
+                    </div>
+                    <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${c.utilizationPct}%` }} />
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Detailed Operational Expenses Breakdown Table */}
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <PieChart className="w-4 h-4 text-emerald-400" />
+                  Rincian Item Biaya Operasional Utama (Monthly Operational Cash Costs)
+                </h3>
+                <p className="text-[11px] text-slate-400">Daftar biaya operasional berkala: BBM Solar B35, Kontraktor Mining, Workshop, Jetty, SDM & HSE</p>
+              </div>
+
+              <div className="relative w-full md:w-64">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Cari biaya, vendor, atau kateg..."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse font-mono">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-[10px]">
+                    <th className="py-2.5 px-3">Kode & Kategori Biaya</th>
+                    <th className="py-2.5 px-3">Cost Center & Vendor</th>
+                    <th className="py-2.5 px-3">Beban Bulanan (USD)</th>
+                    <th className="py-2.5 px-3">Konversi IDR (Rupiah)</th>
+                    <th className="py-2.5 px-3">Unit Cost ($/MT Ore)</th>
+                    <th className="py-2.5 px-3">Keterangan Operasional</th>
+                    <th className="py-2.5 px-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {opexRecords
+                    .filter(o => 
+                      !searchTerm || 
+                      o.category.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                      o.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      o.costCenter.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                    .map((item, idx) => (
+                      <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3 px-3">
+                          <strong className="font-bold text-emerald-400 block font-sans text-xs">{item.category}</strong>
+                          <span className="text-[10px] text-slate-500">{item.id}</span>
+                        </td>
+                        <td className="py-3 px-3 font-sans">
+                          <span className="text-slate-200 block text-xs font-semibold">{item.vendor}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">{item.costCenter}</span>
+                        </td>
+                        <td className="py-3 px-3 text-emerald-400 font-bold text-xs">
+                          ${item.monthlyAmountUsd.toLocaleString('en-US')}
+                        </td>
+                        <td className="py-3 px-3 text-slate-300">
+                          Rp {(item.monthlyAmountUsd * fxRates.USD_IDR).toLocaleString('id-ID')}
+                        </td>
+                        <td className="py-3 px-3 text-amber-300 font-bold">
+                          ${item.costPerTonUsd.toFixed(2)} / MT
+                        </td>
+                        <td className="py-3 px-3 text-slate-300 font-sans text-[11px] max-w-xs">
+                          {item.note}
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-sans font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            {item.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -888,6 +1062,137 @@ export const FinanceAccountingModule: React.FC<FinanceAccountingModuleProps> = (
               </button>
               <button
                 onClick={() => setShowTaxModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: INPUT BIAYA OPERASIONAL BARU (OPEX) */}
+      {showOpexModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                <PieChart className="w-4 h-4 text-emerald-400" /> Catat Biaya Operasional Tambang Baru (OPEX)
+              </h3>
+              <button onClick={() => setShowOpexModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-slate-400 block mb-1">Kategori Biaya Operasional:</label>
+                <select
+                  value={newOpexCategory}
+                  onChange={(e) => setNewOpexCategory(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                >
+                  <option value="Bahan Bakar Solar B35 Industry">Bahan Bakar Solar B35 Industry</option>
+                  <option value="Jasa Kontraktor Stripping Overburden & Mining">Jasa Kontraktor Stripping Overburden & Mining</option>
+                  <option value="Pemeliharaan & Spareparts Alat Berat (Workshop)">Pemeliharaan & Spareparts Alat Berat (Workshop)</option>
+                  <option value="Logistik Jetty, Loading & Transshipment Tongkang">Logistik Jetty, Loading & Transshipment Tongkang</option>
+                  <option value="Gaji, Tunjangan Site & Mess Karyawan">Gaji, Tunjangan Site & Mess Karyawan</option>
+                  <option value="Pengelolaan Lingkungan, Reklamasi & K3 (HSE)">Pengelolaan Lingkungan, Reklamasi & K3 (HSE)</option>
+                  <option value="Sewa Peralatan Tambang Auxiliary">Sewa Peralatan Tambang Auxiliary</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-400 block mb-1">Cost Center Anggaran:</label>
+                  <select
+                    value={newOpexCostCenter}
+                    onChange={(e) => setNewOpexCostCenter(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                  >
+                    {budgetCostCenters.map((cc) => (
+                      <option key={cc.code} value={cc.code}>
+                        {cc.code} - {cc.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Vendor / Pihak Ketiga:</label>
+                  <input
+                    type="text"
+                    value={newOpexVendor}
+                    onChange={(e) => setNewOpexVendor(e.target.value)}
+                    placeholder="Contoh: PT Pertamina Patra Niaga"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Beban Biaya Bulanan ($ USD):</label>
+                <input
+                  type="number"
+                  value={newOpexAmountUsd}
+                  onChange={(e) => setNewOpexAmountUsd(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-bold font-mono focus:outline-none focus:border-emerald-500"
+                />
+                <span className="text-[10px] text-slate-500 block mt-1">
+                  Est. Rupiah: Rp {(newOpexAmountUsd * fxRates.USD_IDR).toLocaleString('id-ID')} | Est. Cash Cost: ${(newOpexAmountUsd / 150000).toFixed(2)} / MT Ore
+                </span>
+              </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Catatan & Justifikasi Operasional:</label>
+                <textarea
+                  value={newOpexNote}
+                  onChange={(e) => setNewOpexNote(e.target.value)}
+                  rows={2}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => {
+                  const newRecord = {
+                    id: `OPEX-2026-${String(opexRecords.length + 1).padStart(3, '0')}`,
+                    category: newOpexCategory,
+                    costCenter: newOpexCostCenter,
+                    vendor: newOpexVendor || 'Vendor Site',
+                    monthlyAmountUsd: newOpexAmountUsd,
+                    costPerTonUsd: Number((newOpexAmountUsd / 150000).toFixed(2)),
+                    status: 'APPROVED',
+                    lastUpdated: new Date().toISOString().slice(0, 10),
+                    note: newOpexNote || 'Pencatatan pengeluaran operasional baru'
+                  };
+
+                  setOpexRecords(prev => [newRecord, ...prev]);
+
+                  // Also update cost center actual spent
+                  setBudgetCostCenters(prev => prev.map(cc => {
+                    if (cc.code === newOpexCostCenter) {
+                      const updatedSpent = cc.actualSpentUsd + newOpexAmountUsd;
+                      const updatedVariance = cc.budgetAllocatedUsd - updatedSpent;
+                      const updatedPct = Number(((updatedSpent / cc.budgetAllocatedUsd) * 100).toFixed(1));
+                      return {
+                        ...cc,
+                        actualSpentUsd: updatedSpent,
+                        varianceUsd: updatedVariance,
+                        utilizationPct: updatedPct
+                      };
+                    }
+                    return cc;
+                  }));
+
+                  setShowOpexModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold flex items-center justify-center gap-2"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Simpan & Catat Biaya Operasional
+              </button>
+              <button
+                onClick={() => setShowOpexModal(false)}
                 className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold"
               >
                 Batal

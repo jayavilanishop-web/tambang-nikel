@@ -99,9 +99,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-lg text-slate-100 tracking-tight">NickelSmart AI</span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  ESDM V3.4
-                </span>
               </div>
               <p className="text-[10px] text-slate-400 font-mono">Enterprise Mining Intelligence Platform</p>
             </div>
@@ -114,6 +111,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <a href="#solusi" className="hover:text-emerald-400 transition-colors">Solusi AI</a>
             <a href="#perbandingan" className="hover:text-amber-400 transition-colors">Perbandingan</a>
             <a href="#kalkulator-roi" className="hover:text-indigo-400 transition-colors">Kalkulator ROI</a>
+            <a href="#harga-layanan" className="hover:text-emerald-400 transition-colors font-bold">Harga Layanan</a>
             <a href="#modul-erp" className="hover:text-indigo-400 transition-colors">27+ Modul</a>
             <a href="#cta" className="hover:text-emerald-300 transition-colors font-bold">Mulai Demo</a>
           </nav>
@@ -620,6 +618,219 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         </div>
 
+      </section>
+
+      {/* Harga Layanan Aplikasi Section */}
+      <section id="harga-layanan" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-10 border-t border-slate-800/80">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <DollarSign className="w-3.5 h-3.5" />
+            <span>Transparan & Terukur</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100">
+            Harga Layanan Aplikasi & Lisensi Enterprise
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            Investasi terukur untuk digitalisasi tambang nikel konsesi & smelter RKEF dengan skema langganan tahunan, termasuk pemeliharaan sistem, garansi kepatuhan ESDM, dan dukungan teknis 24/7.
+          </p>
+        </div>
+
+        {/* Pricing Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              tierId: 'Trial Mode',
+              name: 'Trial Evaluasi (30 Hari)',
+              price: 'Gratis',
+              period: '/ 30 Hari Evaluasi',
+              seats: '5 User Seats',
+              target: 'IUP Baru & Evaluasi Fitur Site',
+              highlight: false,
+              badge: 'Free Trial',
+              features: [
+                'Akses Dasbor Analitik Dasar',
+                'Simulasi Pit & Ore Model (1 Pit)',
+                'Kalkulator HPM Nikel ESDM Dasar',
+                'Uji Coba Blending Stockpile AI',
+                'Dukungan Komunitas & Portal Bantuan'
+              ],
+              buttonText: 'Coba Gratis 30 Hari',
+              buttonClass: 'bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold'
+            },
+            {
+              tierId: 'Standard Mine Tier',
+              name: 'Standard Mine Tier',
+              price: 'Rp 450 Juta',
+              period: '/ Tahun',
+              seats: '25 User Seats',
+              target: 'Kontraktor Tambang & Single Pit',
+              highlight: false,
+              badge: 'Single Site',
+              features: [
+                'Dasbor Analitik Real-Time 360°',
+                'Modul Pit & Ore Block Model Complete',
+                'Telemetri GPS Fleet & Monitoring Solar B35',
+                'Stockpile Blending & Tonase Timbangan',
+                'Offline Mobile App (5 Limit Perangkat)',
+                'Ekspor Laporan RKAB Format Standar ESDM'
+              ],
+              buttonText: 'Pilih Paket Standard',
+              buttonClass: 'bg-indigo-600 hover:bg-indigo-500 text-white font-bold'
+            },
+            {
+              tierId: 'Smelter & Mine Pro Tier',
+              name: 'Smelter & Mine Pro Tier',
+              price: 'Rp 850 Juta',
+              period: '/ Tahun',
+              seats: '75 User Seats',
+              target: 'Konsesi Tambang Nikel & Smelter RKEF',
+              highlight: true,
+              badge: 'Paling Populer',
+              features: [
+                'Semua Fitur Standard Mine Tier',
+                'Smart AI Nickel Ore Blending Engine (Ni/Fe/MC)',
+                'Kalkulator HPM Nikel & Royalti PNBP Auto-Sync',
+                'Barging, Jetty Scheduling & Sucofindo COA API',
+                'Penyusunan Laporan RKAB ESDM Otomatis AI (10 Detik)',
+                'Aktivasi Offline Challenge & Multi-Device Sync',
+                'Integrasi SIMBARA Gateway Kemenkeu Ready'
+              ],
+              buttonText: 'Pilih Paket Pro (Rekomendasi)',
+              buttonClass: 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
+            },
+            {
+              tierId: 'Enterprise Unlimited Tier',
+              name: 'Enterprise Unlimited Tier',
+              price: 'Rp 1,45 Miliar',
+              period: '/ Tahun (Multi-Site)',
+              seats: 'Unlimited Seats',
+              target: 'Mining Holding & Smelter Conglomerate',
+              highlight: false,
+              badge: 'Full Suite',
+              features: [
+                'Semua Fitur Pro Tier Unlocked',
+                'Dedicated NickelSmart AI Engine (Custom Model)',
+                'API Hub Sync (SAP, Oracle ERP, ESDM MODI)',
+                'Multi-Site Pit & Multi-Company Holdings',
+                'SLA Uptime 99.9% & On-Site Engineer Support',
+                'Custom Private Cloud / On-Premise Server Option'
+              ],
+              buttonText: 'Hubungi Sales Enterprise',
+              buttonClass: 'bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold border border-amber-500/30'
+            }
+          ].map((plan, idx) => (
+            <div
+              key={idx}
+              className={`p-6 rounded-3xl bg-slate-900 border flex flex-col justify-between transition-all space-y-6 relative ${
+                plan.highlight
+                  ? 'border-emerald-500 shadow-2xl shadow-emerald-500/20 ring-2 ring-emerald-500/40 bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/40'
+                  : 'border-slate-800 hover:border-slate-700'
+              }`}
+            >
+              {plan.highlight && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 fill-slate-950" />
+                  <span>{plan.badge}</span>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                  <div>
+                    <h3 className="font-extrabold text-slate-100 text-base">{plan.name}</h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{plan.target}</p>
+                  </div>
+                  {!plan.highlight && (
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                      {plan.badge}
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">{plan.price}</span>
+                    <span className="text-xs text-slate-400 font-medium">{plan.period}</span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 text-[11px] font-semibold">
+                    <Users className="w-3 h-3" />
+                    <span>Kapasitas: {plan.seats}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-3 border-t border-slate-800/80 text-xs">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Fitur & Layanan Termasuk:</p>
+                  {plan.features.map((feat, fIdx) => (
+                    <div key={fIdx} className="flex items-start gap-2 text-slate-300 text-[11px] leading-tight">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-4 border-t border-slate-800/80">
+                <button
+                  onClick={() => {
+                    if (plan.tierId === 'Trial Mode') {
+                      onEnterApp('Super Admin');
+                    } else {
+                      setIsConsultModalOpen(true);
+                    }
+                  }}
+                  className={`w-full py-3 rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${plan.buttonClass}`}
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>{plan.buttonText}</span>
+                </button>
+                <p className="text-[10px] text-center text-slate-500">Bisa di-upgrade kapan saja • Garansi SLA ESDM</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* SLA & Service Guarantee Banner */}
+        <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div>
+              <strong className="text-slate-200 block">Kepatuhan ESDM 100%</strong>
+              <span className="text-[10px] text-slate-400">RKAB, SIMBARA, e-PNBP Ready</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center shrink-0">
+              <Lock className="w-5 h-5 text-indigo-400" />
+            </div>
+            <div>
+              <strong className="text-slate-200 block">Sertifikasi Keamanan</strong>
+              <span className="text-[10px] text-slate-400">Enkripsi AES-256 & ISO 27001</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5 text-amber-400" />
+            </div>
+            <div>
+              <strong className="text-slate-200 block">Dukungan Site 24/7</strong>
+              <span className="text-[10px] text-slate-400">Tim On-Site Morowali & Halmahera</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5 text-teal-400" />
+            </div>
+            <div>
+              <strong className="text-slate-200 block">Deployment Cepat</strong>
+              <span className="text-[10px] text-slate-400">Go-Live dalam waktu &lt; 48 Jam</span>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* 27+ Enterprise Modules Showcase Grid */}
