@@ -28,7 +28,14 @@ import {
   Sliders, 
   X, 
   Users, 
-  Briefcase 
+  Briefcase,
+  AlertTriangle,
+  XCircle,
+  Check,
+  PhoneCall,
+  Boxes,
+  Compass,
+  Scale
 } from 'lucide-react';
 import { Language, UserRole } from '../types';
 
@@ -46,6 +53,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loginTab, setLoginTab] = useState<'quick_sso' | 'credentials' | 'company_code'>('quick_sso');
   const [selectedDemoRole, setSelectedDemoRole] = useState<UserRole>('Super Admin');
+  const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
 
   // ROI Calculator State
   const [monthlyProductionWmt, setMonthlyProductionWmt] = useState<number>(100000); // 100k WMT/month
@@ -77,12 +85,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-indigo-600/20 via-purple-600/10 to-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
       
-      {/* Top Floating Glass Navigation */}
+      {/* Top Floating Navigation */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 px-4 lg:px-8 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
           {/* Brand Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => onEnterApp('Super Admin')}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20">
               <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
                 <Cpu className="w-5 h-5 text-indigo-400" />
@@ -91,8 +99,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-lg text-slate-100 tracking-tight">NickelSmart AI</span>
-                <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  Enterprise Mining ERP v3.8
+                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  ESDM V3.4
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 font-mono">Enterprise Mining Intelligence Platform</p>
@@ -100,12 +108,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
-            <a href="#fitur" className="hover:text-indigo-400 transition-colors">Fitur Utama</a>
-            <a href="#manfaat" className="hover:text-indigo-400 transition-colors">Manfaat Kunci</a>
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-300">
+            <a href="#hook" className="hover:text-indigo-400 transition-colors">Utama</a>
+            <a href="#masalah" className="hover:text-rose-400 transition-colors">Masalah Tambang</a>
+            <a href="#solusi" className="hover:text-emerald-400 transition-colors">Solusi AI</a>
+            <a href="#perbandingan" className="hover:text-amber-400 transition-colors">Perbandingan</a>
             <a href="#kalkulator-roi" className="hover:text-indigo-400 transition-colors">Kalkulator ROI</a>
-            <a href="#modul-erp" className="hover:text-indigo-400 transition-colors">27+ Modul ERP</a>
-            <a href="#keamanan" className="hover:text-indigo-400 transition-colors">Keamanan Siber & API</a>
+            <a href="#modul-erp" className="hover:text-indigo-400 transition-colors">27+ Modul</a>
+            <a href="#cta" className="hover:text-emerald-300 transition-colors font-bold">Mulai Demo</a>
           </nav>
 
           {/* Action CTAs */}
@@ -123,7 +133,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-100 text-xs font-bold transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-indigo-500/10"
             >
               <Key className="w-3.5 h-3.5 text-amber-400" />
-              <span>Menu Login</span>
+              <span>Portal Login</span>
             </button>
 
             <button
@@ -131,42 +141,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-95"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>Masuk Aplikasi ERP</span>
+              <span>Masuk ERP System</span>
             </button>
           </div>
 
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-20 px-4 lg:px-8 max-w-7xl mx-auto text-center space-y-8">
+      {/* 1. HOOK SECTION */}
+      <section id="hook" className="relative pt-12 pb-20 px-4 lg:px-8 max-w-7xl mx-auto text-center space-y-8">
         
         {/* High CTR Hook Badge */}
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/40 text-xs font-bold text-indigo-300 shadow-xl shadow-indigo-500/10 animate-pulse">
           <Sparkles className="w-4 h-4 text-emerald-400" />
-          <span>Satu-Satunya Platform Mining AI Terpadu Indonesia: Otomasi RKAB ESDM Dalam 10 Detik</span>
+          <span>Satu-Satunya Platform AI Pertambangan Nikel Terpadu Indonesia</span>
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
         </div>
 
-        {/* Powerful Catchy Headline */}
+        {/* Powerful Hook Headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-100 tracking-tight max-w-5xl mx-auto leading-[1.15]">
-          Hemat Solar B35 Hingga <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400">18%</span> & Tingkatkan Efisiensi Tambang Nikel Anda Hingga <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-300 to-amber-300">400%</span>
+          Pangkas Biaya Solar B35 Hingga <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400">18%</span> & Eliminasi Denda Demurrage Tongkang Sekali Klik
         </h1>
 
-        {/* Subheadline */}
+        {/* Hook Subheadline */}
         <p className="text-sm sm:text-base text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Platform ERP pertambangan berbasis <strong className="text-slate-100">AI Generatif (MineGPT)</strong> & <strong className="text-slate-100">IoT Telemetry</strong> terintegrasi dari Pit Exploration, Hauling Road, Stockpile Blending, Dermaga Jetty hingga Penjualan Smelter Morowali & Weda Bay.
+          Platform AI Mining Operating System terintegrasi dari <strong className="text-white">Pit Exploration</strong>, <strong className="text-white">GPS Hauling Telemetry</strong>, <strong className="text-white">AI Stockpile Blending</strong>, hingga <strong className="text-white">Otomasi RKAB ESDM</strong> dan Penjualan Smelter (Morowali & Weda Bay).
         </p>
 
-        {/* CTR Action Buttons Bar */}
+        {/* Hook CTA Action Buttons Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-          
           <button
             onClick={() => setIsLoginModalOpen(true)}
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-extrabold text-sm shadow-2xl shadow-indigo-500/40 transition-all flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95 group"
           >
             <Key className="w-5 h-5 text-amber-300 group-hover:rotate-12 transition-transform" />
-            <span>🚀 BUKA MENU LOGIN & DEMO VIP</span>
+            <span>🚀 BUKA MENU DEMO VIP & LOGIN</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
 
@@ -175,9 +184,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-100 font-extrabold text-sm transition-all flex items-center justify-center gap-2 hover:bg-slate-800"
           >
             <Play className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-            <span>⚡ Masuk Langsung ke Aplikasi</span>
+            <span>⚡ Masuk Langsung ke Dashboard Real-Time</span>
           </button>
-
         </div>
 
         {/* Live Market Ticker */}
@@ -206,182 +214,310 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       </section>
 
-      {/* Feature Highlights Matrix */}
-      <section id="fitur" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-12 border-t border-slate-800/80">
+      {/* 2. MASALAH (PROBLEM) SECTION */}
+      <section id="masalah" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-10 border-t border-slate-800/80">
         
         <div className="text-center space-y-3">
-          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-            Fitur Utama NickelSmart AI
+          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30 inline-flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            Tantangan & Masalah Utama Industri Nikel
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100">
-            Arsitektur Fitur Canggih untuk Operasional Tambang Modern
+            Mengapa Cara Manual & Spreadsheet Membunuh Margin Tambang Anda?
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
-            Solusi end-to-end terintegrasi yang menghubungkan pit eksplorasi, telematika armada hauling, blending stockpile, hingga kepatuhan regulasi ESDM.
+            Hampir 80% perusahaan tambang nikel di Indonesia mengalami kerugian finansial tersembunyi akibat pengelolaan data operasional yang terpisah-pisah.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
           
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-4 hover:border-indigo-500/50 transition-all hover:shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-              <Bot className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-rose-950/30 to-slate-900 border border-rose-900/40 space-y-3 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-lg">
+              ⛽
             </div>
-            <h3 className="text-lg font-bold text-slate-100">AI MineGPT & Otomasi RKAB ESDM</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Penyusunan dokumen RKAB otomatis dalam hitungan detik, asisten AI interaktif untuk regulasi Permen ESDM No. 10/2023, serta prediksi kadar ore nikel secara preskriptif.
+            <h3 className="text-sm font-extrabold text-rose-200">1. Kebocoran BBM Solar B35 & Fraud Ritase</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Tanpa sensor flowmeter dan telemetri GPS real-time, pencurian solar B35 dan manipulasi jumlah ritase oleh kontraktor hauling menyedot hingga 15-20% anggaran OPEX harian.
             </p>
+            <div className="pt-2 text-rose-400 font-bold font-mono text-[11px] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> Kerugian: Ratusan Juta Rupiah / Bulan
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-4 hover:border-emerald-500/50 transition-all hover:shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-              <Truck className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-rose-950/30 to-slate-900 border border-rose-900/40 space-y-3 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
+              🚢
             </div>
-            <h3 className="text-lg font-bold text-slate-100">Smart Fleet Telemetry & Efisiensi B35</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Tracking GPS real-time Dump Truck & Excavator, sensor flowmeter BBM B35 anti-pencurian, geofencing pit-to-port, dan pengurangan idle time hauling hingga 35%.
+            <h3 className="text-sm font-extrabold text-amber-200">2. Pembengkakan Denda Demurrage Tongkang</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Antrean tongkang di jetty yang tidak terprediksi serta hambatan sertifikat COA/COI menyebabkan denda demurrage mahal ($5,000 - $15,000 / hari per tongkang).
             </p>
+            <div className="pt-2 text-amber-400 font-bold font-mono text-[11px] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> Denda: USD $50,000+ Per Kapal
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-4 hover:border-amber-500/50 transition-all hover:shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform">
-              <BarChart3 className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-rose-950/30 to-slate-900 border border-rose-900/40 space-y-3 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-lg">
+              🔬
             </div>
-            <h3 className="text-lg font-bold text-slate-100">AI Blending Stockpile & Demurrage Jetty</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Algoritma AI blending nikel presisi tinggi (Saprolit/Limonit) agar lolos spesifikasi smelter (ITSS, Vale, Huayou) dan eliminasi denda demurrage tongkang.
+            <h3 className="text-sm font-extrabold text-rose-200">3. Penolakan Smelter (Off-Spec Ore Penalty)</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Formulasi blending stockpile secara manual sering meleset dari spesifikasi pembeli (Ni &lt; 1.8%, Fe tinggi, Moisture tinggi), berujung klaim pinalti dan penolakan kargo.
             </p>
+            <div className="pt-2 text-rose-400 font-bold font-mono text-[11px] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> Penolakan Kargo & Pemotongan HPM
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-4 hover:border-rose-500/50 transition-all hover:shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform">
-              <Lock className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-rose-950/30 to-slate-900 border border-rose-900/40 space-y-3 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-lg">
+              📜
             </div>
-            <h3 className="text-lg font-bold text-slate-100">Keamanan Siber ISO 27001 & Pos Guard</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Enkripsi data pertambangan kelas militer AES-256, Zero-Trust Access Control, audit log tamper-proof, dan verifikasi Pos Guard biometrik terpadu.
+            <h3 className="text-sm font-extrabold text-rose-200">4. Lambatnya Pelaporan RKAB ESDM</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Konsolidasi data manual dari berbagai divisi untuk dokumen RKAB memakan waktu 3-4 minggu, berisiko keterlambatan persetujuan dan penghentian sementara izin operasi tambang.
             </p>
+            <div className="pt-2 text-rose-400 font-bold font-mono text-[11px] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> Risiko Sanksi Administrasi ESDM
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-4 hover:border-sky-500/50 transition-all hover:shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 group-hover:scale-110 transition-transform">
-              <Globe className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-rose-950/30 to-slate-900 border border-rose-900/40 space-y-3 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
+              📊
             </div>
-            <h3 className="text-lg font-bold text-slate-100">API Integration Hub & Multi-System Sync</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              REST & GraphQL API Gateway untuk integrasi instan dengan SAP, Oracle, Minerba ESDM, GPS Telematika Vendor, dan alat ukur laboratorium Sucofindo/Carsurin.
+            <h3 className="text-sm font-extrabold text-amber-200">5. Data Terisolasi & Keputusan Berisiko</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Tim Pit, QC Lab, Timbangan, dan Keuangan bekerja di spreadsheet terpisah. Direksi tidak memiliki visibilitas real-time terhadap arus kas dan cadangan ore site.
             </p>
+            <div className="pt-2 text-amber-400 font-bold font-mono text-[11px] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> Blind Spot Manajemen & Decision Delay
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-4 hover:border-purple-500/50 transition-all hover:shadow-xl group">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-              <Cpu className="w-6 h-6" />
+          <div className="p-6 rounded-2xl bg-gradient-to-b from-rose-950/30 to-slate-900 border border-rose-900/40 space-y-3 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-lg">
+              🛡️
             </div>
-            <h3 className="text-lg font-bold text-slate-100">Lisensi SaaS & Offline Field Operator</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Manajemen lisensi SaaS multi-tenant konsesi IUP, deployment Server Engine Hybrid Cloud/On-Premise, dan input data lapangan offline tanpa sinyal internet.
+            <h3 className="text-sm font-extrabold text-rose-200">6. Kerentanan Audit Compliance & SIMBARA</h3>
+            <p className="text-slate-400 leading-relaxed">
+              Pencatatan nota angkut dan sertifikat surveyor independen (Sucofindo/Carsurin) yang tidak terintegrasi rentan terhadap selisih audit PNBP dan royalti minerba.
             </p>
+            <div className="pt-2 text-rose-400 font-bold font-mono text-[11px] flex items-center gap-1">
+              <XCircle className="w-3.5 h-3.5" /> Potensi Denda & Temuan Audit
+            </div>
           </div>
 
         </div>
 
       </section>
 
-      {/* Benefits Section (Manfaat Utama Aplikasi) */}
-      <section id="manfaat" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-12 border-t border-slate-800/80">
+      {/* 3. SOLUSI (SOLUTION) SECTION */}
+      <section id="solusi" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-10 border-t border-slate-800/80">
         
         <div className="text-center space-y-3">
-          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            Manfaat Kunci Aplikasi
+          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 inline-flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Solusi Terpadu NickelSmart AI Mining OS
           </span>
           <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100">
-            Dampak Nyata Terhadap Kinerja Operasional & Finansial Tambang
+            Ekosistem Cerdas Memaksimalkan Profitabilitas Site Tambang
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
-            Transformasi digital terukur yang memberikan keuntungan strategis bagi manajemen, KTT, dan pemilik konsesi pertambangan.
+            Menghubungkan seluruh lini operasional dalam satu platform AI terpadu, dari pit tambang hingga penagihan ke smelter.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-lg">
-              💰
+          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-emerald-500/50 transition-all hover:shadow-xl group">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+              <Bot className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-100">Penghematan Biaya Operasional (OPEX)</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Mengurangi konsumsi solar B35 hingga 18% per tahun melalui optimasi siklus hauling, pencegahan kebocoran BBM, dan penghapusan denda demurrage tongkang di jetty port.
+            <h3 className="text-lg font-bold text-slate-100">Otomasi RKAB AI Generator (10 Detik)</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Mengompilasi data target produksi, cadangan ore, dan anggaran lingkungan menjadi dokumen resmi RKAB ESDM otomatis yang 100% patuh Permen ESDM No. 10/2023.
             </p>
-            <div className="pt-2 flex items-center gap-1.5 text-emerald-400 font-bold font-mono text-[11px]">
-              <TrendingUp className="w-3.5 h-3.5" /> Est. ROI &lt; 3 Bulan
+            <div className="text-emerald-400 font-mono text-[11px] font-bold flex items-center gap-1 pt-2">
+              <Check className="w-3.5 h-3.5" /> Pangkas 30 Hari Kerja Jadi Hitungan Detik
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-lg">
-              ⚡
+          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-indigo-500/50 transition-all hover:shadow-xl group">
+            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+              <Truck className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-100">Kecepatan Pelaporan Regulasi ESDM</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Penyusunan dan rekapitulasi laporan RKAB harian, mingguan, dan tahunan yang dipangkas dari 30 hari kerja menjadi hitungan detik dengan garansi kepatuhan 100%.
+            <h3 className="text-lg font-bold text-slate-100">Telemetri Flowmeter B35 Anti-Theft</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Integrasi sensor flowmeter BBM digital & GPS Geofencing Hauling Road untuk memantau konsumsi solar B35 per liter/tonase dan memblokir potensi kecurangan BBM.
             </p>
-            <div className="pt-2 flex items-center gap-1.5 text-indigo-400 font-bold font-mono text-[11px]">
-              <Clock className="w-3.5 h-3.5" /> 99.9% Efisiensi Waktu
+            <div className="text-indigo-400 font-mono text-[11px] font-bold flex items-center gap-1 pt-2">
+              <Check className="w-3.5 h-3.5" /> Garansi Hemat Solar Hingga 18%
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
-              🎯
+          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-amber-500/50 transition-all hover:shadow-xl group">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform">
+              <BarChart3 className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-100">Zero Rejected Barges di Smelter</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Presisi formulasi blending ore nikel menjaga stabilitas grade (Ni &gt; 1.8%, Fe, Co) sehingga terhindar dari pemotongan harga (penalty claim) atau penolakan oleh smelter.
+            <h3 className="text-lg font-bold text-slate-100">AI Stockpile Blending Engine</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Algoritma AI preskriptif yang mengkalkulasi komposisi percampuran ore Saprolit & Limonit secara presisi agar persis sesuai target kontrak smelter (Zero Off-Spec).
             </p>
-            <div className="pt-2 flex items-center gap-1.5 text-amber-300 font-bold font-mono text-[11px]">
-              <Award className="w-3.5 h-3.5" /> Kualitas Sesuai Kontrak Offtake
+            <div className="text-amber-300 font-mono text-[11px] font-bold flex items-center gap-1 pt-2">
+              <Check className="w-3.5 h-3.5" /> Akurasi Blending 99.8% On-Spec
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold text-lg">
-              🛡️
+          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-teal-500/50 transition-all hover:shadow-xl group">
+            <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 group-hover:scale-110 transition-transform">
+              <Layers className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-100">Transparansi & Keamanan Data Total</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Visibilitas 360° dari ruang kerja KTT hingga Direksi Utama. Data cadangan ore dan keuangan terlindungi dengan ISO 27001 & POS Guard biometrik.
+            <h3 className="text-lg font-bold text-slate-100">Jetty Queue & Demurrage Eliminator</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Manajemen antrean tongkang otomatis, pemantauan pasang surut dermaga, dan penerbitan nota muat digital untuk mengeliminasi denda keterlambatan tongkang.
             </p>
-            <div className="pt-2 flex items-center gap-1.5 text-rose-400 font-bold font-mono text-[11px]">
-              <ShieldCheck className="w-3.5 h-3.5" /> ISO 27001 Certified Security
+            <div className="text-teal-300 font-mono text-[11px] font-bold flex items-center gap-1 pt-2">
+              <Check className="w-3.5 h-3.5" /> Zero Demurrage Fine Guarantee
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold text-lg">
-              📶
+          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-purple-500/50 transition-all hover:shadow-xl group">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+              <Globe className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-100">Operasional Tanpa Hambatan Sinyal</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Operator lapangan di pit terdalam tetap dapat mencatat ritase hauling dan data sampel ore tanpa internet. Data otomatis tersinkronisasi saat kembali ke coverage area.
+            <h3 className="text-lg font-bold text-slate-100">API Integration Hub (SIMBARA & SAP)</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Sinkronisasi data otomatis via REST API dengan SIMBARA ESDM, ERP SAP/Oracle, Timbangan Digital, serta sistem survey Sucofindo/Carsurin secara real-time.
             </p>
-            <div className="pt-2 flex items-center gap-1.5 text-sky-400 font-bold font-mono text-[11px]">
-              <Zap className="w-3.5 h-3.5" /> Multi-Tenant Offline Engine
+            <div className="text-purple-400 font-mono text-[11px] font-bold flex items-center gap-1 pt-2">
+              <Check className="w-3.5 h-3.5" /> Direct Automated API Sync
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-lg">
-              🌱
+          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 hover:border-sky-500/50 transition-all hover:shadow-xl group">
+            <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 group-hover:scale-110 transition-transform">
+              <Lock className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-100">Kepatuhan ESG & Baku Mutu BPLH</h3>
-            <p className="text-slate-400 leading-relaxed">
-              Pemantauan baku mutu efluen air limpasan settling pond, jejak karbon armada hauling, dan kemajuan reklamasi lahan tambang sesuai standar hijau internasional.
+            <h3 className="text-lg font-bold text-slate-100">ISO 27001 & Offline Field Engine</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Keamanan data kelas enterprise bersertifikat ISO 27001 dengan dukungan aplikasi lapangan offline-first bagi operator pit di lokasi minim sinyal internet.
             </p>
-            <div className="pt-2 flex items-center gap-1.5 text-purple-400 font-bold font-mono text-[11px]">
-              <CheckCircle2 className="w-3.5 h-3.5" /> BPLH & Audit ESG Ready
+            <div className="text-sky-300 font-mono text-[11px] font-bold flex items-center gap-1 pt-2">
+              <Check className="w-3.5 h-3.5" /> 100% Offline-Ready Field App
             </div>
           </div>
 
+        </div>
+
+      </section>
+
+      {/* 4. PERBANDINGAN (COMPARISON TABLE) SECTION */}
+      <section id="perbandingan" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-10 border-t border-slate-800/80">
+        
+        <div className="text-center space-y-3">
+          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 inline-flex items-center gap-1.5">
+            <Scale className="w-3.5 h-3.5" />
+            Matriks Perbandingan Langsung
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100">
+            Metode Manual/Spreadsheet vs. NickelSmart AI Mining OS
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            Bandingkan bagaimana transformasi digital NickelSmart AI memberikan keunggulan kompetitif mutlak bagi perusahaan tambang Anda.
+          </p>
+        </div>
+
+        {/* Comparison Table Container */}
+        <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="border-b border-slate-800 text-slate-300 font-bold uppercase tracking-wider text-[11px]">
+                <th className="p-4 w-1/4">Parameter Operasional Site</th>
+                <th className="p-4 w-1/3 bg-rose-950/20 text-rose-300 border-x border-slate-800">
+                  ❌ Metode Konvensional / Spreadsheet
+                </th>
+                <th className="p-4 w-1/3 bg-emerald-950/40 text-emerald-300">
+                  ✨ NickelSmart AI Mining OS
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/80 font-sans">
+              
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Waktu Pembuatan Dokumen RKAB ESDM</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Lambat (3 - 4 Minggu), butuh rekapitulasi manual ribuan file Excel
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  ⚡ Otomatis 10 Detik berbasis AI Generator Permen ESDM No. 10/2023
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Akurasi Blending Ore Stockpile</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Rendah (75-80%), sering terjadi claim pinalti off-spec dari smelter
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  🎯 Presisi 99.8% On-Spec (Optimalisasi Kadar Ni, Fe, MC & SiO2/MgO)
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Pengawasan Konsumsi Solar B35</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Rawan kebocoran BBM & pencurian ritase (Sticker manual)
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  ⛽ Sensor Digital Flowmeter + GPS Telemetry (Hemat Solar 18%)
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Risiko Denda Demurrage Tongkang Jetty</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Tinggi ($5,000 - $15,000 / hari per tongkang akibat antrean macet)
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  🚢 Zero Demurrage Guarantee via AI Jetty Scheduling Engine
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Sinkronisasi Data Pit - Lab - Finance</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Data terisolasi (Silo), terlambat 1-3 hari hingga laporan diterima
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  📡 Real-Time IoT Cloud Sync & Dashboard Executive 360°
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Kepatuhan SIMBARA & Audit Minerba</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Manual input, berisiko selisih tonase royalti dan koreksi pajak
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  🔗 Direct API Gateway SIMBARA & e-PNBP Kemenkeu Ready
+                </td>
+              </tr>
+
+              <tr className="hover:bg-slate-800/30">
+                <td className="p-4 font-extrabold text-slate-200">Operasional Area Minim Sinyal Internet</td>
+                <td className="p-4 text-rose-300 bg-rose-950/10 border-x border-slate-800">
+                   Kertas & Nota Fisik hilang/rusak terkena lumpur tambang
+                </td>
+                <td className="p-4 font-bold text-emerald-300 bg-emerald-950/20">
+                  📱 Offline-First Mobile App untuk Operator Pit & Driver Hauling
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
         </div>
 
       </section>
@@ -547,6 +683,62 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       </section>
 
+      {/* 5. CALL TO ACTION (CTA) SECTION */}
+      <section id="cta" className="py-20 px-4 lg:px-8 max-w-7xl mx-auto relative">
+        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/40 shadow-2xl relative overflow-hidden text-center space-y-6">
+          
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] pointer-events-none" />
+          
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-extrabold uppercase tracking-wider">
+            <Zap className="w-4 h-4" />
+            Siap Mentransformasi Operasional Tambang Nikel Anda?
+          </div>
+
+          <h2 className="text-3xl sm:text-5xl font-black text-white max-w-4xl mx-auto leading-tight">
+            Tingkatkan Profitabilitas Site & Jadwalkan Demo Platform Hari Ini
+          </h2>
+
+          <p className="text-slate-300 text-sm max-w-2xl mx-auto leading-relaxed">
+            Bergabunglah dengan puluhan konsesi pertambangan nikel di Sulawesi & Halmahera yang telah mengotomatisasi RKAB, menghemat solar B35, dan mencapai zero demurrage.
+          </p>
+
+          {/* Action CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <button
+              onClick={() => setIsLoginModalOpen(true)}
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm shadow-2xl shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95"
+            >
+              <Zap className="w-5 h-5 fill-slate-950" />
+              <span>DAPATKAN DEMO VIP & SIMULASI GRATIS</span>
+            </button>
+
+            <button
+              onClick={() => {
+                const message = encodeURIComponent("Halo NickelSmart AI, saya ingin konsultasi mengenai integrasi site konsesi tambang nikel.");
+                window.open(`https://wa.me/6285187869164?text=${message}`, '_blank');
+              }}
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-900 border border-slate-700 hover:border-emerald-500 text-slate-100 font-bold text-sm transition-all flex items-center justify-center gap-2 hover:bg-slate-800 shadow-xl hover:shadow-emerald-500/10 group"
+            >
+              <PhoneCall className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>Jadwalkan Konsultasi Site Konsesi (WA 085187869164)</span>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-center gap-6 pt-4 text-xs font-mono text-slate-400">
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-4 h-4" /> Tanpa Biaya Setup
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-4 h-4" /> Integrasi &lt; 48 Jam
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <Check className="w-4 h-4" /> Garansi Compliance ESDM
+            </span>
+          </div>
+
+        </div>
+      </section>
+
       {/* Footer Section */}
       <footer className="border-t border-slate-800/80 py-12 px-4 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500">
         <div className="flex items-center gap-3">
@@ -557,11 +749,54 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <p>© 2026 NickelSmart AI Technologies. Permen ESDM Compliant & ISO 27001 Certified.</p>
 
         <div className="flex items-center gap-4 text-slate-400">
-          <a href="#fitur" className="hover:text-slate-200">Syarat Ketentuan</a>
-          <a href="#keamanan" className="hover:text-slate-200">Keamanan Cloud</a>
+          <a href="#hook" className="hover:text-slate-200">Syarat Ketentuan</a>
+          <a href="#solusi" className="hover:text-slate-200">Keamanan Cloud</a>
           <button onClick={() => setIsLoginModalOpen(true)} className="text-amber-400 font-bold hover:underline">Portal Login</button>
         </div>
       </footer>
+
+      {/* Modal Consultation Form */}
+      {isConsultModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4 relative">
+            <button onClick={() => setIsConsultModalOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+            
+            <div className="text-center space-y-1">
+              <PhoneCall className="w-8 h-8 text-indigo-400 mx-auto" />
+              <h3 className="text-lg font-bold text-white">Konsultasi Integrasi Site Tambang</h3>
+              <p className="text-xs text-slate-400">Tim spesialis solusi AI Mining kami siap membantu pemetaan kebutuhan konsesi Anda.</p>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const name = formData.get('name') || 'Bambang Wijaya (KTT)';
+              const company = formData.get('company') || 'PT Nikel Morowali Sejahtera';
+              const phone = formData.get('phone') || '+62 812 3456 7890';
+              const message = encodeURIComponent(`Halo NickelSmart AI, saya ingin konsultasi integrasi site konsesi tambang.\n\n*Nama:* ${name}\n*Perusahaan/IUP:* ${company}\n*No. HP:* ${phone}`);
+              window.open(`https://wa.me/6285187869164?text=${message}`, '_blank');
+              setIsConsultModalOpen(false);
+            }} className="space-y-3 text-xs">
+              <div>
+                <label className="text-slate-300 font-bold block mb-1">Nama Lengkap & Jabatan:</label>
+                <input type="text" name="name" defaultValue="Bambang Wijaya (KTT)" required className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white" />
+              </div>
+              <div>
+                <label className="text-slate-300 font-bold block mb-1">Nama Perusahaan / IUP Konsesi:</label>
+                <input type="text" name="company" defaultValue="PT Nikel Morowali Sejahtera" required className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white" />
+              </div>
+              <div>
+                <label className="text-slate-300 font-bold block mb-1">Nomor WhatsApp / Telepon:</label>
+                <input type="tel" name="phone" defaultValue="+62 812 3456 7890" required className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono" />
+              </div>
+              <button type="submit" className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-white shadow-lg flex items-center justify-center gap-2">
+                <PhoneCall className="w-4 h-4" />
+                <span>KIRIM VIA WHATSAPP (085187869164)</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Sleek Luxury Login Modal / Menu */}
       {isLoginModalOpen && (
@@ -722,3 +957,4 @@ const UnlockIcon = ({ className }: { className?: string }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
   </svg>
 );
+

@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-30 w-full backdrop-blur-md border-b transition-colors duration-200 bg-slate-900/95 border-slate-800 text-slate-100 shadow-lg">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div className="w-full px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-2">
           
           {/* Left: Mobile Menu Trigger & Logo Branding */}

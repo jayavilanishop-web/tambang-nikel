@@ -27,18 +27,16 @@ import {
   History, 
   Scan, 
   FileText, 
-  Sliders 
+  Sliders,
+  Database,
+  BarChart3
 } from 'lucide-react';
 import { Language } from '../../types';
 
 interface WarehouseInventoryModuleProps {
   language: Language;
-}
-
-export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> = ({
-  language
-}) => {
-  const [activeTab, setActiveTab] = useState<
+  initialTab?: 
+    | 'dasbor_warehouse'
     | 'inventory_stock'
     | 'barcode_qr_scan'
     | 'warehouse_locations'
@@ -47,7 +45,25 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
     | 'stock_transfer'
     | 'stock_opname'
     | 'fifo_batch_expiry'
-  >('inventory_stock');
+    | 'master_data_inventory';
+}
+
+export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> = ({
+  language,
+  initialTab = 'dasbor_warehouse'
+}) => {
+  const [activeTab, setActiveTab] = useState<
+    | 'dasbor_warehouse'
+    | 'inventory_stock'
+    | 'barcode_qr_scan'
+    | 'warehouse_locations'
+    | 'goods_receiving'
+    | 'goods_issue'
+    | 'stock_transfer'
+    | 'stock_opname'
+    | 'fifo_batch_expiry'
+    | 'master_data_inventory'
+  >(initialTab);
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedWarehouse, setSelectedWarehouse] = useState<string>('ALL');
@@ -239,9 +255,11 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
         </div>
       </div>
 
-      {/* Navigation Sub-Tabs covering all 13 requested keywords */}
+      {/* Navigation Sub-Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
         {[
+          { id: 'dasbor_warehouse', label: '📊 Dasbor Warehouse', icon: BarChart3 },
+          { id: 'master_data_inventory', label: '🗄️ Master Data Warehouse', icon: Database },
           { id: 'inventory_stock', label: 'Stok Inventaris (Stock Level)', icon: Package },
           { id: 'barcode_qr_scan', label: 'Scan Barcode & QR Code', icon: QrCode },
           { id: 'warehouse_locations', label: 'Lokasi Gudang (Warehouse)', icon: Warehouse },
@@ -269,6 +287,160 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
           );
         })}
       </div>
+
+      {/* VIEW 0: DASBOR WAREHOUSE (WAREHOUSE MANAGER ANALYTICS) */}
+      {activeTab === 'dasbor_warehouse' && (
+        <div className="space-y-6 text-xs">
+          {/* Executive Warehouse KPIs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+              <div className="flex justify-between items-center text-slate-400 mb-2">
+                <span className="font-bold text-[11px] uppercase tracking-wider">Valuasi Total Stok Site</span>
+                <DollarSign className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="text-xl font-black text-slate-100 font-mono">$1,248,500 <span className="text-xs font-normal text-slate-400">USD (FIFO)</span></div>
+              <p className="text-[10px] text-emerald-400 mt-1 font-bold">1,450 Active SKU • 3 Site Storage Bay</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+              <div className="flex justify-between items-center text-slate-400 mb-2">
+                <span className="font-bold text-[11px] uppercase tracking-wider">Inventory Turnover Ratio (ITR)</span>
+                <TrendingUp className="w-4 h-4 text-sky-400" />
+              </div>
+              <div className="text-xl font-black text-sky-300 font-mono">6.8x <span className="text-xs font-normal text-slate-400">/ Tahun</span></div>
+              <p className="text-[10px] text-emerald-400 mt-1 font-bold">↑ 12.4% vs Target Operasional Tambang</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+              <div className="flex justify-between items-center text-slate-400 mb-2">
+                <span className="font-bold text-[11px] uppercase tracking-wider">Okupansi Rak & Bin Gudang</span>
+                <Warehouse className="w-4 h-4 text-indigo-400" />
+              </div>
+              <div className="text-xl font-black text-indigo-300 font-mono">74.2% <span className="text-xs font-normal text-slate-400">Kapasitas</span></div>
+              <p className="text-[10px] text-slate-400 mt-1">486 / 655 Total Bin Rak Terisi Optimal</p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+              <div className="flex justify-between items-center text-slate-400 mb-2">
+                <span className="font-bold text-[11px] uppercase tracking-wider">Alert Reorder / Out of Stock</span>
+                <ShieldAlert className="w-4 h-4 text-rose-400" />
+              </div>
+              <div className="text-xl font-black text-rose-300 font-mono">6 SKU <span className="text-xs font-normal text-slate-400">&lt; Safety Stock</span></div>
+              <p className="text-[10px] text-amber-400 mt-1 font-bold">3 PR Auto-Triggered to Purchasing</p>
+            </div>
+          </div>
+
+          {/* Operational Flow & Warehouse Category Distribution */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* GRN vs GIS Logistics Flow */}
+            <div className="lg:col-span-2 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-emerald-400" />
+                  Alur Penerimaan (GRN) vs Pengeluaran Barang (GIS) Site Bulan Ini
+                </h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-400">Live FIFO Log</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-center">
+                  <span className="text-[10px] text-slate-400 block font-bold">1. Goods Received (GRN)</span>
+                  <strong className="text-lg font-mono text-emerald-400">148 Transactions</strong>
+                  <span className="text-[9px] text-slate-500 block mt-0.5">Valuation $385K USD</span>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-center">
+                  <span className="text-[10px] text-slate-400 block font-bold">2. Goods Issued (GIS)</span>
+                  <strong className="text-lg font-mono text-sky-400">210 Issue Slips</strong>
+                  <span className="text-[9px] text-slate-500 block mt-0.5">Valuation $412K USD</span>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-center">
+                  <span className="text-[10px] text-slate-400 block font-bold">3. Stock Transfer Inter-WH</span>
+                  <strong className="text-lg font-mono text-amber-400">32 Transfers</strong>
+                  <span className="text-[9px] text-slate-500 block mt-0.5">Main WH → Pit/Jetty</span>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-center">
+                  <span className="text-[10px] text-slate-400 block font-bold">4. Stock Opname Variance</span>
+                  <strong className="text-lg font-mono text-indigo-400">0.02%</strong>
+                  <span className="text-[9px] text-emerald-400 block mt-0.5">Audited & Matched</span>
+                </div>
+              </div>
+
+              {/* Fast Moving vs Slow Moving Inventory */}
+              <div className="space-y-3 pt-2">
+                <h4 className="font-bold text-slate-200 text-xs">Distribusi Pergerakan Item Stok (Item Velocity Matrix):</h4>
+                <div className="space-y-2 font-mono">
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">🚀 Fast Moving (Filters, Oils, Consumables & Fast Wearing Parts)</span>
+                      <span className="text-emerald-400 font-bold">$520,000 USD (41.6%)</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: '41.6%' }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">🛞 Heavy Spareparts (OTR Tyres, Undercarriage, GET Teeth)</span>
+                      <span className="text-sky-400 font-bold">$480,000 USD (38.4%)</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                      <div className="bg-sky-500 h-full rounded-full" style={{ width: '38.4%' }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">📦 Medium & Buffer Safety Stock (Engine Component Rebuild Kits)</span>
+                      <span className="text-amber-400 font-bold">$180,000 USD (14.4%)</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                      <div className="bg-amber-500 h-full rounded-full" style={{ width: '14.4%' }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className="text-slate-300">⚠️ Slow Moving / Insurance Spares (Major Transmission Assys)</span>
+                      <span className="text-slate-400 font-bold">$68,500 USD (5.6%)</span>
+                    </div>
+                    <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                      <div className="bg-slate-600 h-full rounded-full" style={{ width: '5.6%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Warehouse Facilities Status */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <h3 className="font-bold text-slate-100 text-sm flex items-center justify-between border-b border-slate-800 pb-3">
+                <span className="flex items-center gap-2"><Warehouse className="w-4 h-4 text-emerald-400" /> Status Facility Gudang</span>
+                <button onClick={() => setActiveTab('warehouse_locations')} className="text-[10px] text-emerald-400 hover:underline">Kelola Lokasi</button>
+              </h3>
+
+              <div className="space-y-3">
+                {warehouseLocations.map((wh) => (
+                  <div key={wh.id} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <strong className="text-slate-100 block font-sans text-xs">{wh.name}</strong>
+                        <span className="text-[10px] text-slate-400 block font-mono">{wh.category} • Mgr: {wh.manager}</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 font-mono font-bold">
+                        {wh.occupiedPct}% Terisi
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${wh.occupiedPct}%` }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* TAB 1: INVENTORY STOCK */}
       {activeTab === 'inventory_stock' && (
@@ -723,6 +895,137 @@ export const WarehouseInventoryModule: React.FC<WarehouseInventoryModuleProps> =
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 9: MASTER DATA INVENTORY & KATALOG SKU */}
+      {activeTab === 'master_data_inventory' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Master Data Inventory & Katalog SKU Terpusat
+              </span>
+              <h3 className="text-xl font-black text-white mt-1 flex items-center gap-2">
+                <Database className="w-5 h-5 text-emerald-400" />
+                Master Catalog Spareparts, Material, OTR Tyre & Hazmat
+              </h3>
+              <p className="text-slate-400 text-xs mt-1">
+                Pengelolaan master SKU, part number OEM/cross-ref, min/max safety stock level, klasifikasi hazard, lokasi rak bin gudang, dan konversi satuan unit (UOM).
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAddItemModal(true)}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-1.5 shrink-0 shadow-md"
+            >
+              <Plus className="w-4 h-4" /> Tambah Master SKU Baru
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Box 1: Master Kategori SKU & Part Number Matrix */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Package className="w-4 h-4 text-emerald-400" />
+                1. Master Kategori Item & OEM Cross-Reference
+              </h4>
+              <div className="space-y-2 font-mono">
+                {[
+                  { cat: 'Heavy OTR Tyre', desc: 'Ban Alat Berat 27.00R49 & 14.00R24', oem: 'Bridgestone VSDL / Michelin XDR2', leadTime: '45 Hari' },
+                  { cat: 'Filters & Separation', desc: 'Filter Hydraulic, Fuel, Oil & Air', oem: 'Donaldson / Fleetguard / Komatsu OEM', leadTime: '14 Hari' },
+                  { cat: 'Engine & Hydraulic Parts', desc: 'Piston, Liner, Hose Assembly & Pump', oem: 'CAT Heavy Parts / Komatsu Genuine', leadTime: '21 Hari' },
+                  { cat: 'Lubricants & Fuel', desc: 'Oli SAE 15W-40, Hydraulic 46, Diesel B35', oem: 'Shell Rimula / Mobil Delvac', leadTime: '7 Hari' }
+                ].map((item, idx) => (
+                  <div key={idx} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-emerald-400 font-bold block">{item.cat}</span>
+                      <span className="text-slate-300 font-sans text-[10px]">{item.desc}</span>
+                      <span className="text-slate-500 text-[10px] block mt-0.5">OEM: {item.oem}</span>
+                    </div>
+                    <span className="text-amber-300 font-bold text-[10px] bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20 shrink-0">
+                      LT: {item.leadTime}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 2: Master Bin Layout & Rak Gudang */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Warehouse className="w-4 h-4 text-indigo-400" />
+                2. Master Pemetaan Lokasi Bin, Rak & Zone Class
+              </h4>
+              <div className="space-y-2 font-mono">
+                {[
+                  { zone: 'RACK-TYRE-A01 s/d A10', wh: 'WH-MAIN-SITE', class: 'Heavy Storage Zone', cap: '150 Unit OTR Tyre' },
+                  { zone: 'BIN-FLT-B01 s/d B50', wh: 'WH-PIT-DEPOT', class: 'Fast Moving Parts Bin', cap: '1,200 Pcs Filter' },
+                  { zone: 'HAZMAT-CHEM-Z01', wh: 'WH-JETTY-STORE', class: 'Chemical & Hazmat Storage', cap: '50 Drum Reagen/Oli' }
+                ].map((zone, idx) => (
+                  <div key={idx} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-indigo-400 font-bold block">{zone.zone}</span>
+                      <span className="text-slate-300 font-sans text-[10px]">{zone.wh} • {zone.class}</span>
+                    </div>
+                    <span className="text-emerald-400 font-bold text-[10px] bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20 shrink-0">
+                      {zone.cap}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 3: Master Vendor & OEM Spareparts Manufacturer */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Truck className="w-4 h-4 text-amber-400" />
+                3. Master Vendor & Manufaktur Spareparts Resmi
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { vendor: 'PT Trakindo Utama', brand: 'Caterpillar (CAT)', rating: '4.9 ★', status: 'AUTHORIZED_DEALER' },
+                  { vendor: 'PT United Tractors Tbk', brand: 'Komatsu & Scania', rating: '4.9 ★', status: 'AUTHORIZED_DEALER' },
+                  { vendor: 'PT Fleetguard Indonesia', brand: 'Cummins & Donaldson Filters', rating: '4.8 ★', status: 'OFFICIAL_SUPPLIER' }
+                ].map((v, i) => (
+                  <div key={i} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-white font-bold block">{v.vendor}</span>
+                      <span className="text-amber-300 text-[10px] font-mono">{v.brand}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-emerald-400 font-bold block text-[10px] font-mono">{v.rating}</span>
+                      <span className="text-slate-400 text-[9px] uppercase font-mono">{v.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 4: Master Konversi Satuan Unit (UOM Matrix) */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Boxes className="w-4 h-4 text-teal-400" />
+                4. Master Satuan Unit (UOM) & Matriks Konversi
+              </h4>
+              <div className="space-y-2 font-mono">
+                {[
+                  { base: 'DRUM (Oli Pelumas)', conv: '1 DRUM = 209 LITER', usage: 'Konsumsi Engine Workshop' },
+                  { base: 'BOX (Filter Elements)', conv: '1 BOX = 12 PCS', usage: 'Penerimaan GRN & Stacking' },
+                  { base: 'PALLET (Grease Bucket)', conv: '1 PALLET = 24 BUCKET', usage: 'Logistik Jetty Terminal' }
+                ].map((u, i) => (
+                  <div key={i} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-teal-300 font-bold block">{u.base}</span>
+                      <span className="text-slate-400 font-sans text-[10px]">{u.usage}</span>
+                    </div>
+                    <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 text-[10px]">
+                      {u.conv}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

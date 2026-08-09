@@ -60,7 +60,46 @@ export const SecurityAccessModule: React.FC<SecurityAccessModuleProps> = ({
     | 'security_incidents'
     | 'blacklist_registry'
     | 'access_control'
+    | 'master_data_security'
   >('cyber_security');
+
+  // MASTER DATA SECURITY DATASETS & SUB-TAB STATE
+  const [masterSecuritySubTab, setMasterSecuritySubTab] = useState<'POS_JAGA' | 'PERSONEL_PAM' | 'INVENTARIS_ALPAL' | 'HARDWARE_CCTV'>('POS_JAGA');
+  const [masterSecuritySearch, setMasterSecuritySearch] = useState('');
+
+  // Master Pos Jaga & Gate
+  const [masterPosJagaList, setMasterPosJagaList] = useState([
+    { posId: 'POS-01', name: 'Pos Utama Gate 01', location: 'Pintu Masuk Site KM 0', gateType: 'Boom Barrier + ANPR + RFID', guardsOnDuty: 6, status: 'OPERATIONAL_ACTIVE' },
+    { posId: 'POS-02', name: 'Pos Gate Jetty Port', location: 'Pelabuhan Barging Jetty', gateType: 'Turnstile RFID + Metal Detector', guardsOnDuty: 4, status: 'OPERATIONAL_ACTIVE' },
+    { posId: 'POS-03', name: 'Pos Pit Alpha', location: 'Ramp Entrance Pit Alpha', gateType: 'Boom Barrier Manual & CCTV PTZ', guardsOnDuty: 3, status: 'OPERATIONAL_ACTIVE' },
+    { posId: 'POS-04', name: 'Pos Workshop & Heavy Equipment', location: 'Workshop Tambang Central', gateType: 'Turnstile Card + Guard Booth', guardsOnDuty: 3, status: 'OPERATIONAL_ACTIVE' },
+    { posId: 'POS-05', name: 'Pos Mess & Field Camp', location: 'Mess Karyawan & Executive Clinic', gateType: 'Security Gate + RFID Scanner', guardsOnDuty: 2, status: 'OPERATIONAL_ACTIVE' }
+  ]);
+
+  // Master Personel Security & PAM TNI/POLRI
+  const [masterPersonelPamList, setMasterPersonelPamList] = useState([
+    { nik: 'SEC-1001', name: 'Sertu Dani Prasetyo', category: 'PAM TNI AD Obvitnas', qualification: 'Gada Madya', sioNo: 'SIO-POLRI-2025/9921', posAssignment: 'Pos Utama Gate 01', status: 'ON_DUTY_SHIFT' },
+    { nik: 'SEC-1002', name: 'Aipda Hendra Kurniawan', category: 'PAM POLRI Brimob', qualification: 'Gada Utama', sioNo: 'SIO-POLRI-2024/8812', posAssignment: 'Pos Gate Jetty Port', status: 'ON_DUTY_SHIFT' },
+    { nik: 'SEC-1003', name: 'Rudi Santoso', category: 'Satpam Internal Site', qualification: 'Gada Pratama', sioNo: 'SIO-POLRI-2025/1102', posAssignment: 'Pos Utama Gate 01', status: 'ON_DUTY_SHIFT' },
+    { nik: 'SEC-1004', name: 'Bambang Irawan', category: 'Satpam Contractor PAM', qualification: 'Gada Pratama', sioNo: 'SIO-POLRI-2025/3342', posAssignment: 'Pos Pit Alpha', status: 'OFF_DUTY_ROSTER' }
+  ]);
+
+  // Master Inventaris Alpal Security
+  const [masterAlpalList, setMasterAlpalList] = useState([
+    { assetId: 'ALP-001', name: 'Motorola Digital Radio HT DP4801e', category: 'Komunikasi Radio', condition: 'SANGAT_BAIK', location: 'Pos Utama Gate 01' },
+    { assetId: 'ALP-002', name: 'Rompi Anti Peluru Tactically Level IIIA', category: 'Proteksi Perorangan', condition: 'SANGAT_BAIK', location: 'Pos Gate Jetty Port' },
+    { assetId: 'ALP-003', name: 'Handheld Metal Detector Garrett SuperScanner', category: 'Inspeksi Gate', condition: 'SANGAT_BAIK', location: 'Pos Utama Gate 01' },
+    { assetId: 'ALP-004', name: 'Mobil Patroli Ford Ranger 4x4 Double Cabin', category: 'Kendaraan Patroli', condition: 'SANGAT_BAIK', location: 'Patroli Unit 1' },
+    { assetId: 'ALP-005', name: 'Senter LED High Lumens Tactical 10,000 LM', category: 'Penerangan Ronda', condition: 'SANGAT_BAIK', location: 'Pos Workshop' }
+  ]);
+
+  // Master Hardware CCTV & Gate Barriers
+  const [masterCctvList, setMasterCctvList] = useState([
+    { devId: 'HW-CCTV-01', name: 'Kamera Hikvision 4K PTZ Thermal AI', ipAddress: '10.200.12.101', area: 'Gate 01 Main Perimeter', aiFeature: 'ANPR + Thermal Intrusion', streamStatus: 'ONLINE_ACTIVE' },
+    { devId: 'HW-CCTV-02', name: 'Kamera Bullet ANPR Speed Dome', ipAddress: '10.200.12.102', area: 'Jetty Port Weighbridge', aiFeature: 'ANPR License Plate 99% Acc', streamStatus: 'ONLINE_ACTIVE' },
+    { devId: 'HW-GATE-01', name: 'Automatic Heavy Duty Boom Barrier Gate', ipAddress: '10.200.12.201', area: 'Gate 01 Entrance Portal', aiFeature: 'Automatic License Trigger', streamStatus: 'ONLINE_ACTIVE' },
+    { devId: 'HW-TURNSTILE-01', name: 'Tripod Turnstile Gate RFID Reader', ipAddress: '10.200.12.202', area: 'Mess & Office Turnstile', aiFeature: 'RFID Card + Face Match', streamStatus: 'ONLINE_ACTIVE' }
+  ]);
 
   // CYBER SECURITY & AES-256 ENCRYPTION DATASET
   const [encryptionStatus] = useState({
@@ -342,7 +381,8 @@ export const SecurityAccessModule: React.FC<SecurityAccessModuleProps> = ({
           { id: 'security_patrol', label: 'Patroli Security & Ronda', icon: Radio },
           { id: 'security_incidents', label: 'Insiden Keamanan', icon: AlertTriangle },
           { id: 'blacklist_registry', label: 'Daftar Hitam (Blacklist)', icon: UserX },
-          { id: 'access_control', label: 'Akses Kontrol RFID', icon: Key }
+          { id: 'access_control', label: 'Akses Kontrol RFID', icon: Key },
+          { id: 'master_data_security', label: '🗄️ Master Data Security & Pos PAM', icon: Database }
         ].map((tab) => {
           const IconComp = tab.icon;
           const isActive = activeTab === tab.id;
@@ -1083,6 +1123,325 @@ export const SecurityAccessModule: React.FC<SecurityAccessModuleProps> = ({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* TAB MASTER DATA SECURITY & POS PAM */}
+      {activeTab === 'master_data_security' && (
+        <div className="space-y-6">
+          {/* Sub-Header Banner */}
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Master Data Pengamanan Site Tambang
+                </span>
+                <span className="text-slate-400 text-xs">• Sesuai SMP Kapolri No. 24/2007 & Perpol No. 4/2020</span>
+              </div>
+              <h2 className="text-xl font-black text-white flex items-center gap-2">
+                <Database className="w-5 h-5 text-indigo-400" />
+                Master Data Pos Jaga, Personel PAM, Inventaris & Hardware CCTV
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Pusat pendaftaran dan manajemen master data pos penjagaan gate, anggota Satpam & PAM TNI/POLRI, alpal perlengkapan taktis, serta sensor hardware CCTV AI.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (masterSecuritySubTab === 'POS_JAGA') {
+                    const newPos = { posId: `POS-0${masterPosJagaList.length + 1}`, name: 'Pos Gate Baru', location: 'KM Pit East', gateType: 'Boom Barrier', guardsOnDuty: 2, status: 'OPERATIONAL_ACTIVE' };
+                    setMasterPosJagaList([...masterPosJagaList, newPos]);
+                    alert("Master Pos Jaga baru berhasil ditambahkan!");
+                  } else if (masterSecuritySubTab === 'PERSONEL_PAM') {
+                    const newPersonel = { nik: `SEC-${1000 + masterPersonelPamList.length + 1}`, name: 'Personel Baru PAM', category: 'Satpam Internal Site', qualification: 'Gada Pratama', sioNo: 'SIO-POLRI-2026/0011', posAssignment: 'Pos Utama Gate 01', status: 'ON_DUTY_SHIFT' };
+                    setMasterPersonelPamList([...masterPersonelPamList, newPersonel]);
+                    alert("Master Personel PAM Satpam baru berhasil mendaftar!");
+                  } else if (masterSecuritySubTab === 'INVENTARIS_ALPAL') {
+                    const newAlpal = { assetId: `ALP-00${masterAlpalList.length + 1}`, name: 'Alpal Peralatan Baru', category: 'Proteksi Site', condition: 'SANGAT_BAIK', location: 'Pos Utama Gate 01' };
+                    setMasterAlpalList([...masterAlpalList, newAlpal]);
+                    alert("Master Inventaris Peralatan PAM baru berhasil dicatat!");
+                  } else {
+                    const newHardware = { devId: `HW-CCTV-0${masterCctvList.length + 1}`, name: 'Kamera CCTV AI Baru', ipAddress: `10.200.12.${100 + masterCctvList.length + 1}`, area: 'Perimeter East', aiFeature: 'ANPR License Detect', streamStatus: 'ONLINE_ACTIVE' };
+                    setMasterCctvList([...masterCctvList, newHardware]);
+                    alert("Master Perangkat Hardware CCTV / Gate baru berhasil dipasangkan!");
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Tambah Data Master Security
+              </button>
+            </div>
+          </div>
+
+          {/* Master Sub-Tabs Selector */}
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+            {[
+              { id: 'POS_JAGA', label: '1. Master Pos Jaga & Gate Access', count: masterPosJagaList.length },
+              { id: 'PERSONEL_PAM', label: '2. Master Personel Satpam & TNI/POLRI', count: masterPersonelPamList.length },
+              { id: 'INVENTARIS_ALPAL', label: '3. Master Inventaris Peralatan PAM', count: masterAlpalList.length },
+              { id: 'HARDWARE_CCTV', label: '4. Master Hardware CCTV AI & Gate', count: masterCctvList.length }
+            ].map((sub) => (
+              <button
+                key={sub.id}
+                onClick={() => setMasterSecuritySubTab(sub.id as any)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                  masterSecuritySubTab === sub.id
+                    ? 'bg-indigo-600 text-white shadow-lg ring-1 ring-indigo-400'
+                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                <span>{sub.label}</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950 font-mono text-indigo-300 border border-slate-700">
+                  {sub.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Sub-Tab 1: Master Pos Jaga */}
+          {masterSecuritySubTab === 'POS_JAGA' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-indigo-400" />
+                    Daftar Master Pos Penjagaan Gate & Barikade Akses
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Master Data Pos Security Jaga, Gate Barrier, Turnstile RFID & Jumlah Guard Shift</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Pos Jaga..."
+                  value={masterSecuritySearch}
+                  onChange={(e) => setMasterSecuritySearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">Pos ID</th>
+                      <th className="p-3">Nama Pos Jaga</th>
+                      <th className="p-3">Lokasi Site</th>
+                      <th className="p-3">Tipe Gate / Barikade</th>
+                      <th className="p-3">Guard Duty Shift</th>
+                      <th className="p-3">Status Operasional</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterPosJagaList
+                      .filter(p => !masterSecuritySearch || p.name.toLowerCase().includes(masterSecuritySearch.toLowerCase()))
+                      .map((pos, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-indigo-400">{pos.posId}</td>
+                          <td className="p-3 text-white font-bold font-sans">{pos.name}</td>
+                          <td className="p-3 text-slate-300 font-sans">{pos.location}</td>
+                          <td className="p-3 font-sans text-emerald-400 font-bold">{pos.gateType}</td>
+                          <td className="p-3 text-slate-300">{pos.guardsOnDuty} Personel Guard</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ✓ {pos.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Master Pos ${pos.name}`)} className="text-indigo-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Tab 2: Master Personel PAM */}
+          {masterSecuritySubTab === 'PERSONEL_PAM' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-emerald-400" />
+                    Daftar Master Personel Security, Satpam & PAM TNI/POLRI Obvitnas
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Database Lisensi Gada Pratama/Madya, SIO Polri, serta Pos Tugas Anggota PAM</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari NIK / Nama Anggota..."
+                  value={masterSecuritySearch}
+                  onChange={(e) => setMasterSecuritySearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">NIK Security</th>
+                      <th className="p-3">Nama Personel</th>
+                      <th className="p-3">Kategori Instansi</th>
+                      <th className="p-3">Kualifikasi Lisensi</th>
+                      <th className="p-3">No. SIO Polri</th>
+                      <th className="p-3">Pos Tugas</th>
+                      <th className="p-3">Status Kesiapan</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterPersonelPamList
+                      .filter(p => !masterSecuritySearch || p.name.toLowerCase().includes(masterSecuritySearch.toLowerCase()))
+                      .map((person, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-indigo-400">{person.nik}</td>
+                          <td className="p-3 text-white font-bold font-sans">{person.name}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                              {person.category}
+                            </span>
+                          </td>
+                          <td className="p-3 text-amber-300 font-bold font-sans">{person.qualification}</td>
+                          <td className="p-3 text-slate-400">{person.sioNo}</td>
+                          <td className="p-3 text-slate-300 font-sans">{person.posAssignment}</td>
+                          <td className="p-3 font-sans">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                              person.status === 'ON_DUTY_SHIFT' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400'
+                            }`}>
+                              {person.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Master Personel ${person.name}`)} className="text-indigo-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Tab 3: Master Inventaris Alpal Security */}
+          {masterSecuritySubTab === 'INVENTARIS_ALPAL' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Radio className="w-4 h-4 text-sky-400" />
+                    Daftar Master Inventaris Peralatan PAM / Alpal Security
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Master Aset Radio HT, Rompi Anti Peluru, Senter Tactical, Vehicle Patroli & Borgol</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Alat PAM / Kode..."
+                  value={masterSecuritySearch}
+                  onChange={(e) => setMasterSecuritySearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">Kode Aset</th>
+                      <th className="p-3">Nama Peralatan Alpal</th>
+                      <th className="p-3">Kategori Perlengkapan</th>
+                      <th className="p-3">Kondisi Aset</th>
+                      <th className="p-3">Pos Penempatan</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterAlpalList
+                      .filter(a => !masterSecuritySearch || a.name.toLowerCase().includes(masterSecuritySearch.toLowerCase()))
+                      .map((alpal, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-indigo-400">{alpal.assetId}</td>
+                          <td className="p-3 text-white font-bold font-sans">{alpal.name}</td>
+                          <td className="p-3 font-sans text-sky-300">{alpal.category}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ✓ {alpal.condition}
+                            </span>
+                          </td>
+                          <td className="p-3 text-slate-300 font-sans">{alpal.location}</td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Aset Alpal ${alpal.name}`)} className="text-indigo-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Tab 4: Master Hardware CCTV AI */}
+          {masterSecuritySubTab === 'HARDWARE_CCTV' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Video className="w-4 h-4 text-emerald-400" />
+                    Daftar Master Hardware Kamera CCTV AI, Turnstile & Boom Barrier Gate
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Pusat Pendaftaran IP Address, Sensor ANPR, PTZ Thermal Kamera & Boom Barriers</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari IP / Device CCTV..."
+                  value={masterSecuritySearch}
+                  onChange={(e) => setMasterSecuritySearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-indigo-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">Device ID</th>
+                      <th className="p-3">Nama Perangkat</th>
+                      <th className="p-3">IP Address</th>
+                      <th className="p-3">Area Installation</th>
+                      <th className="p-3">AI Fitur Analytics</th>
+                      <th className="p-3">Status Connection</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterCctvList
+                      .filter(c => !masterSecuritySearch || c.name.toLowerCase().includes(masterSecuritySearch.toLowerCase()))
+                      .map((cctv, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-indigo-400">{cctv.devId}</td>
+                          <td className="p-3 text-white font-bold font-sans">{cctv.name}</td>
+                          <td className="p-3 text-emerald-400">{cctv.ipAddress}</td>
+                          <td className="p-3 text-slate-300 font-sans">{cctv.area}</td>
+                          <td className="p-3 font-sans text-amber-300 font-bold">{cctv.aiFeature}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ● {cctv.streamStatus}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Hardware CCTV ${cctv.name}`)} className="text-indigo-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

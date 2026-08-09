@@ -20,7 +20,11 @@ import {
   Search,
   Droplets,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Database,
+  Microscope,
+  Award,
+  FlaskConical
 } from 'lucide-react';
 import { OreStockpile, Language } from '../../types';
 import { formatUSD } from '../../utils/hpmCalculator';
@@ -40,6 +44,7 @@ export const StockpileBlendingModule: React.FC<StockpileBlendingModuleProps> = (
     | 'barge_loading_plan'
     | 'lab_sampling_coa'
     | 'spatial_pad_map'
+    | 'master_data_lab'
   >('stockpile_overview');
 
   const [stockpileList, setStockpileList] = useState<OreStockpile[]>(stockpiles);
@@ -230,7 +235,8 @@ export const StockpileBlendingModule: React.FC<StockpileBlendingModuleProps> = (
           { id: 'ai_blending_simulator', label: 'Simulator Optimasi Blending AI', icon: Sliders },
           { id: 'barge_loading_plan', label: 'Rencana Loading Tongkang (Barging)', icon: Anchor },
           { id: 'lab_sampling_coa', label: 'Hasil Lab Sampling & COA XRF', icon: TestTube },
-          { id: 'spatial_pad_map', label: 'Peta Spatial Pad & Kapasitas Grid', icon: MapPin }
+          { id: 'spatial_pad_map', label: 'Peta Spatial Pad & Kapasitas Grid', icon: MapPin },
+          { id: 'master_data_lab', label: '🗄️ Master Data Laboratory Chemist & QA/QC', icon: Database }
         ].map((tab) => {
           const IconComp = tab.icon;
           const isActive = activeTab === tab.id;
@@ -606,6 +612,137 @@ export const StockpileBlendingModule: React.FC<StockpileBlendingModuleProps> = (
                   <div>Tonnage Status: <strong>35,000 MT / 50,000 MT</strong></div>
                   <div>Avg Moisture: <strong className="text-amber-300">26.5% MC</strong></div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 6: MASTER DATA LABORATORY CHEMIST & QA/QC */}
+      {activeTab === 'master_data_lab' && (
+        <div className="space-y-6 text-xs">
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 border border-slate-800 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                Master Data Laboratory Chemist & QA/QC Standard
+              </span>
+              <h3 className="text-xl font-black text-white mt-1 flex items-center gap-2">
+                <Database className="w-5 h-5 text-teal-400" />
+                Database Master Laboratory, Metrologi Assay & Surveyor Independen
+              </h3>
+              <p className="text-slate-400 text-xs mt-1">
+                Pengelolaan master matriks unsur nikel (Ni, Fe, Co, SiO2, MgO, MC), sertifikasi instrumen XRF/ICP-OES, stok reagen CRM OREAS, dan akreditasi KAN ISO/IEC 17025.
+              </p>
+            </div>
+            <button
+              onClick={() => alert("Menambah Entri Master Data Laboratory Baru...")}
+              className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs flex items-center gap-1.5 shrink-0 shadow-md"
+            >
+              <Plus className="w-4 h-4" /> Tambah Entri Master
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Box 1: Master Unsur & Toleransi ISO 17025 */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Microscope className="w-4 h-4 text-teal-400" />
+                1. Master Parameter Unsur Kimia & Standar Toleransi
+              </h4>
+              <div className="space-y-2 font-mono">
+                {[
+                  { name: 'Ni (Nikel)', range: '1.40% - 2.10%', tol: '± 0.03% Ni', method: 'XRF / ICP-OES' },
+                  { name: 'Fe (Besi)', range: '15.0% - 48.0%', tol: '± 0.20% Fe', method: 'WDXRF' },
+                  { name: 'Moisture (MC)', range: '28.0% - 35.0%', tol: '± 0.50% MC', method: 'Oven Drying 105°C' },
+                  { name: 'SiO2 / MgO Ratio', range: '1.80 - 2.30', tol: '± 0.05 S/M', method: 'Fusion Bead' }
+                ].map((m, i) => (
+                  <div key={i} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-white font-bold block">{m.name}</span>
+                      <span className="text-slate-400 font-sans text-[10px]">{m.method}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-emerald-400 font-bold block">{m.range}</span>
+                      <span className="text-amber-300 text-[10px]">{m.tol}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 2: Master Instrumentasi Spektrometer */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <TestTube className="w-4 h-4 text-indigo-400" />
+                2. Master Instrumentasi Spektrometer & Kalibrasi
+              </h4>
+              <div className="space-y-2 font-mono">
+                {[
+                  { id: 'XRF-2024-889', name: 'XRF Rigaku Primus IV', status: 'CALIBRATED_OPERATIONAL', next: '15 Jun 2027' },
+                  { id: 'ICP-2025-102', name: 'ICP-OES PerkinElmer Avio 500', status: 'CALIBRATED_OPERATIONAL', next: '20 Jul 2027' },
+                  { id: 'OVN-302', name: 'Drying Oven Memmert (105°C)', status: 'CALIBRATED_OPERATIONAL', next: '10 Mei 2027' }
+                ].map((eq, idx) => (
+                  <div key={idx} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-indigo-400 font-bold block">{eq.id}</span>
+                      <span className="text-white font-sans font-semibold text-[11px]">{eq.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-emerald-400 font-bold block text-[10px]">✓ {eq.status}</span>
+                      <span className="text-slate-400 text-[10px]">Next Cal: {eq.next}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 3: Master Reagen & Certified Reference Material (CRM) */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <FlaskConical className="w-4 h-4 text-amber-400" />
+                3. Master Reagen Kimia & Standard CRM
+              </h4>
+              <div className="space-y-2 font-mono">
+                {[
+                  { name: 'Asam Nitrat (HNO3) 65%', stock: '120 Liter', supplier: 'PT Merck Indonesia' },
+                  { name: 'Standard CRM OREAS 184', stock: '45 Vials', supplier: 'OREAS Australia' },
+                  { name: 'Lithium Tetraborate Flux', stock: '80 Kg', supplier: 'Claisse Malvern' }
+                ].map((rg, i) => (
+                  <div key={i} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-amber-300 font-bold block font-sans">{rg.name}</span>
+                      <span className="text-slate-400 font-sans text-[10px]">{rg.supplier}</span>
+                    </div>
+                    <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/30">
+                      {rg.stock}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 4: Master Surveyor Independen & Lab Rujukan */}
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <Award className="w-4 h-4 text-emerald-400" />
+                4. Master Surveyor Independen & Lab Rujukan ESDM
+              </h4>
+              <div className="space-y-2">
+                {[
+                  { name: 'PT Sucofindo (Persero)', kan: 'LP-012-IDN ISO 17025', branch: 'Kendari & Morowali' },
+                  { name: 'PT SGS Indonesia', kan: 'LP-048-IDN ISO 17025', branch: 'Halmahera Weda Bay' },
+                  { name: 'PT Carsurin Tbk', kan: 'LP-112-IDN ISO 17025', branch: 'Pomalaa & Morowali' }
+                ].map((s, i) => (
+                  <div key={i} className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-white font-bold block">{s.name}</span>
+                      <span className="text-teal-400 text-[10px] font-mono">{s.branch}</span>
+                    </div>
+                    <span className="text-emerald-300 font-mono text-[10px] bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
+                      {s.kan}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

@@ -22,7 +22,11 @@ import {
   MapPin,
   Clock,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Database,
+  Award,
+  UserCheck,
+  Stethoscope
 } from 'lucide-react';
 import { SafetyIncidentLog, Language } from '../../types';
 
@@ -45,12 +49,48 @@ export const HseEsgModule: React.FC<HseEsgModuleProps> = ({
     | 'inspection_ppe'
     | 'emergency_fire_evac'
     | 'safety_meetings'
+    | 'master_data_hse'
   >('incidents_nearmiss');
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [severity, setSeverity] = useState<SafetyIncidentLog['severityLevel']>('MEDIUM');
+
+  // Master Data HSE Manager & K3LH States
+  const [masterHseSubTab, setMasterHseSubTab] = useState<'HIRADC' | 'STANDAR_APD' | 'LOKASI_HAZARD' | 'KOMPETENSI_K3'>('HIRADC');
+  const [masterHseSearch, setMasterHseSearch] = useState('');
+
+  // Master Data HIRADC / IBPR
+  const [masterHiradcList, setMasterHiradcList] = useState([
+    { code: 'HIR-001', activity: 'Pengangkutan Ore Nikel Haul Road km 0-18', hazard: 'Blindspot & Jalan Licin Pasca Hujan', riskLevel: 'HIGH', controls: 'Speed Limit 30 km/h, Radio Ch 4, Escort Truck', status: 'ACTIVE_APPROVED' },
+    { code: 'HIR-002', activity: 'Pengoperasian Excavator PC2000 Pit Highwall', hazard: 'Longsoran Dinding Pit & Rockfall', riskLevel: 'CRITICAL', controls: 'Radar Geoteknik, Slope Angle 45 Deg, Safety Berm 3m', status: 'ACTIVE_APPROVED' },
+    { code: 'HIR-003', activity: 'Peledakan Overburden (Blasting) Pit Alpha', hazard: 'Flyrock Terbang & Vibro Vibration', riskLevel: 'CRITICAL', controls: 'Evakuasi 500m, Siren Warning, Blasting Mat', status: 'ACTIVE_APPROVED' },
+    { code: 'HIR-004', activity: 'Hot Work Las Tangki Solar Fuel Station', hazard: 'Kebakaran & Semburan Gas Terbakar', riskLevel: 'HIGH', controls: 'LOTO, Gas Detector 4-Gas, APAR CO2 Standby', status: 'ACTIVE_APPROVED' }
+  ]);
+
+  // Master Data Standar APD & Peralatan K3LH
+  const [masterPpeStandardsList, setMasterPpeStandardsList] = useState([
+    { code: 'APD-001', name: 'Helm K3 Mining ANSI Z89.1 Class E', standard: 'Tahan Benturan 5000N, Chinstrap 4-Point', category: 'Proteksi Kepala', inspectionPeriod: 'Bulanan', status: 'MANDATORY_SITE' },
+    { code: 'APD-002', name: 'Sepatu Safety Steel Toe Cap ISO 20345', standard: 'Ketahanan Tekan 15kN, Outsole Anti-Slip Oil Resistant', category: 'Proteksi Kaki', inspectionPeriod: '6 Bulan', status: 'MANDATORY_SITE' },
+    { code: 'APD-003', name: 'Full Body Harness Double Lanyard EN 361', standard: 'Absorber Shock Absorber, Kapasitas Beban 140kg', category: 'Bekerja Ketinggian', inspectionPeriod: 'Mingguan', status: 'MANDATORY_SITE' },
+    { code: 'APD-004', name: 'Detektor 4-Gas Portabel (H2S, CO, O2, LEL)', standard: 'Sensor Respon < 10 Detik, IP68 Waterproof', category: 'Gas Detection', inspectionPeriod: 'Kalibrasi 3 Bulan', status: 'MANDATORY_SITE' }
+  ]);
+
+  // Master Data Zona Risiko & Lokasi Hazard
+  const [masterHazardZonesList, setMasterHazardZonesList] = useState([
+    { zoneId: 'ZON-01', locationName: 'Highwall Pit Alpha Segment 3', hazardCategory: 'Potensi Longsoran Geoteknik Highwall', riskLevel: 'CRITICAL_ZONE', accessRequirement: 'Izin Khusus Geoteknik & KTT', status: 'WARNING_MONITORED' },
+    { zoneId: 'ZON-02', locationName: 'Fuel Storage Station 100,000L', hazardCategory: 'Bahan Mudah Terbakar B3 & Explosive', riskLevel: 'HIGH_FLAMMABLE', accessRequirement: 'Hot Work Permit & Grounding', status: 'RESTRICTED_ACCESS' },
+    { zoneId: 'ZON-03', locationName: 'Stockpile Crusher Plant EFO #1', hazardCategory: 'Kebisingan > 85dB & Debu Silika', riskLevel: 'MEDIUM_HEALTH', accessRequirement: 'Earplug & Respirator N95 Wajib', status: 'OPERATIONAL_SAFE' }
+  ]);
+
+  // Master Data Kompetensi & Sertifikasi K3
+  const [masterK3CertificationsList, setMasterK3CertificationsList] = useState([
+    { certId: 'CERT-001', certName: 'Pengawas Operasional Pertama (POP) ESDM', requirementRole: 'Foreman & Supervisor Pit', validityYears: '5 Tahun', issuingBody: 'LSP Minerba / ESDM', status: 'REQUIRED_SUPERVISOR' },
+    { certId: 'CERT-002', certName: 'Pengawas Operasional Madya (POM) ESDM', requirementRole: 'Superintendent & Manager Mine', validityYears: '5 Tahun', issuingBody: 'LSP Minerba / ESDM', status: 'REQUIRED_MANAGEMENT' },
+    { certId: 'CERT-003', certName: 'Ahli K3 Umum Kemenaker', requirementRole: 'HSE Officer & Safety Inspector', validityYears: '3 Tahun', issuingBody: 'Kemenaker RI', status: 'REQUIRED_HSE_OFFICER' },
+    { certId: 'CERT-004', certName: 'ERT First Aider & Firefighter Level 2', requirementRole: 'Tim Rescue ERT Site', validityYears: '2 Tahun', issuingBody: 'BASARNAS / BNSP', status: 'REQUIRED_RESCUE' }
+  ]);
 
   // Permit to Work (PTW) & Job Safety Analysis (JSA) Dataset
   const permitsData = [
@@ -182,7 +222,8 @@ export const HseEsgModule: React.FC<HseEsgModuleProps> = ({
           { id: 'risk_assessment', label: 'Penilaian Risiko (Risk/HIRADC)', icon: AlertTriangle },
           { id: 'inspection_ppe', label: 'Inspeksi K3 & APD (PPE)', icon: HardHat },
           { id: 'emergency_fire_evac', label: 'Emergency, Fire & Evakuasi', icon: Flame },
-          { id: 'safety_meetings', label: 'Safety Meeting & P5M', icon: Users }
+          { id: 'safety_meetings', label: 'Safety Meeting & P5M', icon: Users },
+          { id: 'master_data_hse', label: '🗄️ Master Data HSE Manager & K3LH', icon: Database }
         ].map((tab) => {
           const IconComp = tab.icon;
           const isActive = activeTab === tab.id;
@@ -473,6 +514,329 @@ export const HseEsgModule: React.FC<HseEsgModuleProps> = ({
               </table>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* TAB 8: MASTER DATA HSE MANAGER & K3LH */}
+      {activeTab === 'master_data_hse' && (
+        <div className="space-y-6 text-xs">
+          {/* Sub-Header Banner */}
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  Master Data K3LH & Safety Pertambangan
+                </span>
+                <span className="text-slate-400 text-xs">• Sesuai Kepmen ESDM No. 1827 K/30/MEM/2018</span>
+              </div>
+              <h2 className="text-xl font-black text-white flex items-center gap-2">
+                <Database className="w-5 h-5 text-rose-400" />
+                Master Data Risk Matrix HIRADC, Standar APD, Lokasi Hazard & Lisensi K3
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Pusat data induk matriks penilaian risiko HIRADC/IBPR, spesifikasi standar APD wajib site, peta zona hazard kritis, serta kualifikasi sertifikasi K3 (POP, POM, POU, ERT).
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (masterHseSubTab === 'HIRADC') {
+                    const newCode = `HIR-00${masterHiradcList.length + 1}`;
+                    setMasterHiradcList([...masterHiradcList, { code: newCode, activity: 'Aktivitas Baru Pit', hazard: 'Potensi Hazard Baru', riskLevel: 'MEDIUM', controls: 'Prosedur SOP & APD Wajib', status: 'ACTIVE_APPROVED' }]);
+                    alert("Master Data HIRADC baru berhasil ditambahkan!");
+                  } else if (masterHseSubTab === 'STANDAR_APD') {
+                    const newCode = `APD-00${masterPpeStandardsList.length + 1}`;
+                    setMasterPpeStandardsList([...masterPpeStandardsList, { code: newCode, name: 'Peralatan APD K3 Baru', standard: 'Standar SNI / ANSI Z89', category: 'Proteksi K3', inspectionPeriod: 'Bulanan', status: 'MANDATORY_SITE' }]);
+                    alert("Master Standar APD K3 baru berhasil dicatat!");
+                  } else if (masterHseSubTab === 'LOKASI_HAZARD') {
+                    const newZone = `ZON-0${masterHazardZonesList.length + 1}`;
+                    setMasterHazardZonesList([...masterHazardZonesList, { zoneId: newZone, locationName: 'Area Hazard Baru', hazardCategory: 'Kategori Risiko Site', riskLevel: 'HIGH_RISK', accessRequirement: 'Izin APD & PTW', status: 'WARNING_MONITORED' }]);
+                    alert("Master Lokasi Hazard Kritis baru berhasil dicatat!");
+                  } else {
+                    const newCert = `CERT-00${masterK3CertificationsList.length + 1}`;
+                    setMasterK3CertificationsList([...masterK3CertificationsList, { certId: newCert, certName: 'Sertifikasi K3 Mining Baru', requirementRole: 'Pengawas / Technical Staff', validityYears: '3 Tahun', issuingBody: 'LSP / ESDM', status: 'REQUIRED_SUPERVISOR' }]);
+                    alert("Master Sertifikasi K3 Baru berhasil ditambahkan!");
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-md shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                Tambah Master Data HSE
+              </button>
+            </div>
+          </div>
+
+          {/* Master Sub-Tabs Selector */}
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
+            {[
+              { id: 'HIRADC', label: '1. Master Matriks Risk HIRADC / IBPR', count: masterHiradcList.length },
+              { id: 'STANDAR_APD', label: '2. Master Standar APD & Peralatan K3', count: masterPpeStandardsList.length },
+              { id: 'LOKASI_HAZARD', label: '3. Master Zona Hazard & Area Kritis', count: masterHazardZonesList.length },
+              { id: 'KOMPETENSI_K3', label: '4. Master Sertifikasi & Kompetensi K3', count: masterK3CertificationsList.length }
+            ].map((sub) => (
+              <button
+                key={sub.id}
+                onClick={() => setMasterHseSubTab(sub.id as any)}
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 shrink-0 ${
+                  masterHseSubTab === sub.id
+                    ? 'bg-rose-600 text-white shadow-lg ring-1 ring-rose-400'
+                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                }`}
+              >
+                <span>{sub.label}</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-950 font-mono text-rose-300 border border-slate-700">
+                  {sub.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Sub-Tab 1: Master HIRADC / IBPR */}
+          {masterHseSubTab === 'HIRADC' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-rose-400" />
+                    Daftar Master HIRADC (Hazard Identification, Risk Assessment & Risk Control)
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Database Penilaian Potensi Bahaya Pekerjaan Tambang, Risiko Sisa & Mitigasi Pengendalian</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Kode / Aktivitas..."
+                  value={masterHseSearch}
+                  onChange={(e) => setMasterHseSearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-rose-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">Kode HIRADC</th>
+                      <th className="p-3">Uraian Aktivitas Pekerjaan</th>
+                      <th className="p-3">Identifikasi Bahaya Utama</th>
+                      <th className="p-3">Level Risiko</th>
+                      <th className="p-3">Mitigasi & Hirarki Pengendalian</th>
+                      <th className="p-3">Status Matriks</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterHiradcList
+                      .filter(h => !masterHseSearch || h.activity.toLowerCase().includes(masterHseSearch.toLowerCase()) || h.code.toLowerCase().includes(masterHseSearch.toLowerCase()))
+                      .map((hir, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-rose-400">{hir.code}</td>
+                          <td className="p-3 text-white font-bold font-sans">{hir.activity}</td>
+                          <td className="p-3 font-sans text-slate-300">{hir.hazard}</td>
+                          <td className="p-3 font-sans">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                              hir.riskLevel === 'CRITICAL' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            }`}>
+                              {hir.riskLevel}
+                            </span>
+                          </td>
+                          <td className="p-3 font-sans text-emerald-300">{hir.controls}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ✓ {hir.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Master HIRADC ${hir.code}`)} className="text-rose-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Tab 2: Master Standar APD & Peralatan K3 */}
+          {masterHseSubTab === 'STANDAR_APD' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <HardHat className="w-4 h-4 text-amber-400" />
+                    Daftar Master Standar Spesifikasi APD & Alat Deteksi Gas K3
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Master Sertifikasi SNI/ANSI Helm, Sepatu Steel Toe, Full Body Harness & Detektor Gas</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Alat APD..."
+                  value={masterHseSearch}
+                  onChange={(e) => setMasterHseSearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-rose-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">Kode APD</th>
+                      <th className="p-3">Nama Alat Pelindung Diri</th>
+                      <th className="p-3">Kategori Proteksi</th>
+                      <th className="p-3">Standar Spesifikasi Teknis</th>
+                      <th className="p-3">Periode Inspeksi</th>
+                      <th className="p-3">Status Kepatuhan</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterPpeStandardsList
+                      .filter(a => !masterHseSearch || a.name.toLowerCase().includes(masterHseSearch.toLowerCase()))
+                      .map((ppe, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-rose-400">{ppe.code}</td>
+                          <td className="p-3 text-white font-bold font-sans">{ppe.name}</td>
+                          <td className="p-3 font-sans text-amber-300 font-bold">{ppe.category}</td>
+                          <td className="p-3 text-slate-300 font-sans">{ppe.standard}</td>
+                          <td className="p-3 text-sky-400 font-bold">{ppe.inspectionPeriod}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ✓ {ppe.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Master APD ${ppe.name}`)} className="text-rose-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Tab 3: Master Lokasi Hazard & Area Kritis */}
+          {masterHseSubTab === 'LOKASI_HAZARD' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-rose-400" />
+                    Daftar Master Zona Kritis & Peta Area Berbahaya Tambang
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Pusat Pendaftaran Highwall Rawan Longsor, Tangki Bahan Bakar B3 & Area Kebisingan Tinggi</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Lokasi Hazard..."
+                  value={masterHseSearch}
+                  onChange={(e) => setMasterHseSearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-rose-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">ID Zona</th>
+                      <th className="p-3">Nama Lokasi Area Site</th>
+                      <th className="p-3">Kategori Bahaya & Hazard</th>
+                      <th className="p-3">Klasifikasi Risiko Area</th>
+                      <th className="p-3">Persyaratan Akses Masuk</th>
+                      <th className="p-3">Status Pengawasan</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterHazardZonesList
+                      .filter(z => !masterHseSearch || z.locationName.toLowerCase().includes(masterHseSearch.toLowerCase()))
+                      .map((zone, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-rose-400">{zone.zoneId}</td>
+                          <td className="p-3 text-white font-bold font-sans">{zone.locationName}</td>
+                          <td className="p-3 font-sans text-rose-300">{zone.hazardCategory}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                              {zone.riskLevel}
+                            </span>
+                          </td>
+                          <td className="p-3 font-sans text-slate-300">{zone.accessRequirement}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              ● {zone.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Area Hazard ${zone.locationName}`)} className="text-rose-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Tab 4: Master Sertifikasi & Kompetensi K3 */}
+          {masterHseSubTab === 'KOMPETENSI_K3' && (
+            <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Award className="w-4 h-4 text-emerald-400" />
+                    Daftar Master Kualifikasi Lisensi & Sertifikasi K3 Pertambangan
+                  </h3>
+                  <p className="text-[11px] text-slate-400">Master Lisensi POP/POM/POU ESDM, Ahli K3 Umum Kemenaker & Sertifikat Tim ERT Rescue</p>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Sertifikasi..."
+                  value={masterHseSearch}
+                  onChange={(e) => setMasterHseSearch(e.target.value)}
+                  className="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:border-rose-500 font-mono"
+                />
+              </div>
+
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-800">
+                      <th className="p-3">ID Lisensi</th>
+                      <th className="p-3">Nama Sertifikasi / Lisensi K3</th>
+                      <th className="p-3">Persyaratan Jabatan / Role</th>
+                      <th className="p-3">Masa Berlaku</th>
+                      <th className="p-3">Lembaga Sertifikasi (LSP/Pemerintah)</th>
+                      <th className="p-3">Status Kebutuhan</th>
+                      <th className="p-3 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800 font-mono text-slate-200">
+                    {masterK3CertificationsList
+                      .filter(c => !masterHseSearch || c.certName.toLowerCase().includes(masterHseSearch.toLowerCase()))
+                      .map((cert, idx) => (
+                        <tr key={idx} className="hover:bg-slate-800/50">
+                          <td className="p-3 font-bold text-rose-400">{cert.certId}</td>
+                          <td className="p-3 text-white font-bold font-sans">{cert.certName}</td>
+                          <td className="p-3 font-sans text-indigo-300 font-bold">{cert.requirementRole}</td>
+                          <td className="p-3 text-emerald-400 font-bold">{cert.validityYears}</td>
+                          <td className="p-3 text-slate-300 font-sans">{cert.issuingBody}</td>
+                          <td className="p-3 font-sans">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              ✓ {cert.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right font-sans">
+                            <button onClick={() => alert(`Mengedit Lisensi ${cert.certName}`)} className="text-rose-400 hover:underline font-bold text-[11px]">Edit Master</button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

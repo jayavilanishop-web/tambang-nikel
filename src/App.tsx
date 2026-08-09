@@ -235,14 +235,15 @@ export default function App() {
         onGoToLandingPage={() => setViewMode('landing')}
       />
 
-      {/* Main Layout Area */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 flex gap-6">
+      {/* Main Layout Area - Full Width Responsive */}
+      <div className="w-full px-3 sm:px-6 lg:px-8 py-6 flex gap-6">
         
         {/* Native Responsive Sidebar Navigation */}
         <Sidebar
           activeModule={activeModule}
           onSelectModule={setActiveModule}
           language={language}
+          currentUserRole={currentUserRole}
           isOpenMobile={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
@@ -257,6 +258,7 @@ export default function App() {
               barges={barges}
               hpm={hpm}
               language={language}
+              currentUserRole={currentUserRole}
               onOpenAIDrawer={() => setIsAIDrawerOpen(true)}
               onNavigateModule={setActiveModule}
             />
@@ -265,6 +267,125 @@ export default function App() {
           {activeModule === 'mine_gpt' && (
             <MineGPTModule
               language={language}
+            />
+          )}
+
+          {activeModule === 'corporate_director' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_corporate_director"
+            />
+          )}
+
+          {activeModule === 'commissioner' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_commissioner"
+            />
+          )}
+
+          {activeModule === 'ceo' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_ceo"
+            />
+          )}
+
+          {activeModule === 'coo' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_coo"
+            />
+          )}
+
+          {activeModule === 'finance_director' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_finance_director"
+            />
+          )}
+
+          {activeModule === 'hr_director' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_hr_director"
+            />
+          )}
+
+          {activeModule === 'mine_manager' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_mine_manager"
+            />
+          )}
+
+          {activeModule === 'operation_manager' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_operation_manager"
+            />
+          )}
+
+          {activeModule === 'production_manager' && (
+            <OperationCenterModule
+              sites={sites}
+              stockpiles={stockpiles}
+              equipment={equipment}
+              barges={barges}
+              language={language}
+              initialTab="dasbor_production_manager"
+            />
+          )}
+
+          {activeModule === 'geologist' && (
+            <ExplorationPitModule
+              pits={pits}
+              sites={sites}
+              language={language}
+              initialTab="dasbor_geologist"
+              onAddPitOperation={handleAddPitOperation}
+            />
+          )}
+
+          {activeModule === 'mine_engineer' && (
+            <ExplorationPitModule
+              pits={pits}
+              sites={sites}
+              language={language}
+              initialTab="dasbor_mine_engineer"
+              onAddPitOperation={handleAddPitOperation}
             />
           )}
 
