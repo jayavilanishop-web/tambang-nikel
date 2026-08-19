@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default-deny catch-all (Pillar 1)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'jayavilanishop@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation Helpers
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId.size() <= 128 &&
+        data.email is string && data.email.size() <= 128 &&
+        data.name is string && data.name.size() <= 128 &&
+        data.role is string && data.role.size() <= 64 &&
+        data.status in ['ACTIVE', 'SUSPENDED', 'EXPIRED', 'TRIAL'];
+    }
+
+    function isValidAppConfig(data) {
+      return data.configId is string && data.configId.size() <= 64;
+    }
+
+    function isValidMiningLog(data) {
+      return data.logId is string && data.logId.size() <= 64 &&
+        data.pitId is string && data.pitId.size() <= 64 &&
+        data.tonnageWmt is number && data.tonnageWmt >= 0 &&
+        data.gradeNi is number && data.gradeNi >= 0 && data.gradeNi <= 100;
+    }
+
+    function isValidShipment(data) {
+      return data.shipmentId is string && data.shipmentId.size() <= 64 &&
+        data.bargeName is string && data.bargeName.size() <= 128 &&
+        data.tonnageWmt is number && data.tonnageWmt >= 0 &&
+        data.status in ['LOADING', 'IN_TRANSIT', 'DISCHARGING', 'COMPLETED', 'CANCELLED'];
+    }
+
+    // Collection Rules
+
+    // 1. User Profiles
+    match /users/{userId} {
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isSignedIn() && isValidId(userId) && isOwner(userId) && isValidUserProfile(incoming());
+      allow update: if isSignedIn() && isValidId(userId) && (isOwner(userId) || isAdmin()) && isValidUserProfile(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 2. Developer / App Configurations (Live CMS/CRM Sync)
+    match /configs/{configId} {
+      allow get: if true; // Public read for landing page config
+      allow list: if true;
+      allow create, update, delete: if isAdmin() && isValidId(configId) && isValidAppConfig(incoming());
+    }
+
+    // 3. Mining Production & Pit Logs
+    match /mining_logs/{logId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(logId) && isValidMiningLog(incoming());
+      allow update: if isSignedIn() && isValidId(logId) && isValidMiningLog(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 4. Barging & Shipments
+    match /shipments/{shipmentId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(shipmentId) && isValidShipment(incoming());
+      allow update: if isSignedIn() && isValidId(shipmentId) && isValidShipment(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 5. Admin Document Directory
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

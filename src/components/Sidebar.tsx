@@ -30,7 +30,8 @@ import {
   Bell,
   Scale,
   ShieldCheck,
-  Crown
+  Crown,
+  Terminal
 } from 'lucide-react';
 import { Language, UserRole } from '../types';
 import { 
@@ -79,7 +80,8 @@ export type ActiveModule =
   | 'offline' 
   | 'api_hub' 
   | 'saas_license'
-  | 'auth_security';
+  | 'auth_security'
+  | 'developer_control_panel';
 
 interface SidebarProps {
   activeModule: ActiveModule;
@@ -438,6 +440,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       labelEn: 'License Key Manager',
       icon: KeyRound,
       badge: 'Server',
+      category: 'ENTERPRISE'
+    },
+    {
+      id: 'developer_control_panel' as ActiveModule,
+      labelId: 'Developer CMS & Control Panel',
+      labelEn: 'Developer CMS & Control Panel',
+      icon: Terminal,
+      badge: 'Live Master Hub',
       category: 'ENTERPRISE'
     }
   ];

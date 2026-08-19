@@ -35,29 +35,43 @@ import {
   PhoneCall,
   Boxes,
   Compass,
-  Scale
+  Scale,
+  Terminal,
+  Image as ImageIcon,
+  Video as VideoIcon
 } from 'lucide-react';
 import { Language, UserRole } from '../types';
+import { useDevConfig } from '../services/devConfigService';
 
 interface LandingPageProps {
   onEnterApp: (selectedRole?: UserRole) => void;
+  onOpenDeveloperPanel?: () => void;
   language: Language;
   onToggleLanguage: () => void;
+  firebaseUser?: any;
+  onGoogleSignIn?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onEnterApp,
+  onOpenDeveloperPanel,
   language,
-  onToggleLanguage
+  onToggleLanguage,
+  firebaseUser,
+  onGoogleSignIn
 }) => {
+  const { config } = useDevConfig();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loginTab, setLoginTab] = useState<'quick_sso' | 'credentials' | 'company_code'>('quick_sso');
   const [selectedDemoRole, setSelectedDemoRole] = useState<UserRole>('Super Admin');
   const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
+  const [selectedMediaCategory, setSelectedMediaCategory] = useState<string>('all');
+  const [activePreviewMedia, setActivePreviewMedia] = useState<any | null>(null);
 
   // ROI Calculator State
   const [monthlyProductionWmt, setMonthlyProductionWmt] = useState<number>(100000); // 100k WMT/month
   const [fuelPricePerLiter, setFuelPricePerLiter] = useState<number>(15000); // Rp 15,000 / Liter B35
+  const [pricingBillingCycle, setPricingBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
 
   // ROI Calculations
   const estimatedFuelSavingsLiters = Math.round(monthlyProductionWmt * 0.45 * 12); // ~0.45L saved per WMT * 12 months
@@ -85,22 +99,55 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-tr from-indigo-600/20 via-purple-600/10 to-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
       
+      {/* Top Floating Announcement Bar (Configurable from Developer Control Panel) */}
+      {config?.website?.announcement?.enabled && (
+        <div className={`py-2 px-4 text-xs font-bold text-center flex items-center justify-center gap-2 border-b z-50 relative ${
+          config.website.announcement.type === 'promo' ? 'bg-emerald-950/90 border-emerald-500/30 text-emerald-300' :
+          config.website.announcement.type === 'warning' ? 'bg-amber-950/90 border-amber-500/30 text-amber-300' :
+          config.website.announcement.type === 'alert' ? 'bg-rose-950/90 border-rose-500/30 text-rose-300' :
+          'bg-indigo-950/90 border-indigo-500/30 text-indigo-300'
+        }`}>
+          <span className="px-2 py-0.5 rounded text-[10px] uppercase font-black tracking-wider bg-white/10">
+            {config.website.announcement.badgeText || 'UPDATE LIVE'}
+          </span>
+          <span>{config.website.announcement.text}</span>
+          {config.website.announcement.linkText && (
+            <button onClick={() => setIsLoginModalOpen(true)} className="underline hover:text-white ml-2 text-[11px]">
+              {config.website.announcement.linkText} →
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Top Floating Navigation */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/80 border-b border-slate-800/80 px-4 lg:px-8 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
           {/* Brand Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => onEnterApp('Super Admin')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-indigo-400" />
+            {config?.website?.logoUrl ? (
+              <img 
+                src={config.website.logoUrl} 
+                alt="Logo" 
+                className="w-10 h-10 rounded-xl object-cover border border-slate-700 shadow-lg"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20">
+                <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+                  <Cpu className="w-5 h-5 text-indigo-400" />
+                </div>
               </div>
-            </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-lg text-slate-100 tracking-tight">NickelSmart AI</span>
+                <span className="font-extrabold text-lg text-slate-100 tracking-tight">
+                  {config?.website?.brandName || 'NickelSmart AI'}
+                </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-mono">Enterprise Mining Intelligence Platform</p>
+              <p className="text-[10px] text-slate-400 font-mono">
+                {config?.website?.brandTagline || 'Enterprise Mining Intelligence Platform'}
+              </p>
             </div>
           </div>
 
@@ -109,29 +156,41 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <a href="#hook" className="hover:text-indigo-400 transition-colors">Utama</a>
             <a href="#masalah" className="hover:text-rose-400 transition-colors">Masalah Tambang</a>
             <a href="#solusi" className="hover:text-emerald-400 transition-colors">Solusi AI</a>
+            <a href="#video-simulasi" className="hover:text-cyan-400 transition-colors">Video & Media</a>
             <a href="#perbandingan" className="hover:text-amber-400 transition-colors">Perbandingan</a>
             <a href="#kalkulator-roi" className="hover:text-indigo-400 transition-colors">Kalkulator ROI</a>
             <a href="#harga-layanan" className="hover:text-emerald-400 transition-colors font-bold">Harga Layanan</a>
             <a href="#modul-erp" className="hover:text-indigo-400 transition-colors">27+ Modul</a>
-            <a href="#cta" className="hover:text-emerald-300 transition-colors font-bold">Mulai Demo</a>
           </nav>
 
           {/* Action CTAs */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Developer Control Panel Quick Access Button */}
+            {onOpenDeveloperPanel && (
+              <button
+                onClick={onOpenDeveloperPanel}
+                className="px-3 py-1.5 rounded-xl bg-slate-900 border border-indigo-500/40 hover:border-indigo-400 text-indigo-300 hover:text-indigo-200 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                title="Buka Developer Master Control Panel (CMS, CRM, API)"
+              >
+                <Terminal className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden sm:inline">Developer Hub</span>
+              </button>
+            )}
+
             <button
               onClick={onToggleLanguage}
               className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold hover:bg-slate-800 transition-all flex items-center gap-1.5"
             >
               <Globe className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{language === 'ID' ? 'Bahasa ID' : 'English'}</span>
+              <span>{language === 'ID' ? 'ID' : 'EN'}</span>
             </button>
 
             <button
               onClick={() => setIsLoginModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-100 text-xs font-bold transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-indigo-500/10"
+              className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-100 text-xs font-bold transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-indigo-500/10"
             >
               <Key className="w-3.5 h-3.5 text-amber-400" />
-              <span>Portal Login</span>
+              <span>Login</span>
             </button>
 
             <button
@@ -139,7 +198,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-95"
             >
               <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>Masuk ERP System</span>
+              <span>Masuk ERP</span>
             </button>
           </div>
 
@@ -152,18 +211,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {/* High CTR Hook Badge */}
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/40 text-xs font-bold text-indigo-300 shadow-xl shadow-indigo-500/10 animate-pulse">
           <Sparkles className="w-4 h-4 text-emerald-400" />
-          <span>Satu-Satunya Platform AI Pertambangan Nikel Terpadu Indonesia</span>
+          <span>{config?.website?.heroBadge || 'Satu-Satunya Platform AI Pertambangan Nikel Terpadu Indonesia'}</span>
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
         </div>
 
         {/* Powerful Hook Headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-100 tracking-tight max-w-5xl mx-auto leading-[1.15]">
-          Pangkas Biaya Solar B35 Hingga <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400">18%</span> & Eliminasi Denda Demurrage Tongkang Sekali Klik
+          {config?.website?.heroTitle || 'Pangkas Biaya Solar B35 Hingga 18% & Eliminasi Denda Demurrage Tongkang Sekali Klik'}
         </h1>
 
         {/* Hook Subheadline */}
         <p className="text-sm sm:text-base text-slate-300 max-w-3xl mx-auto leading-relaxed">
-          Platform AI Mining Operating System terintegrasi dari <strong className="text-white">Pit Exploration</strong>, <strong className="text-white">GPS Hauling Telemetry</strong>, <strong className="text-white">AI Stockpile Blending</strong>, hingga <strong className="text-white">Otomasi RKAB ESDM</strong> dan Penjualan Smelter (Morowali & Weda Bay).
+          {config?.website?.heroSubtitle || 'Platform AI Mining Operating System terintegrasi dari Pit Exploration, GPS Hauling Telemetry, AI Stockpile Blending, hingga Otomasi RKAB ESDM dan Penjualan Smelter (Morowali & Weda Bay).'}
         </p>
 
         {/* Hook CTA Action Buttons Bar */}
@@ -173,7 +232,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-emerald-500 hover:from-indigo-500 hover:to-emerald-400 text-white font-extrabold text-sm shadow-2xl shadow-indigo-500/40 transition-all flex items-center justify-center gap-3 hover:scale-[1.03] active:scale-95 group"
           >
             <Key className="w-5 h-5 text-amber-300 group-hover:rotate-12 transition-transform" />
-            <span>🚀 BUKA MENU DEMO VIP & LOGIN</span>
+            <span>{config?.website?.ctaPrimaryText || '🚀 BUKA MENU DEMO VIP & LOGIN'}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
 
@@ -182,7 +241,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             className="w-full sm:w-auto px-7 py-4 rounded-2xl bg-slate-900 border border-slate-700 hover:border-indigo-500 text-slate-100 font-extrabold text-sm transition-all flex items-center justify-center gap-2 hover:bg-slate-800"
           >
             <Play className="w-4 h-4 text-emerald-400 fill-emerald-400" />
-            <span>⚡ Masuk Langsung ke Dashboard Real-Time</span>
+            <span>{config?.website?.ctaSecondaryText || '⚡ Masuk Langsung ke Dashboard Real-Time'}</span>
           </button>
         </div>
 
@@ -520,6 +579,149 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       </section>
 
+      {/* Video & Media Showcase Section (Managed Live via Developer Control Panel) */}
+      <section id="video-simulasi" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-12 border-t border-slate-800/80">
+        
+        {/* Section Header */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            <VideoIcon className="w-3.5 h-3.5" />
+            <span>Video Promo & Galeri Lapangan Tambang</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100">
+            Simulasi Operasional Tambang & Dokumentasi Lapangan
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
+            Saksikan integrasi teknologi IoT, telemetri hauling, pit blast planning, dan loading tongkang secara visual dari kamera site dan simulasi sistem kami.
+          </p>
+        </div>
+
+        {/* Video Player Showcase (Configurable from Dev Control Panel) */}
+        {config?.website?.videoPromo?.enabled && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl space-y-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-mono">OFFICIAL PROMOTIONAL VIDEO & SIMULATION</span>
+                <h3 className="text-xl font-extrabold text-slate-100">{config.website.videoPromo.title || 'Simulasi Alur Pit to Port Terintegrasi AI'}</h3>
+                <p className="text-xs text-slate-400">{config.website.videoPromo.description}</p>
+              </div>
+              <button 
+                onClick={() => setIsLoginModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 shrink-0 transition-all"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Minta Demo Langsung</span>
+              </button>
+            </div>
+
+            {/* Video Player Box */}
+            <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-950 border border-slate-800 flex items-center justify-center shadow-inner group">
+              {config.website.videoPromo.embedUrl ? (
+                config.website.videoPromo.embedUrl.includes('youtube') || config.website.videoPromo.embedUrl.includes('youtu.be') ? (
+                  <iframe 
+                    src={config.website.videoPromo.embedUrl.replace('watch?v=', 'embed/')} 
+                    title={config.website.videoPromo.title}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video 
+                    src={config.website.videoPromo.embedUrl}
+                    poster={config.website.videoPromo.thumbnailUrl}
+                    controls
+                    className="w-full h-full object-cover"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                )
+              ) : (
+                <div className="text-center space-y-3 p-8">
+                  <div className="w-16 h-16 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto border border-cyan-500/40 animate-pulse">
+                    <Play className="w-8 h-8 fill-current ml-1" />
+                  </div>
+                  <p className="text-xs text-slate-400">Video Promo siap dikonfigurasi melalui Developer Control Panel</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Media Photo & Footage Gallery */}
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-indigo-400" />
+                <span>Galeri Foto & Modul Visual Lapangan</span>
+              </h3>
+              <p className="text-xs text-slate-400">Foto dokumentasi implementasi site tambang, armada, dan fasilitas komersial</p>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-semibold">
+              {[
+                { id: 'all', label: 'Semua' },
+                { id: 'Pit Mining', label: 'Pit Mining' },
+                { id: 'Smelter', label: 'Smelter' },
+                { id: 'Jetty Port', label: 'Jetty Port' },
+                { id: 'Fleet Heavy', label: 'Alat Berat' },
+                { id: 'QC Lab', label: 'Lab & ESG' }
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedMediaCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap ${
+                    selectedMediaCategory === cat.id
+                      ? 'bg-indigo-600 text-white font-bold shadow'
+                      : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Image Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {(config?.website?.mediaGallery || [])
+              .filter(item => selectedMediaCategory === 'all' || item.category === selectedMediaCategory)
+              .map((item, idx) => (
+                <div 
+                  key={item.id || idx}
+                  onClick={() => setActivePreviewMedia(item)}
+                  className="group relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 hover:border-indigo-500/60 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-indigo-500/10"
+                >
+                  <div className="aspect-[4/3] w-full overflow-hidden bg-slate-950">
+                    <img 
+                      src={item.url} 
+                      alt={item.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-3.5 space-y-1 bg-gradient-to-t from-slate-950 via-slate-900/90 to-transparent">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        {item.category}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-100 group-hover:text-indigo-300 transition-colors truncate">
+                      {item.title}
+                    </h4>
+                    {item.description && (
+                      <p className="text-[10px] text-slate-400 line-clamp-1">{item.description}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+
+      </section>
+
       {/* Interactive Live ROI Calculator Section */}
       <section id="kalkulator-roi" className="py-16 px-4 lg:px-8 max-w-7xl mx-auto space-y-8 border-t border-slate-800/80">
         
@@ -631,22 +833,54 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             Harga Layanan Aplikasi & Lisensi Enterprise
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto">
-            Investasi terukur untuk digitalisasi tambang nikel konsesi & smelter RKEF dengan skema langganan tahunan, termasuk pemeliharaan sistem, garansi kepatuhan ESDM, dan dukungan teknis 24/7.
+            Investasi terukur untuk digitalisasi tambang nikel konsesi & smelter RKEF dengan skema langganan bulanan maupun tahunan, termasuk pemeliharaan sistem, garansi kepatuhan ESDM, dan dukungan teknis 24/7.
           </p>
+
+          {/* Billing Cycle Toggle Switch (Bulanan vs Tahunan) */}
+          <div className="pt-4 flex items-center justify-center gap-3">
+            <button
+              onClick={() => setPricingBillingCycle('monthly')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                pricingBillingCycle === 'monthly'
+                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              Tagihan Bulanan (Monthly)
+            </button>
+            <button
+              onClick={() => setPricingBillingCycle('yearly')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                pricingBillingCycle === 'yearly'
+                  ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              <span>Tagihan Tahunan (Yearly)</span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                pricingBillingCycle === 'yearly' ? 'bg-slate-950 text-emerald-300' : 'bg-emerald-500/20 text-emerald-300'
+              }`}>
+                Hemat 15-20%
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Pricing Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
+          {((config?.website?.pricingPlans && config.website.pricingPlans.length > 0) ? config.website.pricingPlans : [
             {
+              id: 'trial',
               tierId: 'Trial Mode',
               name: 'Trial Evaluasi (30 Hari)',
-              price: 'Gratis',
+              monthlyPrice: 'Gratis',
+              yearlyPrice: 'Gratis',
               period: '/ 30 Hari Evaluasi',
               seats: '5 User Seats',
               target: 'IUP Baru & Evaluasi Fitur Site',
               highlight: false,
               badge: 'Free Trial',
+              note: 'Akses penuh tanpa komitmen',
               features: [
                 'Akses Dasbor Analitik Dasar',
                 'Simulasi Pit & Ore Model (1 Pit)',
@@ -658,14 +892,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               buttonClass: 'bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold'
             },
             {
+              id: 'standard',
               tierId: 'Standard Mine Tier',
               name: 'Standard Mine Tier',
-              price: 'Rp 450 Juta',
-              period: '/ Tahun',
+              monthlyPrice: 'Rp 42,5 Juta',
+              yearlyPrice: 'Rp 37,5 Juta',
+              period: pricingBillingCycle === 'monthly' ? '/ Bulan' : '/ Bulan (Ditagih Rp 450 Jt/Thn)',
               seats: '25 User Seats',
               target: 'Kontraktor Tambang & Single Pit',
               highlight: false,
               badge: 'Single Site',
+              note: pricingBillingCycle === 'yearly' ? 'Hemat Rp 60 Juta/Tahun' : 'Opsi Kontrak Bulanan Fleksibel',
               features: [
                 'Dasbor Analitik Real-Time 360°',
                 'Modul Pit & Ore Block Model Complete',
@@ -678,14 +915,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               buttonClass: 'bg-indigo-600 hover:bg-indigo-500 text-white font-bold'
             },
             {
+              id: 'pro',
               tierId: 'Smelter & Mine Pro Tier',
               name: 'Smelter & Mine Pro Tier',
-              price: 'Rp 850 Juta',
-              period: '/ Tahun',
+              monthlyPrice: 'Rp 78,5 Juta',
+              yearlyPrice: 'Rp 70,8 Juta',
+              period: pricingBillingCycle === 'monthly' ? '/ Bulan' : '/ Bulan (Ditagih Rp 850 Jt/Thn)',
               seats: '75 User Seats',
               target: 'Konsesi Tambang Nikel & Smelter RKEF',
               highlight: true,
               badge: 'Paling Populer',
+              note: pricingBillingCycle === 'yearly' ? 'Hemat Rp 92 Juta/Tahun' : 'Solusi Lengkap Pit-to-Smelter',
               features: [
                 'Semua Fitur Standard Mine Tier',
                 'Smart AI Nickel Ore Blending Engine (Ni/Fe/MC)',
@@ -699,14 +939,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               buttonClass: 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black'
             },
             {
+              id: 'enterprise',
               tierId: 'Enterprise Unlimited Tier',
               name: 'Enterprise Unlimited Tier',
-              price: 'Rp 1,45 Miliar',
-              period: '/ Tahun (Multi-Site)',
+              monthlyPrice: 'Rp 132,5 Juta',
+              yearlyPrice: 'Rp 120,8 Juta',
+              period: pricingBillingCycle === 'monthly' ? '/ Bulan' : '/ Bulan (Ditagih Rp 1,45 M/Thn)',
               seats: 'Unlimited Seats',
               target: 'Mining Holding & Smelter Conglomerate',
               highlight: false,
               badge: 'Full Suite',
+              note: pricingBillingCycle === 'yearly' ? 'Hemat Rp 140 Juta/Tahun' : 'Multi-Site Holding & Custom Cloud',
               features: [
                 'Semua Fitur Pro Tier Unlocked',
                 'Dedicated NickelSmart AI Engine (Custom Model)',
@@ -718,7 +961,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               buttonText: 'Hubungi Sales Enterprise',
               buttonClass: 'bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold border border-amber-500/30'
             }
-          ].map((plan, idx) => (
+          ]).map((plan: any, idx: number) => (
             <div
               key={idx}
               className={`p-6 rounded-3xl bg-slate-900 border flex flex-col justify-between transition-all space-y-6 relative ${
@@ -749,12 +992,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div className="space-y-1">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">{plan.price}</span>
+                    <span className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+                      {pricingBillingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice}
+                    </span>
                     <span className="text-xs text-slate-400 font-medium">{plan.period}</span>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 text-[11px] font-semibold">
-                    <Users className="w-3 h-3" />
-                    <span>Kapasitas: {plan.seats}</span>
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 text-[11px] font-semibold">
+                      <Users className="w-3 h-3" />
+                      <span>{plan.seats}</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                      {plan.note}
+                    </span>
                   </div>
                 </div>
 
@@ -953,18 +1203,64 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Footer Section */}
       <footer className="border-t border-slate-800/80 py-12 px-4 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500">
         <div className="flex items-center gap-3">
-          <Cpu className="w-5 h-5 text-indigo-400" />
-          <span className="font-bold text-slate-300">NickelSmart AI Enterprise Mining Suite 2026</span>
+          {config?.website?.logoUrl ? (
+            <img src={config.website.logoUrl} alt="Logo" className="w-5 h-5 rounded object-cover" referrerPolicy="no-referrer" />
+          ) : (
+            <Cpu className="w-5 h-5 text-indigo-400" />
+          )}
+          <span className="font-bold text-slate-300">
+            {config?.website?.brandName || 'NickelSmart AI'} • {config?.website?.contactInfo?.companyName || 'Enterprise Mining Suite'}
+          </span>
         </div>
 
-        <p>© 2026 NickelSmart AI Technologies. Permen ESDM Compliant & ISO 27001 Certified.</p>
+        <p>© 2026 {config?.website?.brandName || 'NickelSmart AI Technologies'}. {config?.website?.contactInfo?.address || 'Permen ESDM Compliant & ISO 27001 Certified.'}</p>
 
         <div className="flex items-center gap-4 text-slate-400">
+          {onOpenDeveloperPanel && (
+            <button 
+              onClick={onOpenDeveloperPanel}
+              className="text-indigo-400 font-bold hover:underline flex items-center gap-1 bg-indigo-950/40 px-2.5 py-1 rounded-lg border border-indigo-500/30"
+            >
+              <Terminal className="w-3.5 h-3.5" />
+              <span>Developer Panel (Live CMS/CRM)</span>
+            </button>
+          )}
           <a href="#hook" className="hover:text-slate-200">Syarat Ketentuan</a>
-          <a href="#solusi" className="hover:text-slate-200">Keamanan Cloud</a>
           <button onClick={() => setIsLoginModalOpen(true)} className="text-amber-400 font-bold hover:underline">Portal Login</button>
         </div>
       </footer>
+
+      {/* Media Lightbox / Fullscreen Preview Modal */}
+      {activePreviewMedia && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="max-w-4xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl relative">
+            <button 
+              onClick={() => setActivePreviewMedia(null)}
+              className="absolute top-4 right-4 z-10 p-2 bg-slate-950/80 hover:bg-slate-800 text-white rounded-full transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="max-h-[70vh] overflow-hidden bg-slate-950 flex items-center justify-center">
+              <img 
+                src={activePreviewMedia.url} 
+                alt={activePreviewMedia.title}
+                referrerPolicy="no-referrer"
+                className="max-h-[70vh] w-auto object-contain"
+              />
+            </div>
+            <div className="p-6 space-y-2 bg-slate-900 border-t border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  {activePreviewMedia.category}
+                </span>
+                <span className="text-[11px] text-slate-500 font-mono">Dokumentasi Site Tambang</span>
+              </div>
+              <h3 className="text-lg font-bold text-white">{activePreviewMedia.title}</h3>
+              <p className="text-xs text-slate-300">{activePreviewMedia.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Consultation Form */}
       {isConsultModalOpen && (
@@ -984,8 +1280,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               const name = formData.get('name') || 'Bambang Wijaya (KTT)';
               const company = formData.get('company') || 'PT Nikel Morowali Sejahtera';
               const phone = formData.get('phone') || '+62 812 3456 7890';
-              const message = encodeURIComponent(`Halo NickelSmart AI, saya ingin konsultasi integrasi site konsesi tambang.\n\n*Nama:* ${name}\n*Perusahaan/IUP:* ${company}\n*No. HP:* ${phone}`);
-              window.open(`https://wa.me/6285187869164?text=${message}`, '_blank');
+              const rawWa = (config?.website?.contactInfo?.whatsapp || '6285187869164').replace(/\D/g, '');
+              const targetWa = rawWa.startsWith('0') ? '62' + rawWa.slice(1) : rawWa;
+              const message = encodeURIComponent(`Halo ${config?.website?.brandName || 'NickelSmart AI'}, saya ingin konsultasi integrasi site konsesi tambang.\n\n*Nama:* ${name}\n*Perusahaan/IUP:* ${company}\n*No. HP:* ${phone}`);
+              window.open(`https://wa.me/${targetWa}?text=${message}`, '_blank');
               setIsConsultModalOpen(false);
             }} className="space-y-3 text-xs">
               <div>
@@ -1002,7 +1300,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <button type="submit" className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-white shadow-lg flex items-center justify-center gap-2">
                 <PhoneCall className="w-4 h-4" />
-                <span>KIRIM VIA WHATSAPP (085187869164)</span>
+                <span>KIRIM VIA WHATSAPP ({config?.website?.contactInfo?.whatsapp || '085187869164'})</span>
               </button>
             </form>
           </div>
@@ -1032,6 +1330,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <h3 className="text-xl font-extrabold text-slate-100">Portal Akses Login Enterprise</h3>
               <p className="text-xs text-slate-400">Pilih metode autentikasi atau Quick SSO Demo untuk masuk</p>
+            </div>
+
+            {/* Google Cloud Auth Quick Login Button */}
+            {onGoogleSignIn && (
+              <button
+                type="button"
+                onClick={() => {
+                  onGoogleSignIn();
+                  setIsLoginModalOpen(false);
+                }}
+                className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition-all flex items-center justify-center gap-3 border border-slate-200 hover:shadow-lg"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+                </svg>
+                <span>Masuk dengan Akun Google (Cloud Firestore)</span>
+              </button>
+            )}
+
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-slate-800" />
+              <span className="text-[10px] text-slate-500 font-mono uppercase">atau opsi login enterprise</span>
+              <div className="flex-1 h-px bg-slate-800" />
             </div>
 
             {/* Login Mode Tabs */}

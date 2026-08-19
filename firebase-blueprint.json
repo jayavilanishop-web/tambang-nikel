@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with role, enterprise tenant, and subscription permissions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Unique auth UID of user" },
+        "email": { "type": "string", "format": "email", "description": "User corporate email" },
+        "name": { "type": "string", "maxLength": 128, "description": "Full legal name or title" },
+        "role": { "type": "string", "maxLength": 64, "description": "Designated enterprise role" },
+        "companyName": { "type": "string", "maxLength": 128, "description": "Company name or holding group" },
+        "iupNumber": { "type": "string", "maxLength": 64, "description": "IUP mining concession license number" },
+        "subscriptionTier": { "type": "string", "maxLength": 64, "description": "Active subscription tier" },
+        "status": { "type": "string", "enum": ["ACTIVE", "SUSPENDED", "EXPIRED", "TRIAL"], "description": "User account state" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account registration timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last profile update timestamp" }
+      },
+      "required": ["userId", "email", "name", "role", "status", "createdAt"]
+    },
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "Developer control panel dynamic CMS and API configurations",
+      "type": "object",
+      "properties": {
+        "configId": { "type": "string", "maxLength": 64, "description": "Configuration key identifier" },
+        "website": { "type": "object", "description": "Dynamic website CMS configuration" },
+        "apiKeys": { "type": "object", "description": "Centralized API credentials metadata" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last configuration timestamp" },
+        "updatedBy": { "type": "string", "maxLength": 128, "description": "UID or email of editor" }
+      },
+      "required": ["configId", "updatedAt"]
+    },
+    "MiningLog": {
+      "title": "MiningLog",
+      "description": "Pit extraction and haulage telemetry record",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string", "maxLength": 64, "description": "Unique log record ID" },
+        "pitId": { "type": "string", "maxLength": 64, "description": "Identifier of the mining pit" },
+        "blockId": { "type": "string", "maxLength": 64, "description": "Block model section coordinate" },
+        "tonnageWmt": { "type": "number", "description": "Wet metric tonnage mined" },
+        "gradeNi": { "type": "number", "description": "Nickel content percentage (e.g. 1.82)" },
+        "gradeFe": { "type": "number", "description": "Iron content percentage" },
+        "moisture": { "type": "number", "description": "Moisture content percentage" },
+        "truckId": { "type": "string", "maxLength": 64, "description": "Haul truck identifier" },
+        "operatorName": { "type": "string", "maxLength": 128, "description": "Operator on duty" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Operation timestamp" }
+      },
+      "required": ["logId", "pitId", "tonnageWmt", "gradeNi", "timestamp"]
+    },
+    "BargingShipment": {
+      "title": "BargingShipment",
+      "description": "Barge loading and jetty departure record",
+      "type": "object",
+      "properties": {
+        "shipmentId": { "type": "string", "maxLength": 64, "description": "Unique shipment ID" },
+        "bargeName": { "type": "string", "maxLength": 128, "description": "Name of the barge vessel" },
+        "tugboatName": { "type": "string", "maxLength": 128, "description": "Assisting tugboat name" },
+        "destinationPort": { "type": "string", "maxLength": 128, "description": "Smelter jetty destination" },
+        "tonnageWmt": { "type": "number", "description": "Total barge tonnage" },
+        "coaNumber": { "type": "string", "maxLength": 64, "description": "Certificate of Analysis number" },
+        "gradeNi": { "type": "number", "description": "Certified nickel grade" },
+        "status": { "type": "string", "enum": ["LOADING", "IN_TRANSIT", "DISCHARGING", "COMPLETED", "CANCELLED"], "description": "Shipment status" },
+        "departedAt": { "type": "string", "format": "date-time", "description": "Jetty departure timestamp" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Created timestamp" }
+      },
+      "required": ["shipmentId", "bargeName", "tonnageWmt", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile documents indexed by auth UID"
+    },
+    "/configs/{configId}": {
+      "schema": "AppConfig",
+      "description": "Dynamic developer configuration and CMS metadata"
+    },
+    "/mining_logs/{logId}": {
+      "schema": "MiningLog",
+      "description": "Daily pit production and hauling telemetry logs"
+    },
+    "/shipments/{shipmentId}": {
+      "schema": "BargingShipment",
+      "description": "Jetty vessel barging and smelter delivery logs"
+    }
+  }
+}

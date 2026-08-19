@@ -265,3 +265,100 @@ export interface APIToken {
   lastUsedDate: string;
   status: 'ACTIVE' | 'REVOKED';
 }
+
+export interface ClientUserAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  companyName: string;
+  iupNumber: string;
+  role: UserRole;
+  subscriptionTier: 'Standard Mine' | 'Smelter & Mine Pro' | 'Enterprise Unlimited' | 'Holding Group' | 'Trial Mode';
+  status: 'ACTIVE' | 'SUSPENDED' | 'EXPIRED' | 'TRIAL';
+  seatsAllocated: number;
+  expiresAt: string;
+  createdAt: string;
+  lastActive: string;
+  notes?: string;
+  apiAccessAllowed: boolean;
+}
+
+export interface MediaGalleryItem {
+  id: string;
+  title: string;
+  category: 'Pit Mining' | 'Smelter RKEF' | 'Jetty Port' | 'Heavy Equipment' | 'Laboratory' | 'Drone Survey';
+  imageUrl: string;
+  description: string;
+}
+
+export interface PricingPlanItem {
+  tierId: string;
+  name: string;
+  monthlyPrice: string;
+  yearlyPrice: string;
+  period: string;
+  seats: string;
+  target: string;
+  highlight: boolean;
+  badge?: string;
+  note: string;
+  features: string[];
+}
+
+export interface DevConfig {
+  website: {
+    brandName: string;
+    brandTagline: string;
+    heroTitle: string;
+    heroSubtitle: string;
+    heroBadge: string;
+    ctaPrimaryText: string;
+    ctaSecondaryText: string;
+    announcement: {
+      enabled: boolean;
+      text: string;
+      badgeText: string;
+      linkText: string;
+      type: 'info' | 'warning' | 'promo' | 'alert';
+    };
+    heroBannerImage: string;
+    logoUrl: string;
+    videoPromo: {
+      enabled: boolean;
+      title: string;
+      videoUrl: string; // YouTube embed URL or Direct MP4 link
+      posterUrl: string;
+      description: string;
+    };
+    mediaGallery: MediaGalleryItem[];
+    pricingPlans: PricingPlanItem[];
+    contactInfo: {
+      companyName: string;
+      email: string;
+      phone: string;
+      whatsappNumber: string;
+      address: string;
+    };
+  };
+  apiKeys: {
+    geminiApiKey: string;
+    googleMapsApiKey: string;
+    weatherApiKey: string;
+    whatsappGatewayToken: string;
+    surveyorWebhookKey: string;
+    iotMqttBrokerUrl: string;
+  };
+  systemSettings: {
+    maintenanceMode: boolean;
+    maintenanceMessage: string;
+    allowRegistration: boolean;
+    defaultLicenseTier: string;
+    activeAiModel: string;
+    offlineModeEnabled: boolean;
+    esdmAutoSyncIntervalMinutes: number;
+    auditLogging: boolean;
+  };
+  clientUsers: ClientUserAccount[];
+}
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { Header } from './components/Header';
 import { Sidebar, ActiveModule } from './components/Sidebar';
@@ -6,6 +6,14 @@ import { LicenseModal } from './components/LicenseModal';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { PushNotificationCenter } from './components/PushNotificationCenter';
 import { FloatingAIAvatar } from './components/FloatingAIAvatar';
+import { 
+  auth, 
+  onAuthStateChanged, 
+  signInWithGoogle, 
+  logOutUser, 
+  testFirestoreConnection 
+} from './services/firebase';
+import { User as FirebaseUser } from 'firebase/auth';
 
 import { DashboardModule } from './components/modules/DashboardModule';
 import { ExplorationPitModule } from './components/modules/ExplorationPitModule';
@@ -37,6 +45,7 @@ import { MultiCompanyModule } from './components/modules/MultiCompanyModule';
 import { AuthSecurityModule } from './components/modules/AuthSecurityModule';
 import { MineGPTModule } from './components/modules/MineGPTModule';
 import { OperationCenterModule } from './components/modules/OperationCenterModule';
+import { DeveloperControlPanelModule } from './components/modules/DeveloperControlPanelModule';
 
 import { 
   INITIAL_LICENSE, 
@@ -88,6 +97,52 @@ export default function App() {
   const [theme, setTheme] = useState<ThemeMode>('dark');
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>('Mine Manager');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [firestoreStatus, setFirestoreStatus] = useState<string>('Initializing Cloud Firestore...');
+
+  // Firebase Boot & Realtime Auth Listener
+  useEffect(() => {
+    // 1. Connection check with Firestore
+    testFirestoreConnection().then(res => {
+      setFirestoreStatus(res.message);
+    });
+
+    // 2. Auth state observer
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      if (user) {
+        // Automatically check if user is Developer / Super Admin
+        if (user.email === 'jayavilanishop@gmail.com' || user.email?.includes('admin')) {
+          setCurrentUserRole('Super Admin');
+        }
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const user = await signInWithGoogle();
+      if (user) {
+        if (user.email === 'jayavilanishop@gmail.com' || user.email?.includes('admin')) {
+          setCurrentUserRole('Super Admin');
+        }
+        setViewMode('app');
+      }
+    } catch (err: any) {
+      console.error('Google Sign-In failed:', err);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await logOutUser();
+      setFirebaseUser(null);
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
 
   // Application State Datasets
   const [companies, setCompanies] = useState<Company[]>(INITIAL_COMPANIES);
@@ -207,8 +262,15 @@ export default function App() {
           }
           setViewMode('app');
         }}
+        onOpenDeveloperPanel={() => {
+          setCurrentUserRole('Super Admin');
+          setActiveModule('developer_control_panel');
+          setViewMode('app');
+        }}
         language={language}
         onToggleLanguage={() => setLanguage(l => l === 'id' ? 'en' : 'id')}
+        firebaseUser={firebaseUser}
+        onGoogleSignIn={handleGoogleSignIn}
       />
     );
   }
@@ -233,6 +295,9 @@ export default function App() {
         onChangeUserRole={setCurrentUserRole}
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         onGoToLandingPage={() => setViewMode('landing')}
+        firebaseUser={firebaseUser}
+        onGoogleSignIn={handleGoogleSignIn}
+        onSignOut={handleSignOut}
       />
 
       {/* Main Layout Area - Full Width Responsive */}
@@ -602,6 +667,13 @@ export default function App() {
               auditLogs={auditLogs}
               language={language}
               onRevokeSession={handleRevokeSession}
+            />
+          )}
+
+          {activeModule === 'developer_control_panel' && (
+            <DeveloperControlPanelModule
+              language={language}
+              onGoToLandingPage={() => setViewMode('landing')}
             />
           )}
         </main>

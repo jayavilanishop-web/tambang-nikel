@@ -56,6 +56,7 @@ import {
   ComposedChart 
 } from 'recharts';
 import { HeavyEquipment, Language } from '../../types';
+import { GoogleMiningMap } from '../maps/GoogleMiningMap';
 
 interface GpsTelemetryTrackingModuleProps {
   equipment: HeavyEquipment[];
@@ -398,181 +399,175 @@ export const GpsTelemetryTrackingModule: React.FC<GpsTelemetryTrackingModuleProp
               </div>
 
               {/* Dynamic Map Canvas Render Engine */}
-              <div className={`relative h-[440px] rounded-2xl border border-slate-800 overflow-hidden shadow-2xl transition-all ${
-                mapMode === 'SATELLITE' ? 'bg-slate-950' :
-                mapMode === 'GOOGLE_MAPS' ? 'bg-slate-900' :
-                mapMode === 'MINING_AREA' ? 'bg-slate-950 border-emerald-900/40' : 'bg-slate-950'
-              }`}>
-                
-                {/* Visual Background texture & grid based on map mode */}
-                {mapMode === 'SATELLITE' && (
-                  <>
-                    <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/30 via-transparent to-slate-950/80 pointer-events-none" />
-                  </>
-                )}
-
-                {mapMode === 'GOOGLE_MAPS' && (
-                  <>
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:24px_24px] opacity-40" />
-                    <div className="absolute top-2 left-2 bg-white/90 text-slate-900 font-bold px-2 py-0.5 rounded text-[10px] shadow z-30">
-                      Google Maps
-                    </div>
-                  </>
-                )}
-
-                {mapMode === 'MINING_AREA' && (
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#064e3b_1px,transparent_1px),linear-gradient(to_bottom,#064e3b_1px,transparent_1px)] bg-[size:16px_16px] opacity-30" />
-                )}
-
-                {/* SVG GEOSPATIAL LAYERS (Hauling Road Curve, Pit Polygons, Stockpile, Jetty) */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                  
-                  {/* HAULING ROAD NETWORK LAYER */}
-                  {activeLayers.haulingRoad && (
-                    <>
-                      <path
-                        d="M 60 80 Q 180 120 280 200 T 480 280 T 640 340"
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="8"
-                        strokeDasharray="6 4"
-                        className="animate-pulse opacity-70"
-                      />
-                      <path
-                        d="M 60 80 Q 180 120 280 200 T 480 280 T 640 340"
-                        fill="none"
-                        stroke="#60a5fa"
-                        strokeWidth="3"
-                      />
-                      <text x="300" y="210" fill="#93c5fd" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                        🛣️ MAIN HAUL ROAD CORRIDOR (KM 00 - KM 18)
-                      </text>
-                    </>
-                  )}
-
-                  {/* PIT AREA CONTOUR POLYGONS LAYER */}
-                  {activeLayers.pit && (
-                    <>
-                      {/* Pit Alpha Polygon */}
-                      <polygon
-                        points="50,40 180,30 220,130 90,150"
-                        fill="rgba(245, 158, 11, 0.15)"
-                        stroke="#f59e0b"
-                        strokeWidth="2"
-                        strokeDasharray="4 2"
-                      />
-                      <text x="70" y="60" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                        ⛏️ PIT ALPHA FRONT +120M
-                      </text>
-
-                      {/* Pit Beta Polygon */}
-                      <polygon
-                        points="220,240 340,220 380,320 260,340"
-                        fill="rgba(234, 179, 8, 0.12)"
-                        stroke="#eab308"
-                        strokeWidth="2"
-                      />
-                      <text x="240" y="260" fill="#fde047" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                        ⛏️ PIT BETA BENCH
-                      </text>
-                    </>
-                  )}
-
-                  {/* STOCKPILE DEPOT POLYGON LAYER */}
-                  {activeLayers.stockpile && (
-                    <g>
-                      <rect
-                        x="420"
-                        y="230"
-                        width="130"
-                        height="90"
-                        rx="12"
-                        fill="rgba(168, 85, 247, 0.15)"
-                        stroke="#a855f7"
-                        strokeWidth="2"
-                      />
-                      <text x="430" y="250" fill="#c084fc" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                        🏔️ STOCKPILE ETO
-                      </text>
-                      <text x="430" y="265" fill="#e9d5ff" fontSize="9" fontFamily="monospace">
-                        Kapasitas: 145,000 MT
-                      </text>
-                    </g>
-                  )}
-
-                  {/* JETTY PORT TERMINAL LAYER */}
-                  {activeLayers.jetty && (
-                    <g>
-                      <rect
-                        x="580"
-                        y="300"
-                        width="130"
-                        height="95"
-                        rx="12"
-                        fill="rgba(6, 182, 212, 0.15)"
-                        stroke="#06b6d4"
-                        strokeWidth="2"
-                      />
-                      <text x="590" y="320" fill="#22d3ee" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                        🚢 JETTY PORT TERMINAL
-                      </text>
-                      <text x="590" y="335" fill="#a5f3fc" fontSize="9" fontFamily="monospace">
-                        Pier 1 & Pier 2 Docks
-                      </text>
-                    </g>
-                  )}
-                </svg>
-
-                {/* GEOFENCE BOUNDARY OVERLAYS */}
-                {activeLayers.geofence && (
-                  <>
-                    <div className="absolute top-4 left-6 px-3 py-1.5 rounded-xl border-2 border-emerald-500/50 bg-emerald-950/40 backdrop-blur-sm text-emerald-300 font-mono text-[10px] font-bold shadow-lg">
-                      🛡️ GEOFENCE: PIT ALPHA EXCAVATION (LIMIT: 25 km/h)
-                    </div>
-
-                    <div className="absolute bottom-12 right-12 px-3 py-1.5 rounded-xl border-2 border-cyan-500/50 bg-cyan-950/40 backdrop-blur-sm text-cyan-300 font-mono text-[10px] font-bold shadow-lg">
-                      🛡️ GEOFENCE: JETTY PORT DRAINAGE ZONE
-                    </div>
-                  </>
-                )}
-
-                {/* REALTIME EQUIPMENT POSITIONS MARKERS LAYER */}
-                {activeLayers.equipmentPos && gpsFleetUnits.map((v, idx) => (
-                  <div
-                    key={v.id}
-                    onClick={() => setSelectedVehicleId(v.id)}
-                    style={{ top: `${22 + idx * 13}%`, left: `${18 + idx * 13}%` }}
-                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer p-2 rounded-xl border shadow-2xl transition-all hover:scale-125 flex items-center gap-2 z-20 ${
-                      selectedVehicleId === v.id
-                        ? 'bg-emerald-600 border-white text-white scale-110 shadow-emerald-500/50 ring-4 ring-emerald-500/30'
-                        : v.status === 'SPEEDING'
-                        ? 'bg-rose-900/90 border-rose-500 text-rose-200 animate-bounce'
-                        : 'bg-slate-900/90 border-slate-700 text-slate-200'
-                    }`}
-                  >
-                    <Navigation className={`w-4 h-4 ${v.status === 'MOVING' ? 'text-emerald-300 animate-spin' : ''}`} />
-                    <div>
-                      <span className="font-bold block text-[11px] font-mono">{v.id}</span>
-                      <span className="text-[9px] opacity-90 font-mono">{v.speedKmh} km/h</span>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Map Bottom Legend Status Bar */}
-                <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-[10px] text-slate-400 space-y-1 shadow-xl">
-                  <p className="font-bold text-slate-200 flex items-center gap-2">
-                    <Compass className="w-3.5 h-3.5 text-emerald-400" /> Koordinat Geospasial Aktif:
-                    <span className="text-emerald-400 font-mono">-2.5210° S, 121.3420° E (UTM 51S WGS84)</span>
-                  </p>
-                  <div className="flex flex-wrap items-center gap-4 text-slate-300 pt-1">
-                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Operasional Normal</span>
-                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Speeding Overlimit</span>
-                    <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Engine Idle Time</span>
-                  </div>
+              {(mapMode === 'GOOGLE_MAPS' || mapMode === 'SATELLITE') ? (
+                <div className="rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+                  <GoogleMiningMap
+                    height="460px"
+                    equipmentList={equipment}
+                    language={language}
+                    onSelectEquipment={(eq) => {
+                      setSelectedVehicleId(eq.code);
+                    }}
+                  />
                 </div>
+              ) : (
+                <div className={`relative h-[440px] rounded-2xl border border-slate-800 overflow-hidden shadow-2xl transition-all ${
+                  mapMode === 'MINING_AREA' ? 'bg-slate-950 border-emerald-900/40' : 'bg-slate-950'
+                }`}>
+                  
+                  {mapMode === 'MINING_AREA' && (
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#064e3b_1px,transparent_1px),linear-gradient(to_bottom,#064e3b_1px,transparent_1px)] bg-[size:16px_16px] opacity-30" />
+                  )}
 
-              </div>
+                  {/* SVG GEOSPATIAL LAYERS (Hauling Road Curve, Pit Polygons, Stockpile, Jetty) */}
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                    
+                    {/* HAULING ROAD NETWORK LAYER */}
+                    {activeLayers.haulingRoad && (
+                      <>
+                        <path
+                          d="M 60 80 Q 180 120 280 200 T 480 280 T 640 340"
+                          fill="none"
+                          stroke="#3b82f6"
+                          strokeWidth="8"
+                          strokeDasharray="6 4"
+                          className="animate-pulse opacity-70"
+                        />
+                        <path
+                          d="M 60 80 Q 180 120 280 200 T 480 280 T 640 340"
+                          fill="none"
+                          stroke="#60a5fa"
+                          strokeWidth="3"
+                        />
+                        <text x="300" y="210" fill="#93c5fd" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                          🛣️ MAIN HAUL ROAD CORRIDOR (KM 00 - KM 18)
+                        </text>
+                      </>
+                    )}
+
+                    {/* PIT AREA CONTOUR POLYGONS LAYER */}
+                    {activeLayers.pit && (
+                      <>
+                        {/* Pit Alpha Polygon */}
+                        <polygon
+                          points="50,40 180,30 220,130 90,150"
+                          fill="rgba(245, 158, 11, 0.15)"
+                          stroke="#f59e0b"
+                          strokeWidth="2"
+                          strokeDasharray="4 2"
+                        />
+                        <text x="70" y="60" fill="#fbbf24" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                          ⛏️ PIT ALPHA FRONT +120M
+                        </text>
+
+                        {/* Pit Beta Polygon */}
+                        <polygon
+                          points="220,240 340,220 380,320 260,340"
+                          fill="rgba(234, 179, 8, 0.12)"
+                          stroke="#eab308"
+                          strokeWidth="2"
+                        />
+                        <text x="240" y="260" fill="#fde047" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                          ⛏️ PIT BETA BENCH
+                        </text>
+                      </>
+                    )}
+
+                    {/* STOCKPILE DEPOT POLYGON LAYER */}
+                    {activeLayers.stockpile && (
+                      <g>
+                        <rect
+                          x="420"
+                          y="230"
+                          width="130"
+                          height="90"
+                          rx="12"
+                          fill="rgba(168, 85, 247, 0.15)"
+                          stroke="#a855f7"
+                          strokeWidth="2"
+                        />
+                        <text x="430" y="250" fill="#c084fc" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                          🏔️ STOCKPILE ETO
+                        </text>
+                        <text x="430" y="265" fill="#e9d5ff" fontSize="9" fontFamily="monospace">
+                          Kapasitas: 145,000 MT
+                        </text>
+                      </g>
+                    )}
+
+                    {/* JETTY PORT TERMINAL LAYER */}
+                    {activeLayers.jetty && (
+                      <g>
+                        <rect
+                          x="580"
+                          y="300"
+                          width="130"
+                          height="95"
+                          rx="12"
+                          fill="rgba(6, 182, 212, 0.15)"
+                          stroke="#06b6d4"
+                          strokeWidth="2"
+                        />
+                        <text x="590" y="320" fill="#22d3ee" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                          🚢 JETTY PORT TERMINAL
+                        </text>
+                        <text x="590" y="335" fill="#a5f3fc" fontSize="9" fontFamily="monospace">
+                          Pier 1 & Pier 2 Docks
+                        </text>
+                      </g>
+                    )}
+                  </svg>
+
+                  {/* GEOFENCE BOUNDARY OVERLAYS */}
+                  {activeLayers.geofence && (
+                    <>
+                      <div className="absolute top-4 left-6 px-3 py-1.5 rounded-xl border-2 border-emerald-500/50 bg-emerald-950/40 backdrop-blur-sm text-emerald-300 font-mono text-[10px] font-bold shadow-lg">
+                        🛡️ GEOFENCE: PIT ALPHA EXCAVATION (LIMIT: 25 km/h)
+                      </div>
+
+                      <div className="absolute bottom-12 right-12 px-3 py-1.5 rounded-xl border-2 border-cyan-500/50 bg-cyan-950/40 backdrop-blur-sm text-cyan-300 font-mono text-[10px] font-bold shadow-lg">
+                        🛡️ GEOFENCE: JETTY PORT DRAINAGE ZONE
+                      </div>
+                    </>
+                  )}
+
+                  {/* REALTIME EQUIPMENT POSITIONS MARKERS LAYER */}
+                  {activeLayers.equipmentPos && gpsFleetUnits.map((v, idx) => (
+                    <div
+                      key={v.id}
+                      onClick={() => setSelectedVehicleId(v.id)}
+                      style={{ top: `${22 + idx * 13}%`, left: `${18 + idx * 13}%` }}
+                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer p-2 rounded-xl border shadow-2xl transition-all hover:scale-125 flex items-center gap-2 z-20 ${
+                        selectedVehicleId === v.id
+                          ? 'bg-emerald-600 border-white text-white scale-110 shadow-emerald-500/50 ring-4 ring-emerald-500/30'
+                          : v.status === 'SPEEDING'
+                          ? 'bg-rose-900/90 border-rose-500 text-rose-200 animate-bounce'
+                          : 'bg-slate-900/90 border-slate-700 text-slate-200'
+                      }`}
+                    >
+                      <Navigation className={`w-4 h-4 ${v.status === 'MOVING' ? 'text-emerald-300 animate-spin' : ''}`} />
+                      <div>
+                        <span className="font-bold block text-[11px] font-mono">{v.id}</span>
+                        <span className="text-[9px] opacity-90 font-mono">{v.speedKmh} km/h</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Map Bottom Legend Status Bar */}
+                  <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-[10px] text-slate-400 space-y-1 shadow-xl">
+                    <p className="font-bold text-slate-200 flex items-center gap-2">
+                      <Compass className="w-3.5 h-3.5 text-emerald-400" /> Koordinat Geospasial Aktif:
+                      <span className="text-emerald-400 font-mono">-2.5210° S, 121.3420° E (UTM 51S WGS84)</span>
+                    </p>
+                    <div className="flex flex-wrap items-center gap-4 text-slate-300 pt-1">
+                      <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Operasional Normal</span>
+                      <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Speeding Overlimit</span>
+                      <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Engine Idle Time</span>
+                    </div>
+                  </div>
+
+                </div>
+              )}
             </div>
 
             {/* Right Side Fleet Status List */}

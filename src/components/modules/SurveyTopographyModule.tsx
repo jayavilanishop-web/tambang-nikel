@@ -47,6 +47,7 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import { Language, OreStockpile } from '../../types';
+import { GoogleMiningMap } from '../maps/GoogleMiningMap';
 
 interface SurveyTopographyModuleProps {
   stockpiles: OreStockpile[];
@@ -62,6 +63,7 @@ export const SurveyTopographyModule: React.FC<SurveyTopographyModuleProps> = ({
   const [activeTab, setActiveTab] = useState<
     | 'dasbor_surveyor'
     | 'master_data_surveyor'
+    | 'gis_google_maps'
     | 'drone_uav'
     | 'gps_rtk'
     | 'total_station'
@@ -203,6 +205,7 @@ export const SurveyTopographyModule: React.FC<SurveyTopographyModuleProps> = ({
         {[
           { id: 'dasbor_surveyor', label: '📐 Dasbor Akun Surveyor', icon: Compass, badge: 'Surveyor Cockpit' },
           { id: 'master_data_surveyor', label: '🗄️ Master Data Surveyor', icon: Database, badge: 'GCP & Certs' },
+          { id: 'gis_google_maps', label: '🛰️ Google Maps Satelit GIS', icon: Globe, badge: 'Live GIS' },
           { id: 'drone_uav', label: 'Drone UAV & LiDAR Flight', icon: Plane, badge: '3 Misi' },
           { id: 'gps_rtk', label: 'GPS RTK Geodetic Control', icon: Satellite, badge: '4 GCP' },
           { id: 'total_station', label: 'Total Station Survey', icon: Crosshair, badge: '3 Point' },
@@ -852,6 +855,27 @@ export const SurveyTopographyModule: React.FC<SurveyTopographyModuleProps> = ({
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUB-MODULE GIS: GOOGLE MAPS SATELLITE GIS HUB */}
+      {activeTab === 'gis_google_maps' && (
+        <div className="space-y-6">
+          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-100 text-base flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-indigo-400" />
+                  Citra Satelit Geospasial Konsesi Tambang (Google Maps Platform)
+                </h3>
+                <p className="text-slate-400 text-xs mt-0.5">
+                  Visualisasi citra satelit resolusi tinggi koordinat WGS84, posisi patok batas IUP, jalan tambang (haul road), stockpile, dan pit penambangan aktif.
+                </p>
+              </div>
+            </div>
+
+            <GoogleMiningMap height="600px" language={language} />
           </div>
         </div>
       )}

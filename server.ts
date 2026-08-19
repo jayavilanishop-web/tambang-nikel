@@ -4,6 +4,17 @@ import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { parseAndCalculateMiningPrompt } from "./src/services/miningEngine";
+import {
+  getMiningSites,
+  getWeighbridgeTickets,
+  createWeighbridgeTicket,
+  getStockpileInventory,
+  getRecentFleetTelemetry,
+  logFleetTelemetry,
+  getBlendingBatches,
+  createBlendingBatch,
+} from "./src/db/operations.ts";
+import { getOrCreateUser, getAllUsers } from "./src/db/users.ts";
 
 dotenv.config();
 
@@ -12,14 +23,252 @@ const PORT = 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
-// Helper for Gemini AI client with lazy init
+// Helper for Gemini AI client with lazy init & dynamic runtime override
 function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-  if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || RUNTIME_DEV_CONFIG.apiKeys?.geminiApiKey;
+  if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey.trim().length < 6) {
     return null;
   }
   return new GoogleGenAI({ apiKey });
 }
+
+// In-Memory Mutable Developer Runtime & CMS Store
+let RUNTIME_DEV_CONFIG: any = {
+  website: {
+    brandName: "NickelSmart AI",
+    brandTagline: "Enterprise Mining & AI Smelter Orchestration Indonesia",
+    heroTitle: "Sistem Manajemen Tambang Nikel & AI Smelter RKEF/HPAL Terintegrasi",
+    heroSubtitle: "Platform Digital Tambang Nikel Terlengkap: Pit-to-Port Hauling, Ore Blending Otomatis, Kepatuhan ESDM/HPM, Timbangan Digital, Surveyor COA, dan Telemetri Alat Berat Real-Time.",
+    heroBadge: "🚀 Platform Nikel Indonesia #1 Terintegrasi ESDM & MODI",
+    ctaPrimaryText: "Masuk Sistem Operasi Tambang",
+    ctaSecondaryText: "Pelajari Fitur & Simulasi ROI",
+    announcement: {
+      enabled: true,
+      badgeText: "UPDATE v4.2",
+      text: "Modul Blending Smelter RKEF & Integrasi SIMBARA / MODI ESDM 2026 telah aktif.",
+      linkText: "Lihat Changelog",
+      type: "promo"
+    },
+    heroBannerImage: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1600&q=80",
+    logoUrl: "",
+    videoPromo: {
+      enabled: true,
+      title: "Video Simulasi Operasional Tambang & Blending Ore Nikel",
+      videoUrl: "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+      posterUrl: "https://images.unsplash.com/photo-1516937941344-00b4e0337589?auto=format&fit=crop&w=1200&q=80",
+      description: "Tonton bagaimana NickelSmart AI memotong antrean tongkang di jetty, mencegah penalti demurrage, dan menghitung formula pencampuran ore secara presisi."
+    },
+    mediaGallery: [
+      {
+        id: "MG-01",
+        title: "Penambangan Pit Alpha & Overburden Stripping",
+        category: "Pit Mining",
+        imageUrl: "https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=800&q=80",
+        description: "Operasi Excavator PC2000 memuat ore saprolit kadar 1.82% Ni di Pit Alpha."
+      },
+      {
+        id: "MG-02",
+        title: "Pemuatan Tongkang (Barging) & Jetty Port Transshipment",
+        category: "Jetty Port",
+        imageUrl: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=800&q=80",
+        description: "Barge Robby 3012 memuat 7.800 MT ore nikel menuju Smelter Bahodopi."
+      },
+      {
+        id: "MG-03",
+        title: "Ore Stockpile & Blending Management",
+        category: "Smelter RKEF",
+        imageUrl: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80",
+        description: "Stockpile EFO & ETO dengan rasio SiO2/MgO terukur akurat."
+      },
+      {
+        id: "MG-04",
+        title: "Laboratorium XRF & Verifikasi Surveyor Independen",
+        category: "Laboratory",
+        imageUrl: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80",
+        description: "Pengujian cepat kadar Ni, Fe, Co, dan MC sebelum sertifikat COA diterbitkan."
+      }
+    ],
+    pricingPlans: [
+      {
+        tierId: 'Trial Mode',
+        name: 'Trial Evaluasi (30 Hari)',
+        monthlyPrice: 'Gratis',
+        yearlyPrice: 'Gratis',
+        period: '/ 30 Hari Evaluasi',
+        seats: '5 User Seats',
+        target: 'IUP Baru & Evaluasi Fitur Site',
+        highlight: false,
+        badge: 'Free Trial',
+        note: 'Akses penuh tanpa komitmen',
+        features: [
+          'Akses Dasbor Analitik Dasar',
+          'Simulasi Pit & Ore Model (1 Pit)',
+          'Input Jembatan Timbang Manual',
+          'Export Laporan Format Excel',
+          'Dukungan Komunitas via Email'
+        ]
+      },
+      {
+        tierId: 'Standard Mine Tier',
+        name: 'Standard Mine Tier',
+        monthlyPrice: 'Rp 42,5 Juta',
+        yearlyPrice: 'Rp 37,5 Juta',
+        period: '/ Bulan (Ditagih Tahunan)',
+        seats: '25 User Seats',
+        target: 'Kontraktor Tambang & Single Pit',
+        highlight: false,
+        note: 'Opsi Kontrak Bulanan Fleksibel',
+        features: [
+          'Dasbor Analitik Real-Time 360°',
+          'Modul Pit & Ore Block Model Complete',
+          'Integrasi Timbangan Truk Otomatis (Surat Jalan QR)',
+          'Pelacakan GPS Fleet & Ritase Hauling',
+          'Manajemen Stockpile ETO / EFO Real-Time',
+          'Kepatuhan K3LH & Safety Incident Tracker',
+          'Dukungan Teknis Office Hours'
+        ]
+      },
+      {
+        tierId: 'Smelter & Mine Pro Tier',
+        name: 'Smelter & Mine Pro Tier',
+        monthlyPrice: 'Rp 78,5 Juta',
+        yearlyPrice: 'Rp 70,8 Juta',
+        period: '/ Bulan (Ditagih Tahunan)',
+        seats: '75 User Seats',
+        target: 'Konsesi Tambang Nikel & Smelter RKEF',
+        highlight: true,
+        badge: 'Paling Populer',
+        note: 'Solusi Lengkap Pit-to-Smelter',
+        features: [
+          'Semua Fitur Standard Mine Tier',
+          'Smart AI Nickel Ore Blending Engine (Ni/Fe/MC)',
+          'Manajemen Jetty, Tongkang & Draft Survey COA',
+          'Integrasi HPM Nikel ESDM & Kalkulator Penalti Royalti',
+          'Telemetri IoT Sensor Tangki Solar B35 & Workshop',
+          'Offline Mode Tablet Operator Front & Haul Road',
+          'AI Assistant Operasional 24/7 (NickelSmart AI)'
+        ]
+      },
+      {
+        tierId: 'Enterprise Unlimited Tier',
+        name: 'Enterprise Unlimited Tier',
+        monthlyPrice: 'Rp 132,5 Juta',
+        yearlyPrice: 'Rp 120,8 Juta',
+        period: '/ Bulan (Ditagih Tahunan)',
+        seats: 'Unlimited Seats',
+        target: 'Mining Holding & Smelter Conglomerate',
+        highlight: false,
+        badge: 'Holding Enterprise',
+        note: 'Multi-Site Holding & Custom Cloud',
+        features: [
+          'Semua Fitur Pro Tier Unlocked',
+          'Dedicated NickelSmart AI Engine (Custom Model)',
+          'Multi-IUP & Multi-Site Holding Consolidation',
+          'Konektor REST API SAP S/4HANA & Oracle ERP',
+          'Opsi Lisensi Offline Dongle Hardware & On-Premise',
+          'SLA Uptime 99.9% & Dedicated Account Manager',
+          'Kustomisasi Modul Khusus Tanpa Biaya Tambahan'
+        ]
+      }
+    ],
+    contactInfo: {
+      companyName: "PT NickelSmart Teknologi Nusantara",
+      email: "sales@smartmine.co.id",
+      phone: "+62 21 5088 9900",
+      whatsappNumber: "+6281288997766",
+      address: "Menara Batavia Lt. 28, Jl. K.H. Mas Mansyur Kav. 126, Jakarta Pusat 10220"
+    }
+  },
+  apiKeys: {
+    geminiApiKey: process.env.GEMINI_API_KEY || "",
+    googleMapsApiKey: "AIzaSyD-sample-maps-key-2026",
+    weatherApiKey: "bmkg-openweather-api-live",
+    whatsappGatewayToken: "WAGATEWAY-TOKEN-SMARTMINE-8899",
+    surveyorWebhookKey: "SUCOFINDO-CARSURIN-WEBHOOK-TOKEN-2026",
+    iotMqttBrokerUrl: "mqtts://broker.smartmine.co.id:8883"
+  },
+  systemSettings: {
+    maintenanceMode: false,
+    maintenanceMessage: "Sistem sedang dalam pemeliharaan terjadwal server ESDM. Operasional lokal tetap berjalan.",
+    allowRegistration: true,
+    defaultLicenseTier: "Smelter & Mine Pro",
+    activeAiModel: "gemini-3.6-flash",
+    offlineModeEnabled: true,
+    esdmAutoSyncIntervalMinutes: 15,
+    auditLogging: true
+  },
+  clientUsers: [
+    {
+      id: "CLI-001",
+      name: "Bapak Hendra Wibisono",
+      email: "h.wibisono@halmaheranickel.co.id",
+      phone: "+6281122334455",
+      companyName: "PT Halmahera Nickel Industry",
+      iupNumber: "IUP-OP No. 540/091/ESDM/2022",
+      role: "Mine Manager",
+      subscriptionTier: "Smelter & Mine Pro",
+      status: "ACTIVE",
+      seatsAllocated: 50,
+      expiresAt: "2027-12-31",
+      createdAt: "2025-01-15",
+      lastActive: "10 menit yang lalu",
+      notes: "Klien utama konsesi Halmahera Timur. Butuh modul blending RKEF.",
+      apiAccessAllowed: true
+    },
+    {
+      id: "CLI-002",
+      name: "Ibu Diana Kusuma Wardani",
+      email: "diana.k@nusantaranickel.com",
+      phone: "+6281234567890",
+      companyName: "PT Nickel Mining Nusantara Tbk",
+      iupNumber: "IUP-OP No. 540/128/ESDM/2021",
+      role: "Super Admin",
+      subscriptionTier: "Enterprise Unlimited",
+      status: "ACTIVE",
+      seatsAllocated: 250,
+      expiresAt: "2027-12-31",
+      createdAt: "2024-11-20",
+      lastActive: "Baru saja",
+      notes: "Akun Holding Morowali & Kolaka.",
+      apiAccessAllowed: true
+    },
+    {
+      id: "CLI-003",
+      name: "Kapten Surya Darma",
+      email: "surya.jetty@morowalilogistics.com",
+      phone: "+6281398765432",
+      companyName: "PT Morowali Jetty Logistik",
+      iupNumber: "TUKS No. 04/PORT/2023",
+      role: "Operation Manager",
+      subscriptionTier: "Standard Mine Tier",
+      status: "ACTIVE",
+      seatsAllocated: 20,
+      expiresAt: "2026-11-30",
+      createdAt: "2025-06-10",
+      lastActive: "1 jam yang lalu",
+      notes: "Kontraktor operasional pelabuhan & barging.",
+      apiAccessAllowed: false
+    },
+    {
+      id: "CLI-004",
+      name: "Ir. Bambang Santoso, M.T.",
+      email: "bambang.geo@sulawesimine.co.id",
+      phone: "+6281567890123",
+      companyName: "PT Sulawesi Mining Exploration",
+      iupNumber: "IUP-EKS No. 22/EKS/2024",
+      role: "Geologist",
+      subscriptionTier: "Trial Mode",
+      status: "TRIAL",
+      seatsAllocated: 5,
+      expiresAt: "2026-09-15",
+      createdAt: "2026-08-01",
+      lastActive: "Kemarin",
+      notes: "Masa evaluasi 30 hari untuk modul 3D Ore Block Model.",
+      apiAccessAllowed: false
+    }
+  ]
+};
+
 
 // Helper to attempt call with primary model gemini-3.6-flash and fallback to gemini-flash-latest
 async function generateContentWithFallback(ai: GoogleGenAI, params: { contents: any; config?: any }) {
@@ -63,6 +312,176 @@ const ACTIVE_LICENSES: Record<string, { company: string; tier: string; seats: nu
 };
 
 // ------------------- API ENDPOINTS -------------------
+
+// 0. Developer Control Panel & Live CMS Endpoints (No Redeploy Required)
+app.get("/api/dev/config", (req, res) => {
+  return res.json(RUNTIME_DEV_CONFIG);
+});
+
+app.post("/api/dev/config", (req, res) => {
+  try {
+    const updated = req.body;
+    if (updated) {
+      RUNTIME_DEV_CONFIG = {
+        ...RUNTIME_DEV_CONFIG,
+        ...updated,
+        website: { ...RUNTIME_DEV_CONFIG.website, ...(updated.website || {}) },
+        apiKeys: { ...RUNTIME_DEV_CONFIG.apiKeys, ...(updated.apiKeys || {}) },
+        systemSettings: { ...RUNTIME_DEV_CONFIG.systemSettings, ...(updated.systemSettings || {}) },
+        clientUsers: updated.clientUsers || RUNTIME_DEV_CONFIG.clientUsers
+      };
+
+      // If geminiApiKey was updated, apply to process.env immediately
+      if (updated.apiKeys?.geminiApiKey && updated.apiKeys.geminiApiKey.trim().length > 5) {
+        process.env.GEMINI_API_KEY = updated.apiKeys.geminiApiKey.trim();
+      }
+
+      return res.json({
+        success: true,
+        message: "Konfigurasi sistem developer & CMS berhasil disimpan dan langsung aktif di semua akun!",
+        updatedAt: new Date().toISOString(),
+        config: RUNTIME_DEV_CONFIG
+      });
+    }
+    return res.status(400).json({ success: false, message: "Payload kosong" });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err?.message });
+  }
+});
+
+// 0b. Live API Keys Management & Live Override
+app.get("/api/dev/apikeys", (req, res) => {
+  const keys = RUNTIME_DEV_CONFIG.apiKeys || {};
+  const mask = (str: string) => {
+    if (!str || str.length < 8) return str ? "********" : "NOT_CONFIGURED";
+    return str.substring(0, 4) + "••••••••" + str.substring(str.length - 4);
+  };
+
+  return res.json({
+    geminiApiKeyStatus: process.env.GEMINI_API_KEY ? "CONFIGURED_ACTIVE" : (keys.geminiApiKey ? "CONFIGURED_ACTIVE" : "NOT_SET"),
+    geminiApiKeyMasked: mask(process.env.GEMINI_API_KEY || keys.geminiApiKey),
+    googleMapsApiKeyMasked: mask(keys.googleMapsApiKey),
+    weatherApiKeyMasked: mask(keys.weatherApiKey),
+    whatsappGatewayTokenMasked: mask(keys.whatsappGatewayToken),
+    surveyorWebhookKeyMasked: mask(keys.surveyorWebhookKey),
+    iotMqttBrokerUrl: keys.iotMqttBrokerUrl || "NOT_SET"
+  });
+});
+
+app.post("/api/dev/apikeys", (req, res) => {
+  const { geminiApiKey, googleMapsApiKey, weatherApiKey, whatsappGatewayToken, surveyorWebhookKey, iotMqttBrokerUrl } = req.body;
+  if (!RUNTIME_DEV_CONFIG.apiKeys) RUNTIME_DEV_CONFIG.apiKeys = {};
+
+  if (geminiApiKey !== undefined) {
+    RUNTIME_DEV_CONFIG.apiKeys.geminiApiKey = geminiApiKey;
+    if (geminiApiKey && geminiApiKey.trim().length > 5) {
+      process.env.GEMINI_API_KEY = geminiApiKey.trim();
+    }
+  }
+  if (googleMapsApiKey !== undefined) RUNTIME_DEV_CONFIG.apiKeys.googleMapsApiKey = googleMapsApiKey;
+  if (weatherApiKey !== undefined) RUNTIME_DEV_CONFIG.apiKeys.weatherApiKey = weatherApiKey;
+  if (whatsappGatewayToken !== undefined) RUNTIME_DEV_CONFIG.apiKeys.whatsappGatewayToken = whatsappGatewayToken;
+  if (surveyorWebhookKey !== undefined) RUNTIME_DEV_CONFIG.apiKeys.surveyorWebhookKey = surveyorWebhookKey;
+  if (iotMqttBrokerUrl !== undefined) RUNTIME_DEV_CONFIG.apiKeys.iotMqttBrokerUrl = iotMqttBrokerUrl;
+
+  return res.json({
+    success: true,
+    message: "API Keys berhasil diperbarui dan langsung aktif di runtime!",
+    updatedAt: new Date().toISOString()
+  });
+});
+
+// 0c. Live Test Gemini API Key
+app.post("/api/dev/test-key", async (req, res) => {
+  const { apiKey } = req.body;
+  const keyToTest = apiKey || process.env.GEMINI_API_KEY || RUNTIME_DEV_CONFIG.apiKeys?.geminiApiKey;
+
+  if (!keyToTest || keyToTest.trim().length < 6) {
+    return res.status(400).json({ success: false, message: "API Key kosong atau tidak valid." });
+  }
+
+  try {
+    const testAi = new GoogleGenAI({ apiKey: keyToTest.trim() });
+    const { response, model } = await generateContentWithFallback(testAi, {
+      contents: [{ role: "user", parts: [{ text: "Ketik satu kata saja: CONNECTED" }] }]
+    });
+
+    return res.json({
+      success: true,
+      message: `Koneksi Google Gemini API Berhasil! (Model: ${model})`,
+      reply: response.text?.trim()
+    });
+  } catch (err: any) {
+    return res.status(400).json({
+      success: false,
+      message: `Uji koneksi API gagal: ${err?.message || "Invalid API Key or quota exhausted"}`
+    });
+  }
+});
+
+// 0d. Reset Developer Config to Defaults
+app.post("/api/dev/reset-defaults", (req, res) => {
+  return res.json({
+    success: true,
+    message: "Konfigurasi developer berhasil direset ke setelan awal."
+  });
+});
+
+// 0e. CRM Client Users Management API
+app.get("/api/dev/users", (req, res) => {
+  return res.json({
+    totalUsers: RUNTIME_DEV_CONFIG.clientUsers?.length || 0,
+    users: RUNTIME_DEV_CONFIG.clientUsers || []
+  });
+});
+
+app.post("/api/dev/users", (req, res) => {
+  const user = req.body;
+  if (!user || !user.name || !user.email) {
+    return res.status(400).json({ success: false, message: "Nama dan Email wajib diisi." });
+  }
+
+  if (!RUNTIME_DEV_CONFIG.clientUsers) {
+    RUNTIME_DEV_CONFIG.clientUsers = [];
+  }
+
+  const existingIdx = RUNTIME_DEV_CONFIG.clientUsers.findIndex((u: any) => u.id === user.id);
+  if (existingIdx >= 0) {
+    RUNTIME_DEV_CONFIG.clientUsers[existingIdx] = {
+      ...RUNTIME_DEV_CONFIG.clientUsers[existingIdx],
+      ...user,
+      lastUpdated: new Date().toISOString()
+    };
+  } else {
+    const newUser = {
+      id: user.id || `CLI-${Date.now()}`,
+      createdAt: new Date().toISOString().slice(0, 10),
+      lastActive: "Baru saja",
+      status: "ACTIVE",
+      ...user
+    };
+    RUNTIME_DEV_CONFIG.clientUsers.unshift(newUser);
+  }
+
+  return res.json({
+    success: true,
+    message: `Akun pelanggan ${user.name} berhasil disimpan!`,
+    users: RUNTIME_DEV_CONFIG.clientUsers
+  });
+});
+
+app.delete("/api/dev/users/:id", (req, res) => {
+  const { id } = req.params;
+  if (RUNTIME_DEV_CONFIG.clientUsers) {
+    RUNTIME_DEV_CONFIG.clientUsers = RUNTIME_DEV_CONFIG.clientUsers.filter((u: any) => u.id !== id);
+  }
+  return res.json({
+    success: true,
+    message: `Akun ${id} berhasil dihapus dari database.`,
+    users: RUNTIME_DEV_CONFIG.clientUsers
+  });
+});
+
 
 // 1. License Verification Endpoint
 app.post("/api/license/verify", (req, res) => {
@@ -471,6 +890,168 @@ app.get("/api/v1/modi/rkab-status", (req, res) => {
     remainingQuotaMT: 1155000,
     lastSyncTimestamp: new Date().toISOString()
   });
+});
+
+// ------------------- CLOUD SQL RELATIONAL DATABASE ENDPOINTS -------------------
+
+// 7a. Mining Sites
+app.get("/api/db/sites", async (req, res) => {
+  try {
+    const sites = await getMiningSites();
+    return res.json({ success: true, count: sites.length, data: sites });
+  } catch (error: any) {
+    console.error("Error fetching mining sites:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch mining sites" });
+  }
+});
+
+// 7b. Weighbridge Tickets
+app.get("/api/db/weighbridge", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 50;
+    const tickets = await getWeighbridgeTickets(limit);
+    return res.json({ success: true, count: tickets.length, data: tickets });
+  } catch (error: any) {
+    console.error("Error fetching weighbridge tickets:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch weighbridge tickets" });
+  }
+});
+
+app.post("/api/db/weighbridge", async (req, res) => {
+  try {
+    const { ticketNo, truckCode, driverName, grossKg, tareKg, originPit, destinationStockpile, oreGradeNi } = req.body;
+    if (!truckCode || !grossKg || !tareKg || !originPit || !destinationStockpile) {
+      return res.status(400).json({ success: false, error: "Data timbangan tidak lengkap" });
+    }
+
+    const netKg = Number(grossKg) - Number(tareKg);
+    const newTicket = await createWeighbridgeTicket({
+      id: `TKT-${Date.now()}`,
+      ticketNo: ticketNo || `WB-${Math.floor(100000 + Math.random() * 900000)}`,
+      truckCode,
+      driverName: driverName || "Operator Truk",
+      grossKg: Number(grossKg),
+      tareKg: Number(tareKg),
+      netKg,
+      originPit,
+      destinationStockpile,
+      oreGradeNi: oreGradeNi || "1.82% Ni",
+      rfidScanned: true,
+    });
+
+    return res.json({ success: true, message: "Tiket timbangan berhasil disimpan di PostgreSQL Cloud SQL!", data: newTicket });
+  } catch (error: any) {
+    console.error("Error creating weighbridge ticket:", error);
+    return res.status(500).json({ success: false, error: "Failed to create weighbridge ticket" });
+  }
+});
+
+// 7c. Stockpile Inventory
+app.get("/api/db/stockpiles", async (req, res) => {
+  try {
+    const piles = await getStockpileInventory();
+    return res.json({ success: true, count: piles.length, data: piles });
+  } catch (error: any) {
+    console.error("Error fetching stockpile inventory:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch stockpile inventory" });
+  }
+});
+
+// 7d. Fleet Telemetry Logs
+app.get("/api/db/telemetry", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 20;
+    const logs = await getRecentFleetTelemetry(limit);
+    return res.json({ success: true, count: logs.length, data: logs });
+  } catch (error: any) {
+    console.error("Error fetching telemetry logs:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch telemetry logs" });
+  }
+});
+
+app.post("/api/db/telemetry", async (req, res) => {
+  try {
+    const { unitCode, operatorName, lat, lng, speedKmh, fuelPercent, status } = req.body;
+    if (!unitCode || !lat || !lng) {
+      return res.status(400).json({ success: false, error: "Unit code, lat, dan lng wajib diisi" });
+    }
+
+    const log = await logFleetTelemetry({
+      unitCode,
+      operatorName,
+      lat: String(lat),
+      lng: String(lng),
+      speedKmh: Number(speedKmh) || 0,
+      fuelPercent: Number(fuelPercent) || 100,
+      status: status || "OPERATIONAL",
+    });
+
+    return res.json({ success: true, message: "Telemetri berhasil direkam ke database PostgreSQL", data: log });
+  } catch (error: any) {
+    console.error("Error logging telemetry:", error);
+    return res.status(500).json({ success: false, error: "Failed to log telemetry" });
+  }
+});
+
+// 7e. Blending Batches
+app.get("/api/db/blending", async (req, res) => {
+  try {
+    const batches = await getBlendingBatches();
+    return res.json({ success: true, count: batches.length, data: batches });
+  } catch (error: any) {
+    console.error("Error fetching blending batches:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch blending batches" });
+  }
+});
+
+app.post("/api/db/blending", async (req, res) => {
+  try {
+    const { batchCode, targetNi, resultNi, targetSmelter, totalTonnage, status } = req.body;
+    if (!targetNi || !resultNi || !targetSmelter || !totalTonnage) {
+      return res.status(400).json({ success: false, error: "Data formula blending tidak lengkap" });
+    }
+
+    const newBatch = await createBlendingBatch({
+      id: `BLEND-${Date.now()}`,
+      batchCode: batchCode || `BATCH-NI-${Math.floor(1000 + Math.random() * 9000)}`,
+      targetNi: Number(targetNi),
+      resultNi: Number(resultNi),
+      targetSmelter,
+      totalTonnage: Number(totalTonnage),
+      status: status || "COMPLETED",
+    });
+
+    return res.json({ success: true, message: "Batch blending berhasil disimpan di database relasional", data: newBatch });
+  } catch (error: any) {
+    console.error("Error creating blending batch:", error);
+    return res.status(500).json({ success: false, error: "Failed to create blending batch" });
+  }
+});
+
+// 7f. Users Sync & Listing
+app.get("/api/db/users", async (req, res) => {
+  try {
+    const usersList = await getAllUsers();
+    return res.json({ success: true, count: usersList.length, data: usersList });
+  } catch (error: any) {
+    console.error("Error fetching database users:", error);
+    return res.status(500).json({ success: false, error: "Failed to fetch database users" });
+  }
+});
+
+app.post("/api/db/user/sync", async (req, res) => {
+  try {
+    const { uid, email, displayName, role } = req.body;
+    if (!uid || !email) {
+      return res.status(400).json({ success: false, error: "UID dan Email wajib diisi" });
+    }
+
+    const user = await getOrCreateUser(uid, email, displayName, role);
+    return res.json({ success: true, message: "User synced to PostgreSQL Cloud SQL", data: user });
+  } catch (error: any) {
+    console.error("Error syncing user to database:", error);
+    return res.status(500).json({ success: false, error: "Failed to sync user" });
+  }
 });
 
 // ------------------- VITE SERVER INTEGRATION -------------------

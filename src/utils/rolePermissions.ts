@@ -31,7 +31,41 @@ export type DashboardTab =
   | 'hse_esg'
   | 'ai' 
   | 'realtime_kpi' 
-  | 'gis_map';
+  | 'gis_map'
+  | 'dasbor_corporate_director'
+  | 'master_corporate_director'
+  | 'master_data_corporate_director'
+  | 'dasbor_commissioner'
+  | 'master_commissioner'
+  | 'master_data_commissioner'
+  | 'dasbor_ceo'
+  | 'master_ceo'
+  | 'master_data_ceo'
+  | 'dasbor_coo'
+  | 'master_coo'
+  | 'master_data_coo'
+  | 'dasbor_mine_manager'
+  | 'master_mine_manager'
+  | 'master_data_mine_manager'
+  | 'dasbor_operation_manager'
+  | 'master_operation_manager'
+  | 'master_data_operation_manager'
+  | 'dasbor_production_manager'
+  | 'master_production_manager'
+  | 'master_data_production_manager'
+  | 'dasbor_geologist'
+  | 'master_geologist'
+  | 'master_data_geologist'
+  | 'dasbor_mine_engineer'
+  | 'master_mine_engineer'
+  | 'master_data_mine_engineer'
+  | 'dasbor_finance_director'
+  | 'master_finance_director'
+  | 'master_data_finance_director'
+  | 'dasbor_hr_director'
+  | 'master_hr_director'
+  | 'master_data_hr_director'
+  | string;
 
 export interface RolePermissionConfig {
   role: UserRole;
@@ -54,7 +88,7 @@ export const ROLE_PERMISSIONS: Record<string, RolePermissionConfig> = {
       'gps_telemetry', 'iot_telemetry', 'fleet', 'stockpile', 'weighbridge', 'warehouse',
       'procurement', 'finance', 'hr', 'jetty', 'smelter', 'hse', 'environment',
       'security', 'document', 'project', 'crm', 'report', 'notification', 'rkab',
-      'offline', 'api_hub', 'saas_license', 'auth_security'
+      'offline', 'api_hub', 'saas_license', 'auth_security', 'developer_control_panel'
     ],
     allowedDashboardTabs: [
       'ktt_executive', 'transporter', 'payroll', 'supplier_vendor', 'purchasing', 'master_purchasing', 'executive', 'bi_analytics', 'production_analytics',
@@ -648,6 +682,9 @@ export function getRolePermissionConfig(role: string | UserRole): RolePermission
 export function isModuleAllowedForRole(role: string | UserRole, moduleId: ActiveModule, customOverrides?: Record<string, boolean>): boolean {
   if (customOverrides && typeof customOverrides[moduleId] === 'boolean') {
     return customOverrides[moduleId];
+  }
+  if (moduleId === 'developer_control_panel') {
+    return role === 'Super Admin' || role === 'License Owner' || role === 'Company Owner' || role === 'Corporate Director' || role === 'Mine Manager';
   }
   const config = getRolePermissionConfig(role);
   return config.allowedModules.includes(moduleId);
