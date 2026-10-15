@@ -24,9 +24,12 @@ import {
   Download,
   Search,
   Eye,
-  EyeOff
+  EyeOff,
+  Database
 } from 'lucide-react';
 import { UserRole, UserSession, AuditLoginLog, Language } from '../../types';
+import { signInWithSupabase, getSupabaseConfig } from '../../lib/supabase';
+
 
 interface AuthSecurityModuleProps {
   currentUserRole: UserRole;
@@ -48,7 +51,7 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
   const [activeTab, setActiveTab] = useState<'login_portal' | 'otp_2fa' | 'biometrics' | 'rbac_matrix' | 'session_audit'>('login_portal');
 
   // Login Simulator State
-  const [loginMethod, setLoginMethod] = useState<'EMAIL' | 'PHONE' | 'GOOGLE' | 'MICROSOFT'>('EMAIL');
+  const [loginMethod, setLoginMethod] = useState<'EMAIL' | 'SUPABASE' | 'PHONE' | 'GOOGLE' | 'MICROSOFT'>('SUPABASE');
   const [emailInput, setEmailInput] = useState('p.soebagyo@nickelsmart.co.id');
   const [phoneInput, setPhoneInput] = useState('+62 812-8899-2026');
   const [passwordInput, setPasswordInput] = useState('NickelSmart#2026!');
@@ -108,14 +111,41 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
     }));
   };
 
-  const handleSimulateLoginSubmit = (e: React.FormEvent) => {
+  const handleSimulateLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
+    setLoginSuccessMessage(null);
+
+    if (loginMethod === 'SUPABASE') {
+      const cfg = getSupabaseConfig();
+      if (!cfg.isConfigured) {
+        // Mock demo token fallback for demonstration
+        setTimeout(() => {
+          setIsLoggingIn(false);
+          setLoginSuccessMessage('Autentikasi Supabase Auth Demo Berhasil! Sesi JWT PostgreSQL diterbitkan.');
+          setTimeout(() => setLoginSuccessMessage(null), 4000);
+        }, 1200);
+        return;
+      }
+
+      const { user, error } = await signInWithSupabase(emailInput, passwordInput);
+      setIsLoggingIn(false);
+
+      if (error) {
+        alert(`Supabase Auth Gagal: ${error.message}`);
+      } else {
+        setLoginSuccessMessage(`Sesi Supabase Aktif: ${user?.email} (${user?.user_metadata?.role || 'Enterprise User'})`);
+        setTimeout(() => setLoginSuccessMessage(null), 4000);
+      }
+      return;
+    }
+
     setTimeout(() => {
       setIsLoggingIn(false);
       setOtpStep(true);
     }, 1000);
   };
+
 
   const handleVerifyOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,7 +258,18 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
             </div>
 
             {/* Method Select Buttons */}
-            <div className="grid grid-cols-4 gap-2 text-xs">
+            <div className="grid grid-cols-5 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setLoginMethod('SUPABASE')}
+                className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all ${
+                  loginMethod === 'SUPABASE' ? 'bg-emerald-600/20 border-emerald-500 text-emerald-300 font-bold' : 'bg-slate-950 border-slate-800 text-slate-400'
+                }`}
+              >
+                <Database className="w-4 h-4 text-emerald-400" />
+                <span>Supabase</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setLoginMethod('EMAIL')}
@@ -277,16 +318,23 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
             {/* Form Fields */}
             {!otpStep ? (
               <form onSubmit={handleSimulateLoginSubmit} className="space-y-4 text-xs">
-                {loginMethod === 'EMAIL' && (
+                {(loginMethod === 'SUPABASE' || loginMethod === 'EMAIL') && (
                   <>
                     <div>
-                      <label className="block text-slate-300 mb-1 font-semibold">Alamat Email Perusahaan:</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-slate-300 font-semibold">
+                          {loginMethod === 'SUPABASE' ? 'Email Akun Supabase Auth:' : 'Alamat Email Perusahaan:'}
+                        </label>
+                        {loginMethod === 'SUPABASE' && (
+                          <span className="text-[10px] text-emerald-400 font-mono">PostgreSQL JWT</span>
+                        )}
+                      </div>
                       <input
                         type="email"
                         required
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-100 font-mono"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-100 font-mono focus:outline-none focus:border-emerald-500"
                       />
                     </div>
                     <div>
@@ -297,7 +345,7 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
                           required
                           value={passwordInput}
                           onChange={(e) => setPasswordInput(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-100 font-mono pr-10"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-100 font-mono pr-10 focus:outline-none focus:border-emerald-500"
                         />
                         <button
                           type="button"
@@ -336,12 +384,21 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
                 <button
                   type="submit"
                   disabled={isLoggingIn}
-                  className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2"
+                  className={`w-full py-3 rounded-xl text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 ${
+                    loginMethod === 'SUPABASE'
+                      ? 'bg-emerald-600 hover:bg-emerald-500'
+                      : 'bg-purple-600 hover:bg-purple-500'
+                  }`}
                 >
                   {isLoggingIn ? (
                     <>
                       <Sparkles className="w-4 h-4 animate-spin" />
                       <span>Memproses Autentikasi...</span>
+                    </>
+                  ) : loginMethod === 'SUPABASE' ? (
+                    <>
+                      <Database className="w-4 h-4" />
+                      <span>Masuk dengan Supabase Auth (JWT)</span>
                     </>
                   ) : (
                     <>
@@ -430,10 +487,25 @@ export const AuthSecurityModule: React.FC<AuthSecurityModuleProps> = ({
                 </div>
                 <p className="text-slate-400 text-[11px]">Dukungan sensor sidik jari Touch ID / Windows Hello / Face ID pada perangkat lapangan.</p>
               </div>
+
+              {/* Multi-Provider Auth Architecture */}
+              <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    Multi-Provider Auth (Firebase & Supabase)
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">Dual IdP Active</span>
+                </div>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Aplikasi mendukung autentikasi hibrida ganda: <strong>Firebase Authentication</strong> (Google Workspace Cloud) dan <strong>Supabase Auth</strong> (PostgreSQL RLS & Enterprise JWT), memungkinkan single sign-on bagi kontraktor, holding grup, dan regulator.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
+
 
       {/* TAB 2: 2FA & OTP AUTHENTICATOR */}
       {activeTab === 'otp_2fa' && (

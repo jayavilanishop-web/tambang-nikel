@@ -588,29 +588,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           }
                         `}
                       >
-                        <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
                           <Icon className={`w-4 h-4 shrink-0 ${
                             isActive ? 'text-white' : isAllowed ? 'text-slate-400 group-hover:text-emerald-400' : 'text-slate-600'
                           }`} />
                           <span className="truncate text-left">{label}</span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0 ml-2">
                           {!isAllowed && (
                             <span className="p-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30" title="Akses Dibatasi Role">
                               <Lock className="w-3 h-3" />
-                            </span>
-                          )}
-
-                          {isAllowed && item.badge && (
-                            <span className={`
-                              text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider
-                              ${isActive 
-                                ? 'bg-white/20 text-white' 
-                                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              }
-                            `}>
-                              {item.badge}
                             </span>
                           )}
                           <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'text-white translate-x-0.5' : 'text-slate-600 group-hover:text-slate-400'}`} />

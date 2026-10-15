@@ -6,6 +6,13 @@ import { LicenseModal } from './components/LicenseModal';
 import { AIAssistantDrawer } from './components/AIAssistantDrawer';
 import { PushNotificationCenter } from './components/PushNotificationCenter';
 import { FloatingAIAvatar } from './components/FloatingAIAvatar';
+import { SupabaseAuthModal } from './components/SupabaseAuthModal';
+import { 
+  getSupabaseSession, 
+  onSupabaseAuthStateChange, 
+  signOutSupabase, 
+  SupabaseAuthUser 
+} from './lib/supabase';
 import { 
   auth, 
   onAuthStateChanged, 
@@ -14,6 +21,7 @@ import {
   testFirestoreConnection 
 } from './services/firebase';
 import { User as FirebaseUser } from 'firebase/auth';
+
 
 import { DashboardModule } from './components/modules/DashboardModule';
 import { ExplorationPitModule } from './components/modules/ExplorationPitModule';
@@ -98,27 +106,55 @@ export default function App() {
   const [currentUserRole, setCurrentUserRole] = useState<UserRole>('Mine Manager');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseAuthUser | null>(null);
+  const [isSupabaseAuthModalOpen, setIsSupabaseAuthModalOpen] = useState(false);
   const [firestoreStatus, setFirestoreStatus] = useState<string>('Initializing Cloud Firestore...');
 
-  // Firebase Boot & Realtime Auth Listener
+  // Multi-Provider Auth Observer: Firebase Auth & Supabase Auth Listeners
   useEffect(() => {
     // 1. Connection check with Firestore
     testFirestoreConnection().then(res => {
       setFirestoreStatus(res.message);
     });
 
-    // 2. Auth state observer
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+    // 2. Firebase Auth state observer
+    const unsubscribeFirebase = onAuthStateChanged(auth, (user) => {
       setFirebaseUser(user);
       if (user) {
-        // Automatically check if user is Developer / Super Admin
         if (user.email === 'jayavilanishop@gmail.com' || user.email?.includes('admin')) {
           setCurrentUserRole('Super Admin');
         }
       }
     });
 
-    return () => unsubscribeAuth();
+    // 3. Supabase Auth initial session & listener
+    getSupabaseSession().then(({ user }) => {
+      if (user) {
+        setSupabaseUser(user);
+        if (user.user_metadata?.role) {
+          setCurrentUserRole(user.user_metadata.role as UserRole);
+        } else if (user.email === 'jayavilanishop@gmail.com' || user.email?.includes('admin')) {
+          setCurrentUserRole('Super Admin');
+        }
+      }
+    });
+
+    const unsubscribeSupabase = onSupabaseAuthStateChange((event, session) => {
+      const user = session?.user || null;
+      setSupabaseUser(user);
+      if (user) {
+        if (user.user_metadata?.role) {
+          setCurrentUserRole(user.user_metadata.role as UserRole);
+        } else if (user.email === 'jayavilanishop@gmail.com' || user.email?.includes('admin')) {
+          setCurrentUserRole('Super Admin');
+        }
+      }
+    });
+
+    return () => {
+      unsubscribeFirebase();
+      if (unsubscribeSupabase) unsubscribeSupabase();
+    };
   }, []);
 
   const handleGoogleSignIn = async () => {
@@ -137,12 +173,19 @@ export default function App() {
 
   const handleSignOut = async () => {
     try {
-      await logOutUser();
-      setFirebaseUser(null);
+      if (firebaseUser) {
+        await logOutUser();
+        setFirebaseUser(null);
+      }
+      if (supabaseUser) {
+        await signOutSupabase();
+        setSupabaseUser(null);
+      }
     } catch (err) {
       console.error('Sign out error:', err);
     }
   };
+
 
   // Application State Datasets
   const [companies, setCompanies] = useState<Company[]>(INITIAL_COMPANIES);
@@ -255,23 +298,45 @@ export default function App() {
 
   if (viewMode === 'landing') {
     return (
-      <LandingPage
-        onEnterApp={(selectedRole) => {
-          if (selectedRole) {
-            setCurrentUserRole(selectedRole);
-          }
-          setViewMode('app');
-        }}
-        onOpenDeveloperPanel={() => {
-          setCurrentUserRole('Super Admin');
-          setActiveModule('developer_control_panel');
-          setViewMode('app');
-        }}
-        language={language}
-        onToggleLanguage={() => setLanguage(l => l === 'id' ? 'en' : 'id')}
-        firebaseUser={firebaseUser}
-        onGoogleSignIn={handleGoogleSignIn}
-      />
+      <>
+        <LandingPage
+          onEnterApp={(selectedRole) => {
+            if (selectedRole) {
+              setCurrentUserRole(selectedRole);
+            }
+            setViewMode('app');
+          }}
+          onOpenDeveloperPanel={() => {
+            setCurrentUserRole('Super Admin');
+            setActiveModule('developer_control_panel');
+            setViewMode('app');
+          }}
+          language={language}
+          onToggleLanguage={() => setLanguage(l => l === 'id' ? 'en' : 'id')}
+          firebaseUser={firebaseUser}
+          supabaseUser={supabaseUser}
+          onGoogleSignIn={handleGoogleSignIn}
+          onOpenSupabaseAuth={() => setIsSupabaseAuthModalOpen(true)}
+        />
+
+        {/* Multi-Provider: Supabase Enterprise Auth Modal */}
+        <SupabaseAuthModal
+          isOpen={isSupabaseAuthModalOpen}
+          onClose={() => setIsSupabaseAuthModalOpen(false)}
+          currentUser={supabaseUser}
+          onSignOut={handleSignOut}
+          onAuthSuccess={(user, role) => {
+            setSupabaseUser(user);
+            if (role) setCurrentUserRole(role);
+            setViewMode('app');
+          }}
+          onOpenDeveloperConfig={() => {
+            setCurrentUserRole('Super Admin');
+            setActiveModule('developer_control_panel');
+            setViewMode('app');
+          }}
+        />
+      </>
     );
   }
 
@@ -296,9 +361,12 @@ export default function App() {
         onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         onGoToLandingPage={() => setViewMode('landing')}
         firebaseUser={firebaseUser}
+        supabaseUser={supabaseUser}
         onGoogleSignIn={handleGoogleSignIn}
+        onOpenSupabaseAuthModal={() => setIsSupabaseAuthModalOpen(true)}
         onSignOut={handleSignOut}
       />
+
 
       {/* Main Layout Area - Full Width Responsive */}
       <div className="w-full px-3 sm:px-6 lg:px-8 py-6 flex gap-6">
@@ -708,6 +776,23 @@ export default function App() {
         onClearNotifications={handleClearNotifications}
         language={language}
       />
+
+      {/* Multi-Provider: Supabase Enterprise Auth Modal (App Layout) */}
+      <SupabaseAuthModal
+        isOpen={isSupabaseAuthModalOpen}
+        onClose={() => setIsSupabaseAuthModalOpen(false)}
+        currentUser={supabaseUser}
+        onSignOut={handleSignOut}
+        onAuthSuccess={(user, role) => {
+          setSupabaseUser(user);
+          if (role) setCurrentUserRole(role);
+        }}
+        onOpenDeveloperConfig={() => {
+          setCurrentUserRole('Super Admin');
+          setActiveModule('developer_control_panel');
+        }}
+      />
+
 
     </div>
   );

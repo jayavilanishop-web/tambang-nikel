@@ -348,6 +348,9 @@ export interface DevConfig {
     whatsappGatewayToken: string;
     surveyorWebhookKey: string;
     iotMqttBrokerUrl: string;
+    supabaseUrl?: string;
+    supabaseAnonKey?: string;
+    supabaseServiceKey?: string;
   };
   systemSettings: {
     maintenanceMode: boolean;

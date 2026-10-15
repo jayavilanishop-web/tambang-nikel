@@ -155,7 +155,10 @@ export const DEFAULT_DEV_CONFIG: DevConfig = {
     weatherApiKey: "",
     whatsappGatewayToken: "WAGATEWAY-TOKEN-SMARTMINE-8899",
     surveyorWebhookKey: "SUCOFINDO-CARSURIN-WEBHOOK-TOKEN-2026",
-    iotMqttBrokerUrl: "mqtts://broker.smartmine.co.id:8883"
+    iotMqttBrokerUrl: "mqtts://broker.smartmine.co.id:8883",
+    supabaseUrl: "",
+    supabaseAnonKey: "",
+    supabaseServiceKey: ""
   },
   systemSettings: {
     maintenanceMode: false,

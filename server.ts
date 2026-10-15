@@ -15,6 +15,7 @@ import {
   createBlendingBatch,
 } from "./src/db/operations.ts";
 import { getOrCreateUser, getAllUsers } from "./src/db/users.ts";
+import { getServerSupabase } from "./src/lib/supabase-server.ts";
 
 dotenv.config();
 
@@ -185,7 +186,10 @@ let RUNTIME_DEV_CONFIG: any = {
     weatherApiKey: "bmkg-openweather-api-live",
     whatsappGatewayToken: "WAGATEWAY-TOKEN-SMARTMINE-8899",
     surveyorWebhookKey: "SUCOFINDO-CARSURIN-WEBHOOK-TOKEN-2026",
-    iotMqttBrokerUrl: "mqtts://broker.smartmine.co.id:8883"
+    iotMqttBrokerUrl: "mqtts://broker.smartmine.co.id:8883",
+    supabaseUrl: process.env.SUPABASE_URL || "",
+    supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
   },
   systemSettings: {
     maintenanceMode: false,
@@ -364,12 +368,16 @@ app.get("/api/dev/apikeys", (req, res) => {
     weatherApiKeyMasked: mask(keys.weatherApiKey),
     whatsappGatewayTokenMasked: mask(keys.whatsappGatewayToken),
     surveyorWebhookKeyMasked: mask(keys.surveyorWebhookKey),
-    iotMqttBrokerUrl: keys.iotMqttBrokerUrl || "NOT_SET"
+    iotMqttBrokerUrl: keys.iotMqttBrokerUrl || "NOT_SET",
+    supabaseUrl: keys.supabaseUrl || process.env.SUPABASE_URL || "",
+    supabaseAnonKeyMasked: mask(keys.supabaseAnonKey || process.env.SUPABASE_ANON_KEY || ""),
+    supabaseServiceKeyMasked: mask(keys.supabaseServiceKey || process.env.SUPABASE_SERVICE_ROLE_KEY || ""),
+    supabaseStatus: (keys.supabaseUrl || process.env.SUPABASE_URL) ? "CONFIGURED" : "NOT_CONFIGURED",
   });
 });
 
 app.post("/api/dev/apikeys", (req, res) => {
-  const { geminiApiKey, googleMapsApiKey, weatherApiKey, whatsappGatewayToken, surveyorWebhookKey, iotMqttBrokerUrl } = req.body;
+  const { geminiApiKey, googleMapsApiKey, weatherApiKey, whatsappGatewayToken, surveyorWebhookKey, iotMqttBrokerUrl, supabaseUrl, supabaseAnonKey, supabaseServiceKey } = req.body;
   if (!RUNTIME_DEV_CONFIG.apiKeys) RUNTIME_DEV_CONFIG.apiKeys = {};
 
   if (geminiApiKey !== undefined) {
@@ -383,6 +391,18 @@ app.post("/api/dev/apikeys", (req, res) => {
   if (whatsappGatewayToken !== undefined) RUNTIME_DEV_CONFIG.apiKeys.whatsappGatewayToken = whatsappGatewayToken;
   if (surveyorWebhookKey !== undefined) RUNTIME_DEV_CONFIG.apiKeys.surveyorWebhookKey = surveyorWebhookKey;
   if (iotMqttBrokerUrl !== undefined) RUNTIME_DEV_CONFIG.apiKeys.iotMqttBrokerUrl = iotMqttBrokerUrl;
+  if (supabaseUrl !== undefined) {
+    RUNTIME_DEV_CONFIG.apiKeys.supabaseUrl = supabaseUrl;
+    process.env.SUPABASE_URL = supabaseUrl;
+  }
+  if (supabaseAnonKey !== undefined) {
+    RUNTIME_DEV_CONFIG.apiKeys.supabaseAnonKey = supabaseAnonKey;
+    process.env.SUPABASE_ANON_KEY = supabaseAnonKey;
+  }
+  if (supabaseServiceKey !== undefined) {
+    RUNTIME_DEV_CONFIG.apiKeys.supabaseServiceKey = supabaseServiceKey;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = supabaseServiceKey;
+  }
 
   return res.json({
     success: true,
@@ -1053,6 +1073,181 @@ app.post("/api/db/user/sync", async (req, res) => {
     return res.status(500).json({ success: false, error: "Failed to sync user" });
   }
 });
+
+// ------------------- SUPABASE BACKEND & DATABASE INTEGRATION ENDPOINTS -------------------
+
+// 8a. Supabase Status Check
+app.get("/api/supabase/status", (req, res) => {
+  const supabase = getServerSupabase();
+  const url = process.env.SUPABASE_URL || RUNTIME_DEV_CONFIG.apiKeys?.supabaseUrl || "";
+  const isConfigured = Boolean(url && url.startsWith("http"));
+
+  return res.json({
+    configured: isConfigured,
+    supabaseUrl: url ? url.substring(0, 15) + "..." : "",
+    activeDriver: isConfigured ? "SUPABASE_POSTGRESQL" : "CLOUDSQL_POSTGRESQL",
+    capabilities: [
+      "Real-time Subscriptions",
+      "PostgreSQL Database Engine",
+      "Row Level Security (RLS)",
+      "REST & GraphQL Auto-APIs",
+      "Database Auth & Webhooks"
+    ]
+  });
+});
+
+// 8b. Supabase Test Connection
+app.post("/api/supabase/test", async (req, res) => {
+  const { url, key } = req.body;
+  const targetUrl = url || process.env.SUPABASE_URL || RUNTIME_DEV_CONFIG.apiKeys?.supabaseUrl;
+  const targetKey = key || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || RUNTIME_DEV_CONFIG.apiKeys?.supabaseAnonKey;
+
+  if (!targetUrl || !targetKey) {
+    return res.status(400).json({
+      success: false,
+      message: "Supabase Project URL dan API Key belum diisi."
+    });
+  }
+
+  try {
+    const { createClient } = await import("@supabase/supabase-js");
+    const testClient = createClient(targetUrl.trim(), targetKey.trim());
+    const { error } = await testClient.from("mining_sites").select("count", { count: "exact", head: true });
+
+    if (error && error.code === "42P01") {
+      return res.json({
+        success: true,
+        message: "Koneksi Supabase Berhasil! (Tabel belum dibuat, silakan jalankan SQL Script migrasi pada Supabase SQL Editor)."
+      });
+    }
+
+    if (error && error.message && (error.message.includes("Invalid API key") || error.message.includes("JWT"))) {
+      return res.status(400).json({
+        success: false,
+        message: `Autentikasi Supabase Gagal: ${error.message}`
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Koneksi Supabase Berhasil Terhubung & Siap Digunakan!"
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      success: false,
+      message: `Uji koneksi Supabase gagal: ${err?.message || "Network error"}`
+    });
+  }
+});
+
+// 8c. Supabase Sync All Data to Supabase
+app.post("/api/supabase/sync-all", async (req, res) => {
+  const supabase = getServerSupabase();
+  if (!supabase) {
+    return res.status(400).json({
+      success: false,
+      message: "Supabase belum dikonfigurasi di server. Masukkan SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY."
+    });
+  }
+
+  try {
+    // 1. Fetch current sites from Cloud SQL & push to Supabase
+    const sites = await getMiningSites();
+    if (sites.length > 0) {
+      const siteRows = sites.map(s => ({
+        id: s.id,
+        name: s.name,
+        region: s.region,
+        center_lat: s.centerLat,
+        center_lng: s.centerLng,
+        iup_number: s.iupNumber,
+        status: s.status,
+      }));
+      await supabase.from("mining_sites").upsert(siteRows, { onConflict: "id" });
+    }
+
+    // 2. Fetch stockpiles & push to Supabase
+    const stockpiles = await getStockpileInventory();
+    if (stockpiles.length > 0) {
+      const spRows = stockpiles.map(sp => ({
+        id: sp.id,
+        stockpile_name: sp.stockpileName,
+        location_code: sp.locationCode,
+        ore_tonnage: sp.oreTonnage,
+        ni_grade: sp.niGrade,
+        fe_grade: sp.feGrade,
+        mc_percent: sp.mcPercent,
+        status: sp.status,
+      }));
+      await supabase.from("stockpile_inventory").upsert(spRows, { onConflict: "id" });
+    }
+
+    // 3. Fetch tickets & push to Supabase
+    const tickets = await getWeighbridgeTickets(50);
+    if (tickets.length > 0) {
+      const ticketRows = tickets.map(t => ({
+        id: t.id,
+        ticket_no: t.ticketNo,
+        truck_code: t.truckCode,
+        driver_name: t.driverName,
+        gross_kg: t.grossKg,
+        tare_kg: t.tareKg,
+        net_kg: t.netKg,
+        origin_pit: t.originPit,
+        destination_stockpile: t.destinationStockpile,
+        ore_grade_ni: t.oreGradeNi,
+        rfid_scanned: t.rfidScanned,
+      }));
+      await supabase.from("weighbridge_tickets").upsert(ticketRows, { onConflict: "id" });
+    }
+
+    return res.json({
+      success: true,
+      message: `Sinkronisasi data ke Supabase berhasil! (${sites.length} Sites, ${stockpiles.length} Stockpiles, ${tickets.length} Tiket Timbangan)`
+    });
+  } catch (err: any) {
+    console.error("Supabase sync error:", err);
+    return res.status(500).json({
+      success: false,
+      message: `Gagal sinkronisasi data ke Supabase: ${err?.message}`
+    });
+  }
+});
+
+// 8d. Supabase Auth Verify / Current User Endpoint
+app.post("/api/supabase/auth/verify", async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({ error: "Access token is required" });
+  }
+
+  const supabase = getServerSupabase();
+  if (!supabase) {
+    return res.status(400).json({ error: "Supabase server client not configured" });
+  }
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+      return res.status(401).json({ error: error?.message || "Invalid Supabase session" });
+    }
+
+    return res.json({
+      valid: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.user_metadata?.role || "Mine Manager",
+        fullName: user.user_metadata?.full_name || user.email?.split("@")[0],
+        company: user.user_metadata?.company_name || "PT NickelSmart Nusantara",
+        provider: "supabase"
+      }
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || "Internal auth error" });
+  }
+});
+
 
 // ------------------- VITE SERVER INTEGRATION -------------------
 async function startServer() {

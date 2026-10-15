@@ -49,7 +49,9 @@ interface LandingPageProps {
   language: Language;
   onToggleLanguage: () => void;
   firebaseUser?: any;
+  supabaseUser?: any;
   onGoogleSignIn?: () => void;
+  onOpenSupabaseAuth?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
@@ -58,7 +60,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   language,
   onToggleLanguage,
   firebaseUser,
-  onGoogleSignIn
+  supabaseUser,
+  onGoogleSignIn,
+  onOpenSupabaseAuth
 }) => {
   const { config } = useDevConfig();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -1351,6 +1355,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <span>Masuk dengan Akun Google (Cloud Firestore)</span>
               </button>
             )}
+
+            {/* Supabase Enterprise Auth Quick Login Button */}
+            {onOpenSupabaseAuth && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLoginModalOpen(false);
+                  onOpenSupabaseAuth();
+                }}
+                className="w-full py-3 px-4 rounded-2xl bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 hover:text-emerald-200 font-bold text-xs shadow-md transition-all flex items-center justify-center gap-3 hover:shadow-emerald-900/20"
+              >
+                <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 text-[10px] font-black">
+                  S
+                </div>
+                <span>Masuk dengan Supabase Auth (PostgreSQL Enterprise)</span>
+              </button>
+            )}
+
 
             {/* Divider */}
             <div className="flex items-center gap-3">

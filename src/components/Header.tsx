@@ -20,6 +20,7 @@ import {
 import { LicenseInfo, Language, ThemeMode, UserRole, PushNotification } from '../types';
 import { formatUSD } from '../utils/hpmCalculator';
 import { User as FirebaseUser } from 'firebase/auth';
+import { SupabaseAuthUser } from '../lib/supabase';
 
 interface HeaderProps {
   licenseInfo: LicenseInfo;
@@ -38,7 +39,9 @@ interface HeaderProps {
   onToggleMobileSidebar: () => void;
   onGoToLandingPage?: () => void;
   firebaseUser?: FirebaseUser | null;
+  supabaseUser?: SupabaseAuthUser | null;
   onGoogleSignIn?: () => void;
+  onOpenSupabaseAuthModal?: () => void;
   onSignOut?: () => void;
 }
 
@@ -59,7 +62,9 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleMobileSidebar,
   onGoToLandingPage,
   firebaseUser,
+  supabaseUser,
   onGoogleSignIn,
+  onOpenSupabaseAuthModal,
   onSignOut
 }) => {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
@@ -303,46 +308,81 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* Firebase Google Auth User Profile / Sign In */}
-            {firebaseUser ? (
-              <div className="flex items-center gap-2 pl-1 border-l border-slate-800">
-                {firebaseUser.photoURL ? (
-                  <img 
-                    src={firebaseUser.photoURL} 
-                    alt={firebaseUser.displayName || 'User'} 
-                    className="w-7 h-7 rounded-full border border-emerald-500/50 object-cover" 
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-xs flex items-center justify-center border border-emerald-500/30">
-                    {(firebaseUser.displayName || firebaseUser.email || 'U').charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <div className="hidden lg:flex flex-col text-left">
-                  <span className="text-[11px] font-bold text-slate-200 leading-tight max-w-[120px] truncate">
-                    {firebaseUser.displayName || firebaseUser.email?.split('@')[0]}
-                  </span>
-                  <span className="text-[9px] text-emerald-400 font-mono">Firebase Verified</span>
-                </div>
+            {/* Multi-Provider Auth Profile: Firebase & Supabase */}
+            {firebaseUser || supabaseUser ? (
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+                {firebaseUser ? (
+                  <>
+                    {firebaseUser.photoURL ? (
+                      <img 
+                        src={firebaseUser.photoURL} 
+                        alt={firebaseUser.displayName || 'User'} 
+                        className="w-7 h-7 rounded-full border border-emerald-500/50 object-cover" 
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-xs flex items-center justify-center border border-emerald-500/30">
+                        {(firebaseUser.displayName || firebaseUser.email || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="hidden lg:flex flex-col text-left">
+                      <span className="text-[11px] font-bold text-slate-200 leading-tight max-w-[120px] truncate">
+                        {firebaseUser.displayName || firebaseUser.email?.split('@')[0]}
+                      </span>
+                      <span className="text-[9px] text-emerald-400 font-mono">Firebase Google</span>
+                    </div>
+                  </>
+                ) : supabaseUser ? (
+                  <>
+                    <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-xs flex items-center justify-center border border-emerald-500/40">
+                      {(supabaseUser.user_metadata?.full_name || supabaseUser.email || 'S').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="hidden lg:flex flex-col text-left">
+                      <span className="text-[11px] font-bold text-slate-200 leading-tight max-w-[120px] truncate">
+                        {supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0]}
+                      </span>
+                      <span className="text-[9px] text-emerald-400 font-mono">Supabase Auth</span>
+                    </div>
+                  </>
+                ) : null}
+
                 {onSignOut && (
                   <button 
                     onClick={onSignOut} 
-                    className="text-[10px] text-slate-400 hover:text-red-400 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 transition-colors"
-                    title="Sign Out Firebase"
+                    className="text-[10px] text-slate-400 hover:text-red-400 px-2 py-1 rounded bg-slate-800 border border-slate-700 transition-colors"
+                    title="Sign Out Session"
                   >
                     Logout
                   </button>
                 )}
               </div>
-            ) : onGoogleSignIn ? (
-              <button
-                onClick={onGoogleSignIn}
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-indigo-200 text-xs font-semibold transition-all"
-                title="Login with Google Cloud Auth"
-              >
-                <span>Google Auth</span>
-              </button>
-            ) : null}
+            ) : (
+              <div className="flex items-center gap-1.5 pl-1 border-l border-slate-800">
+                {/* Supabase Auth Login Trigger */}
+                {onOpenSupabaseAuthModal && (
+                  <button
+                    onClick={onOpenSupabaseAuthModal}
+                    className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 hover:text-emerald-200 text-xs font-semibold transition-all shadow-sm"
+                    title="Login Enterprise dengan Supabase Auth (Email / JWT / SSO)"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Supabase Auth</span>
+                  </button>
+                )}
+
+                {/* Firebase Google Auth Trigger */}
+                {onGoogleSignIn && (
+                  <button
+                    onClick={onGoogleSignIn}
+                    className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-indigo-200 text-xs font-semibold transition-all"
+                    title="Login with Google Cloud Auth"
+                  >
+                    <span>Google Auth</span>
+                  </button>
+                )}
+              </div>
+            )}
+
 
           </div>
 

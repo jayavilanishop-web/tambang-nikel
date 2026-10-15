@@ -31,10 +31,15 @@ import {
   Layers,
   Sparkles,
   Smartphone,
-  Server
+  Server,
+  Database,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useDevConfig } from '../../services/devConfigService';
 import { ClientUserAccount, MediaGalleryItem, PricingPlanItem, UserRole, Language } from '../../types';
+import { SUPABASE_SQL_INIT_SCRIPT } from '../../services/supabaseSqlSchema';
+import { saveSupabaseConfig, testSupabaseConnection } from '../../lib/supabase';
 
 interface DeveloperControlPanelModuleProps {
   language?: Language;
@@ -48,7 +53,7 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
   const { config, saveConfig, saveApiKeys, saveClientUser, deleteClientUser, resetToDefaults } = useDevConfig();
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<'cms_website' | 'media_video' | 'crm_users' | 'api_keys' | 'pricing_plans' | 'system_flags'>('cms_website');
+  const [activeTab, setActiveTab] = useState<'cms_website' | 'media_video' | 'crm_users' | 'api_keys' | 'supabase' | 'pricing_plans' | 'system_flags'>('cms_website');
 
   // Local draft state for quick editing
   const [draftWebsite, setDraftWebsite] = useState(config.website);
@@ -59,6 +64,13 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [testApiResult, setTestApiResult] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
+
+  // Supabase states
+  const [showSupabaseKey, setShowSupabaseKey] = useState(false);
+  const [showSupabaseServiceKey, setShowSupabaseServiceKey] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
+  const [supabaseTestStatus, setSupabaseTestStatus] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
+  const [supabaseSyncStatus, setSupabaseSyncStatus] = useState<{ status: 'idle' | 'loading' | 'success' | 'error'; message: string }>({ status: 'idle', message: '' });
 
   // CRM User Management Modal State
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -291,6 +303,23 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
         </button>
 
         <button
+          onClick={() => setActiveTab('supabase')}
+          className={`px-4 py-2.5 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all ${
+            activeTab === 'supabase'
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+              : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          }`}
+        >
+          <Database className="w-4 h-4 text-emerald-400" />
+          <span className="flex items-center gap-1.5">
+            5. Supabase Database & Backend
+            <span className="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-bold border border-emerald-500/30">
+              ACTIVE
+            </span>
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('pricing_plans')}
           className={`px-4 py-2.5 rounded-xl flex items-center gap-2 whitespace-nowrap transition-all ${
             activeTab === 'pricing_plans'
@@ -299,7 +328,7 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
           }`}
         >
           <DollarSign className="w-4 h-4" />
-          <span>5. Paket Layanan & Harga</span>
+          <span>6. Paket Layanan & Harga</span>
         </button>
 
         <button
@@ -311,7 +340,7 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
           }`}
         >
           <Settings className="w-4 h-4" />
-          <span>6. Pengaturan Sistem & Fitur</span>
+          <span>7. Pengaturan Sistem & Fitur</span>
         </button>
       </div>
 
@@ -1168,6 +1197,42 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
                 </p>
               </div>
 
+              {/* Supabase Database & Backend Config */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-emerald-500/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-200 font-bold flex items-center gap-2">
+                    <Database className="w-4 h-4 text-emerald-400" />
+                    Supabase Project URL & Public Key:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('supabase')}
+                    className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 hover:bg-emerald-500/30"
+                  >
+                    Buka Supabase Hub ➔
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    placeholder="https://your-project.supabase.co"
+                    value={draftApiKeys.supabaseUrl || ''}
+                    onChange={(e) => setDraftApiKeys({ ...draftApiKeys, supabaseUrl: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-mono text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Supabase Anon Public Key (eyJhb...)"
+                    value={draftApiKeys.supabaseAnonKey || ''}
+                    onChange={(e) => setDraftApiKeys({ ...draftApiKeys, supabaseAnonKey: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-mono text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Untuk PostgreSQL database relasional berkecepatan tinggi, integrasi backend, dan sinkronisasi real-time.
+                </p>
+              </div>
+
               {/* Weather & IoT Keys */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
@@ -1200,7 +1265,294 @@ export const DeveloperControlPanelModule: React.FC<DeveloperControlPanelModulePr
       )}
 
       {/* ======================================================== */}
-      {/* TAB 5: PRICING PLANS & PACKAGES */}
+      {/* TAB 5: SUPABASE DATABASE & BACKEND MANAGEMENT */}
+      {/* ======================================================== */}
+      {activeTab === 'supabase' && (
+        <div className="space-y-6">
+          <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 space-y-6 shadow-xl">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-bold text-slate-100 text-sm flex items-center gap-2">
+                    <Database className="w-4 h-4 text-emerald-400" />
+                    Supabase Database & Backend Hub
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1">
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    Supabase Client Ready
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Hubungkan dan kelola database PostgreSQL Supabase Anda, jalankan skrip DDL/DML, dan sinkronkan data operasional tambang secara real-time.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={async () => {
+                    setSupabaseTestStatus({ status: 'loading', message: 'Menguji koneksi ke Supabase Project...' });
+                    try {
+                      const res = await fetch('/api/supabase/test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          url: draftApiKeys.supabaseUrl,
+                          key: draftApiKeys.supabaseAnonKey || draftApiKeys.supabaseServiceKey
+                        })
+                      });
+                      const data = await res.json();
+                      if (res.ok && data.success) {
+                        setSupabaseTestStatus({ status: 'success', message: data.message });
+                        if (draftApiKeys.supabaseUrl && draftApiKeys.supabaseAnonKey) {
+                          saveSupabaseConfig(draftApiKeys.supabaseUrl, draftApiKeys.supabaseAnonKey);
+                        }
+                      } else {
+                        setSupabaseTestStatus({ status: 'error', message: data.message || 'Gagal terhubung dengan Supabase' });
+                      }
+                    } catch (err: any) {
+                      setSupabaseTestStatus({ status: 'error', message: err?.message || 'Gagal menghubungi server' });
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${supabaseTestStatus.status === 'loading' ? 'animate-spin' : ''}`} />
+                  <span>Uji Koneksi Supabase</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    setSupabaseSyncStatus({ status: 'loading', message: 'Menyinkronkan data tambang ke Supabase...' });
+                    try {
+                      const res = await fetch('/api/supabase/sync-all', { method: 'POST' });
+                      const data = await res.json();
+                      if (res.ok && data.success) {
+                        setSupabaseSyncStatus({ status: 'success', message: data.message });
+                      } else {
+                        setSupabaseSyncStatus({ status: 'error', message: data.message || 'Gagal sinkronisasi data' });
+                      }
+                    } catch (err: any) {
+                      setSupabaseSyncStatus({ status: 'error', message: err?.message || 'Gagal menghubungi server' });
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Sinkronisasi Data Tambang</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Test & Sync Alerts */}
+            {supabaseTestStatus.status !== 'idle' && (
+              <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${
+                supabaseTestStatus.status === 'loading'
+                  ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300'
+                  : supabaseTestStatus.status === 'success'
+                  ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/20 border-rose-500/30 text-rose-300'
+              }`}>
+                <div className="flex items-center gap-2">
+                  {supabaseTestStatus.status === 'loading' && <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />}
+                  {supabaseTestStatus.status === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                  {supabaseTestStatus.status === 'error' && <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />}
+                  <span>{supabaseTestStatus.message}</span>
+                </div>
+                <button onClick={() => setSupabaseTestStatus({ status: 'idle', message: '' })} className="text-xs opacity-70 hover:opacity-100">✕</button>
+              </div>
+            )}
+
+            {supabaseSyncStatus.status !== 'idle' && (
+              <div className={`p-3 rounded-xl border text-xs font-semibold flex items-center justify-between ${
+                supabaseSyncStatus.status === 'loading'
+                  ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-300'
+                  : supabaseSyncStatus.status === 'success'
+                  ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/20 border-rose-500/30 text-rose-300'
+              }`}>
+                <div className="flex items-center gap-2">
+                  {supabaseSyncStatus.status === 'loading' && <RefreshCw className="w-4 h-4 animate-spin text-indigo-400" />}
+                  {supabaseSyncStatus.status === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+                  {supabaseSyncStatus.status === 'error' && <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />}
+                  <span>{supabaseSyncStatus.message}</span>
+                </div>
+                <button onClick={() => setSupabaseSyncStatus({ status: 'idle', message: '' })} className="text-xs opacity-70 hover:opacity-100">✕</button>
+              </div>
+            )}
+
+            {/* Architecture Overview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Engine Database</span>
+                <div className="text-emerald-400 font-bold text-sm flex items-center gap-1.5">
+                  <Database className="w-4 h-4" />
+                  PostgreSQL Supabase
+                </div>
+                <p className="text-[11px] text-slate-400">PostgreSQL relasional berkecepatan tinggi dengan auto-generated REST APIs & RLS.</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Real-time Stream</span>
+                <div className="text-teal-400 font-bold text-sm flex items-center gap-1.5">
+                  <Radio className="w-4 h-4 animate-pulse" />
+                  Websocket Broadcast
+                </div>
+                <p className="text-[11px] text-slate-400">Pembaruan langsung posisi fleet dump truck dan timbangan jembatan real-time.</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Keamanan & RBAC</span>
+                <div className="text-indigo-400 font-bold text-sm flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4" />
+                  Row Level Security (RLS)
+                </div>
+                <p className="text-[11px] text-slate-400">Hak akses tabel terisolasi per perusahaan IUP dan role pengguna tambang.</p>
+              </div>
+            </div>
+
+            {/* Credentials Inputs */}
+            <div className="space-y-4 text-xs">
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <h3 className="text-slate-200 font-bold text-xs flex items-center gap-2">
+                  <Key className="w-4 h-4 text-emerald-400" />
+                  Kredensial & URL Proyek Supabase
+                </h3>
+
+                {/* Project URL */}
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-semibold block text-[11px]">Supabase Project URL (SUPABASE_URL):</label>
+                  <input
+                    type="text"
+                    placeholder="https://your-project-id.supabase.co"
+                    value={draftApiKeys.supabaseUrl || ''}
+                    onChange={(e) => setDraftApiKeys({ ...draftApiKeys, supabaseUrl: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-emerald-400 font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                  <span className="text-[10px] text-slate-500">Ditemukan di Supabase Dashboard &gt; Project Settings &gt; API &gt; Project URL</span>
+                </div>
+
+                {/* Anon Key */}
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-semibold block text-[11px]">Supabase Anon / Public API Key (SUPABASE_ANON_KEY):</label>
+                  <div className="relative">
+                    <input
+                      type={showSupabaseKey ? 'text' : 'password'}
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={draftApiKeys.supabaseAnonKey || ''}
+                      onChange={(e) => setDraftApiKeys({ ...draftApiKeys, supabaseAnonKey: e.target.value })}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 pr-10 text-emerald-400 font-mono focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSupabaseKey(!showSupabaseKey)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                    >
+                      {showSupabaseKey ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-slate-500">Kunci publik aman untuk query sisi browser (client-side)</span>
+                </div>
+
+                {/* Service Role Key */}
+                <div className="space-y-1">
+                  <label className="text-slate-400 font-semibold block text-[11px]">Supabase Service Role Key (SUPABASE_SERVICE_ROLE_KEY - Opsional Server Secret):</label>
+                  <div className="relative">
+                    <input
+                      type={showSupabaseServiceKey ? 'text' : 'password'}
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={draftApiKeys.supabaseServiceKey || ''}
+                      onChange={(e) => setDraftApiKeys({ ...draftApiKeys, supabaseServiceKey: e.target.value })}
+                      className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 pr-10 text-emerald-400 font-mono focus:outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSupabaseServiceKey(!showSupabaseServiceKey)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                    >
+                      {showSupabaseServiceKey ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <span className="text-[10px] text-slate-500">Kunci rahasia server untuk bypass RLS (jangan pernah dibagikan ke publik)</span>
+                </div>
+              </div>
+
+              {/* SQL Migration Script Box */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <h3 className="text-slate-200 font-bold text-xs flex items-center gap-2">
+                      <Terminal className="w-4 h-4 text-indigo-400" />
+                      Skrip SQL Inisialisasi Database Supabase
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Salin skrip ini dan tempel di <strong>Supabase SQL Editor</strong> untuk membuat seluruh tabel tambang nikel otomatis.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(SUPABASE_SQL_INIT_SCRIPT);
+                      setCopiedSql(true);
+                      setTimeout(() => setCopiedSql(false), 3000);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      copiedSql
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40'
+                    }`}
+                  >
+                    {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedSql ? 'Tersalin ke Clipboard!' : 'Salin Skrip SQL'}</span>
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-slate-300 font-mono text-[10px] max-h-48 overflow-y-auto leading-relaxed scrollbar-thin">
+                    {SUPABASE_SQL_INIT_SCRIPT}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Tables Reference */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <h3 className="text-slate-200 font-bold text-xs flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-teal-400" />
+                  Daftar Tabel Database Tambang yang Didukung di Supabase:
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="text-emerald-400 font-mono font-bold text-xs block">mining_sites</span>
+                    <span className="text-slate-400 text-[10px]">Master data konsesi IUP & koordinat center pit.</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="text-emerald-400 font-mono font-bold text-xs block">weighbridge_tickets</span>
+                    <span className="text-slate-400 text-[10px]">Transaksi jembatan timbang truk & tonase net ore.</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="text-emerald-400 font-mono font-bold text-xs block">stockpile_inventory</span>
+                    <span className="text-slate-400 text-[10px]">Stok ore nikel EFO/ETO, kadar Ni, Fe & kadar air.</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="text-emerald-400 font-mono font-bold text-xs block">fleet_telemetry_logs</span>
+                    <span className="text-slate-400 text-[10px]">Telemetri GPS ritase & level bahan bakar alat berat.</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="text-emerald-400 font-mono font-bold text-xs block">blending_batches</span>
+                    <span className="text-slate-400 text-[10px]">Formula pencampuran ore nikel untuk umpan smelter.</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
+                    <span className="text-emerald-400 font-mono font-bold text-xs block">users</span>
+                    <span className="text-slate-400 text-[10px]">Data profil pengguna dan role akses operasional.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB 6: PRICING PLANS & PACKAGES */}
       {/* ======================================================== */}
       {activeTab === 'pricing_plans' && (
         <div className="space-y-6">
